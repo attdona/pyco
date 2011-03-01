@@ -1,7 +1,6 @@
 '''
 Created on Feb 1, 2011
 
-@author: adona
 '''
 """This module implements a Finite State Machine (ExtFSM). In addition to state
 this ExtFSM also maintains a user defined "memory". So this ExtFSM can be used as a
