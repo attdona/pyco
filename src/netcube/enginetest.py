@@ -4,14 +4,11 @@ Created on Jan 31, 2011
 @author: adona
 '''
 import unittest
-from netcube.linux import Linux
-from netcube.common import *
 
-import netcube.config
+from netcube.master import *
 from netcube.exceptions import *
 
-#from linux import Linux
-
+#
 skip = True
 
 class Test(unittest.TestCase):
@@ -57,7 +54,7 @@ class Test(unittest.TestCase):
         #print "TIMEOUT = %s" % linx.timeout
         print "TIMEOUT = %s" % linux.timeout
         
-    @unittest.skipIf(skip==True,"skipped test")    
+    @unittest.skipIf(skip==False,"skipped test")    
     def testSendCommand(self):    
         linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
@@ -81,7 +78,7 @@ class Test(unittest.TestCase):
             output = linux.send('ls')
             print "SECOND OUTPUT: <%s>" % output
 
-    @unittest.skipIf(skip==False,"skipped test")    
+    @unittest.skipIf(skip==True,"skipped test")    
     def testCommandWithAnswers(self):    
         linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
@@ -105,6 +102,8 @@ class Test(unittest.TestCase):
         linux.addPattern(suPattern)
         linux.addPattern(authFailed)
         linux.addTransition(suRule)
+        
+        linux.discoverPrompt = True
         
         linux.send('su pyco')
         output = linux.send('ls')

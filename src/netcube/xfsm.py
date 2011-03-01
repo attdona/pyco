@@ -231,8 +231,11 @@ class ExtFSM:
             if self.action is not None:
                 log.debug("executing action [%s]", str(self.action))
                 self.action (device)
+            
+            stateChanged = (self.current_state != self.next_state)
             self.current_state = self.next_state
             self.next_state = None
+            return stateChanged
 
     def process_list (self, input_symbols):
 

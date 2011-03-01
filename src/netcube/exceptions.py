@@ -21,3 +21,12 @@ class AuthenticationFailed(Exception):
     '''
     pass
 
+class ConfigFileError(Exception):
+    '''
+    Thrown when the pyco config file is invalid
+    '''
+    def __init__(self, value):
+        self.value = value
+        
+    def __str__(self):
+        return repr(self.value)

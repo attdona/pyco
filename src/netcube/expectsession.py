@@ -115,11 +115,14 @@ class ExpectSession:
             #log.debug("detected event [%s]" % target.currentEvent)
             if target.hasEventHandlers(target.currentEvent):
                 
-                
                 for eh in target.getEventHandlers(target.currentEvent):
                     eh(target, self.pipe.before)
            
-            target.fsm.process(target, target.currentEvent)
+            stateChanged = target.fsm.process(target, target.currentEvent)
+
+            if stateChanged and target.discoverPrompt and target.fsm.current_state.endswith('PROMPT'):
+                log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.fsm.current_state))
+                common.discoverPrompt(target)
 
         return self.pipe.before
         

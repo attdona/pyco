@@ -62,6 +62,7 @@ def disableTimeoutEvent(device, output):
     '''
     device.currentEvent.stopPropagation()
      
+# TODO: actually assume that the discovered prompt is a single line prompt     
 def discoverPromptCallback(device, output):
     # if regular exp succeed then set the prompt
     log.debug("[%s] prompt discovery ..." % (device.name))
