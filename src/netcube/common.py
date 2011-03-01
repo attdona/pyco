@@ -308,9 +308,11 @@ class Common:
         return out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')
            
     def clearBuffer(self):
-        # TODO: wait for a 1 second timeout period and then consider cleared the buffer 
-        self.esession.pipe.expect('.*', timeout=1)    
-        
+        # wait for a 1 second timeout period and then consider cleared the buffer
+        try: 
+            self.esession.pipe.expect('.*', timeout=1)    
+        except:
+            log.debug("[%s] clearBuffer timeout: cleared expect buffer" % self.name) 
 
         
 
