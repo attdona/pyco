@@ -4,7 +4,7 @@ Created on 29/gen/2011
 @author: SO000112
 '''
 
-#import pexpect
+import re
 from netcube.xfsm import ExtFSM
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
@@ -61,6 +61,20 @@ def disableTimeoutEvent(device, output):
     Prevent the propagation of timeout event to fsm engine
     '''
     device.currentEvent.stopPropagation()
+
+def getExactStringForMatch(str):
+    '''
+    Used for example to escape special characters in prompt strings 
+    '''
+    specials = ['(\\$)', '(\\\\)']
+    orSep = '|'
+    pattern = orSep.join(specials)
+    
+    p = re.compile(pattern)
+    match = p.sub(r'\\\1', str)
+    
+    return match
+
      
 # TODO: actually assume that the discovered prompt is a single line prompt     
 def discoverPromptCallback(device, output):
@@ -78,7 +92,7 @@ def discoverPromptCallback(device, output):
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
             #device.setState('USER_PROMPT')
-            device._addPattern('prompt-match', device.prompt[sts].value, device.fsm.current_state)
+            device._addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             
             device.removeEventHandler('timeout', discoverPromptCallback)
             #device.onEvent('timeout', disableTimeoutEvent)
@@ -292,17 +306,20 @@ class Common:
             return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match'
 
         out = self.esession.processResponseWithTimeout(self, runUntilTimeout)
-        prevOut = None
-        while out != prevOut:
-            self.clearBuffer()
-            log.debug("[%s] == [%s]" % (prevOut,out))
-            prevOut = out
-            currOut = self.esession.processResponseWithTimeout(self, runUntilTimeout)
-            if prevOut == None:
-                out = currOut
-            else:
-                out = prevOut + currOut
-            log.debug("Checking if [%s] response [%s] is complete" % (command,out))
+        
+        if self.checkOnOutputComplete == True:
+        
+            prevOut = None
+            while out != prevOut:
+                self.clearBuffer()
+                log.debug("[%s] == [%s]" % (prevOut,out))
+                prevOut = out
+                currOut = self.esession.processResponseWithTimeout(self, runUntilTimeout)
+                if prevOut == None:
+                    out = currOut
+                else:
+                    out = prevOut + currOut
+                log.debug("Checking if [%s] response [%s] is complete" % (command,out))
            
         log.debug("[%s]: response does not change between responseCompleteTimePeriod" % (command))
         

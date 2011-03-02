@@ -86,8 +86,8 @@ class ExpectSession:
             # expect and match 
             try:
                 log.debug("[%s] matching [%s]" % (target.fsm.current_state, patterns))
-                log.debug("PRE exp before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
-                if exactMatch:
+                #log.debug("PRE exp before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
+                if target.exactPatternMatch:
                     index = self.pipe.expect_exact(patterns, int(maxWaitTime))
                 else:
                     index = self.pipe.expect(patterns, int(maxWaitTime))
@@ -135,11 +135,8 @@ class ExpectSession:
         log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
 
     def processResponseWithTimeout(self, target, checkPoint):
-
         patterns = [pexpect.TIMEOUT]
-        log.debug("[%s]; matching %s", target.fsm.current_state, patterns)
         return self.patternMatch(target, checkPoint, patterns, target.responseCompleteTimePeriod, exactMatch=True)
-        #log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
         
     def processResponse(self, target, checkPoint):
         '''

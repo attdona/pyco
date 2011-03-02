@@ -54,9 +54,62 @@ class Test(unittest.TestCase):
         #print "TIMEOUT = %s" % linx.timeout
         print "TIMEOUT = %s" % linux.timeout
         
-    @unittest.skipIf(skip==False,"skipped test")    
-    def testSendCommand(self):    
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testSendCommand(self):
+        '''
+        Send a simple command without prompt discovery
+        '''    
         linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux.discoverPrompt = False
+        linux.login()
+        output = linux.send('id')
+        
+        print "<%s>" % output
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+        self.assertTrue('USER_PROMPT' not in linux.prompt, 'prompt discovered unexpectedly')
+        
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testSendCommandWithPromptDiscovery(self):
+        '''
+        Send a simple command with prompt discovery
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.login()
+        output = linux.send('id')
+        
+        print "<%s>" % output
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+        self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
+
+    @unittest.skipIf(skip==False,"skipped test")    
+    def testOutputCompleteOnPromptMatch(self):
+        '''
+        Send simple commands and use prompt match only
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.checkOnOutputComplete = True
+        
+        linux.login()
+        output = linux.send('id')
+        
+        print "<%s>" % output
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+        self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testOutputCompleteOnPromptMatchTc2(self):
+        '''
+        Send simple commands and use prompt match only with promptDiscovery disabled
+        expected result:  
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        
+        linux.discoverPrompt = False
+        linux.checkOnOutputComplete = False
         
         linux.login()
         output = linux.send('id')
