@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
         self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
 
-    @unittest.skipIf(skip==False,"skipped test")    
+    @unittest.skipIf(skip==True,"skipped test")    
     def testOutputCompleteOnPromptMatch(self):
         '''
         Send simple commands and use prompt match only
@@ -113,6 +113,23 @@ class Test(unittest.TestCase):
         
         linux.login()
         output = linux.send('id')
+        
+        print "<%s>" % output
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+
+    @unittest.skipIf(skip==False,"skipped test")    
+    def testChangePrompt(self):
+        '''
+        Send simple commands and use prompt match only with promptDiscovery disabled
+        expected result:  
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        
+        linux.discoverPrompt = False
+        linux.checkOnOutputComplete = False
+        
+        linux.login()
+        output = linux.send('PS1=pippo')
         
         print "<%s>" % output
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
