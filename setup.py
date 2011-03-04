@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='pyco',
-      version='1.10',
+      version='0.1',
       description='python library for network devices control and automation',
       author='adona',
       #author_email='gward@python.net',
