@@ -20,7 +20,7 @@ log = netcube.log.getLogger("config")
 import os
 module_path = os.path.dirname(netcube.__file__)
 
-config = ConfigObj(netcube.pyco_home + "/cfg/pyco.cfg", configspec=module_path + '/pyco_spec.cfg')
+config = ConfigObj(netcube.pyco_home + "/cfg/pyco.cfg", configspec=netcube.pyco_home + '/cfg/pyco_spec.cfg')
 
 val = Validator()
 results = config.validate(val)

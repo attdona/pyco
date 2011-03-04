@@ -11,6 +11,5 @@ setup(name='pyco',
       packages=['netcube'],
       package_dir={'netcube': 'src/netcube'},
       package_data={'cfg': ['cfg/*.*']},
-
      )
 
