@@ -8,9 +8,36 @@ import unittest
 from netcube.master import *
 from netcube.exceptions import *
 
-#
+
+unableToConnectHost = "163.162.155.91"
+loginSuccessfullHost = "127.0.0.1"
+targetCommand = "uname -a"
+
+localhost = {
+             'name':'localhost', 
+             'username':'netcube',
+             'password':'netcube'
+             }
+
+
 skip = True
 
+class TestConstraints(unittest.TestCase):
+
+    def setUp(self):
+        pass
+   
+        
+    def tearDown(self):
+        pass
+    
+    def testNoName(self):
+        h = Linux(**localhost)
+        
+        h.login()
+        
+    
+@unittest.skip("temp skip")
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -117,11 +144,10 @@ class Test(unittest.TestCase):
         print "<%s>" % output
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
 
-    @unittest.skipIf(skip==False,"skipped test")    
+    @unittest.skipIf(skip==True,"skipped test")    
     def testChangePrompt(self):
         '''
-        Send simple commands and use prompt match only with promptDiscovery disabled
-        expected result:  
+        Change the prompt and rediscover it 
         '''    
         linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
@@ -133,6 +159,40 @@ class Test(unittest.TestCase):
         
         print "<%s>" % output
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testMultilinePrompt(self):
+        '''
+        Discover a multiline prompt
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.checkOnOutputComplete = False
+        
+        output = linux.send('id')
+        
+        print "<%s>" % output
+        #self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testChangingPrompt(self):
+        '''
+        Ever changing prompt case
+        '''    
+        linux = Linux(name = self.loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.checkOnOutputComplete = False
+        
+        linux('myprompt_counter=1; export PROMPT_COMMAND=\'myprompt_counter=$((myprompt_counter + 1))\'')
+        linux('PS1=\'$myprompt_counter \'')
+        
+        self.assertEqual(linux.discoverPrompt, False, "discoverPrompt must be set to FALSE when unable to discover prompt")
+        
+        #self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+
+
 
 
     @unittest.skipIf(skip==True,"skipped test")    
@@ -148,7 +208,7 @@ class Test(unittest.TestCase):
             output = linux.send('ls')
             print "SECOND OUTPUT: <%s>" % output
 
-    @unittest.skipIf(skip==True,"skipped test")    
+    @unittest.skipIf(skip==False,"skipped test")    
     def testCommandWithAnswers(self):    
         linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
@@ -169,14 +229,14 @@ class Test(unittest.TestCase):
                  'end_state' : 'USER2_PROMPT'
                }
         
-        linux.addPattern(suPattern)
-        linux.addPattern(authFailed)
+        linux.addPattern(**suPattern)
+        linux.addPattern(**authFailed)
         linux.addTransition(suRule)
         
         linux.discoverPrompt = True
         
         linux.send('su pyco')
-        output = linux.send('ls')
+        output = linux.send('uname -a')
         print "OUTPUT: <%s>" % output
       
 

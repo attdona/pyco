@@ -53,7 +53,7 @@ def discoverPrompt(device):
     #device.registerPattern('timeout', device.promptRegexp)
     
     device.onEvent('timeout', discoverPromptCallback)
-    device.expect(lambda d: d.currentEvent.name == 'timeout')
+    device.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
 
 # OBSOLETED
 def disableTimeoutEvent(device, output):
@@ -62,6 +62,7 @@ def disableTimeoutEvent(device, output):
     '''
     device.currentEvent.stopPropagation()
 
+# TODO: add all the regexp special chars
 def getExactStringForMatch(str):
     '''
     Used for example to escape special characters in prompt strings 
@@ -76,37 +77,51 @@ def getExactStringForMatch(str):
     return match
 
      
-# TODO: actually assume that the discovered prompt is a single line prompt     
 def discoverPromptCallback(device, output):
     # if regular exp succeed then set the prompt
     log.debug("[%s] prompt discovery ..." % (device.name))
 
     # stop the default handling of the timeout event
     device.currentEvent.stopPropagation()
-    rows = output.split('\r\n')
     
     sts = device.state()
 
     if sts in device.prompt:
-        if device.prompt[sts].value == rows[-1]:
+        if device.prompt[sts].value == output.replace('\r\n', '', 1):
+            device.discoveryCounter = 0
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
             #device.setState('USER_PROMPT')
             device._addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             
             device.removeEventHandler('timeout', discoverPromptCallback)
-            #device.onEvent('timeout', disableTimeoutEvent)
+            
+            # declare the discovery with the event
+            device.currentEvent = Event('prompt-match')
+            
+            return
+            
+        else:
+            if device.discoveryCounter == 2:
+                log.debug("[%s] [%s] unable to found the prompt, unsetting discovery. last output: [%s]" % (device.name, sts, output))
+                device.discoverPrompt = False
+                device.removeEventHandler('timeout', discoverPromptCallback)
+                return
+            else:
+                log.debug("[%s] [%s] prompt not match, retrying discovery with pointer [%s]" % (device.name, sts, output))
+                device.prompt[sts].value = output.replace('\r\n', '', 1)
+                device.discoveryCounter += 1
     else:
+        rows = output.split('\r\n')
         tentativePrompt = rows[-1]
-        
+        device.discoveryCounter = 0
         log.debug("[%s] tentativePrompt: [%s]" % (device.name, tentativePrompt))
         device.prompt[sts] = Prompt(tentativePrompt, tentative=True)
         
-        device.clearBuffer()
-        
-        device.sendLine('')
-        device.expect(lambda d: d.currentEvent.name == 'timeout')
-    #device.setFsmState('USER_PROMPT')
+    device.clearBuffer()
+    device.sendLine('')
+    device.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
+    
     
     
 class Event:
@@ -171,7 +186,7 @@ class Common:
     def addTransition(self, t):
         self.fsm.add_transition(t['event'], t['begin_state'], t['action'], t['end_state'])    
         
-    def addPattern(self, pattern):
+    def addPattern(self, **pattern):
         '''
         Add a pattern to be matched in the FSM state. If the pattern is matched then event is generated
         '''
@@ -253,6 +268,7 @@ class Common:
         return self.eventCb[event.name]
     
     def onEvent(self, eventName, callback):
+        log.debug("[%s] adding [%s] for [%s] event" % (self.name, callback, eventName))
         try:
             if not callback in self.eventCb[eventName]:
                 self.eventCb[eventName].append(callback)
@@ -260,6 +276,7 @@ class Common:
             self.eventCb[eventName] = [callback]
 
     def removeEventHandler(self, eventName, callback):
+        log.debug("[%s] removing event handler [%s]" % (self.name, callback))
         self.eventCb[eventName].remove(callback)
         
     def login(self):
@@ -307,7 +324,12 @@ class Common:
 
         out = self.esession.processResponseWithTimeout(self, runUntilTimeout)
         
-        if self.checkOnOutputComplete == True:
+        if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
+            # rediscover the prompt
+            log.debug("[%s] discovering again the prompt ..." % self.name)
+            discoverPrompt(self)
+            
+        if self.timeoutCheckOnOutputComplete == True:
         
             prevOut = None
             while out != prevOut:
@@ -320,10 +342,11 @@ class Common:
                 else:
                     out = prevOut + currOut
                 log.debug("Checking if [%s] response [%s] is complete" % (command,out))
-           
-        log.debug("[%s]: response does not change between responseCompleteTimePeriod" % (command))
         
-        return out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')
+        out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
+        log.debug("[%s:%s]: captured response [%s]" % (self.name, command, out))
+        
+        return out 
            
     def clearBuffer(self):
         # wait for a 1 second timeout period and then consider cleared the buffer
@@ -360,6 +383,7 @@ def cliDefaultErrorHandler(device):
     '''
     The default error handler invoked when an unexpected pattern or a timeout or eof event occurs
     '''
+    
     log.error("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.fsm.current_state, device.currentEvent.name))
 
     event_map = {
@@ -385,6 +409,9 @@ class CommonFSM(ExtFSM):
         ExtFSM.__init__(self, 'GROUND', memory)
         
         self.set_default_transition(cliDefaultErrorHandler, 'ERROR')
+        
+        # simply ignore 'prompt-match' on any state
+        self.add_input_any('prompt-match')
         
         for transitionKey, t in Common.transitions.items():
             log.debug("adding transition %s: %s -> %s -> %s (action: %s)" % ( transitionKey, t['begin_state'], t['event'], t['end_state'], t['action'] ))

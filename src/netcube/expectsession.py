@@ -12,10 +12,6 @@ log = log.getLogger("exp-session")
 
        
 def loginSuccessfull(device):
-    log.debug("[%s] prompt isFinal: [%s]" % (device.fsm.current_state, device.promptDiscovered()))
-    
-    # TODO: if prompt discovery enabled check if device.promptDiscovered() == True 
-    
     if device.fsm.current_state == 'USER_PROMPT':
         return True
     return False
@@ -80,8 +76,10 @@ class ExpectSession:
     def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
         
         target.currentEvent = common.Event('do-nothing-event')
+        log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
         
         while not checkPoint (target):
+            
             patterns = target.patterns(target.fsm.current_state) + patternsExt
             # expect and match 
             try:
@@ -114,7 +112,7 @@ class ExpectSession:
 
             #log.debug("detected event [%s]" % target.currentEvent)
             if target.hasEventHandlers(target.currentEvent):
-                
+                log.debug("[%s] got [%s] event; invoking handlers: [%s]" % (target.name, target.currentEvent.name, target.getEventHandlers(target.currentEvent)))
                 for eh in target.getEventHandlers(target.currentEvent):
                     eh(target, self.pipe.before)
            

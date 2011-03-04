@@ -98,6 +98,7 @@ class ExtFSM:
         self.state_transitions = {}
         # Map (current_state) --> (action, next_state).
         self.state_transitions_any = {}
+        self.input_transitions_any = {}
         self.default_transition = None
 
         self.input_symbol = None
@@ -167,6 +168,23 @@ class ExtFSM:
             next_state = state
         self.state_transitions_any [state] = (action, next_state)
 
+    def add_input_any (self, input_symbol, action=None, next_state=None):
+
+        """This adds a transition that associates:
+
+                (input_symbol) --> (action, next_state)
+
+        That is, the input symbol will trigger a transition in any state.
+        The process() method checks the "any state" input_symbol associations after it
+        checks for a match of transition_any
+
+        The action may be set to None in which case the process() method will
+        ignore the action and only set the next_state. The next_state may be
+        set to None in which case the current state will be unchanged. """
+
+        self.input_transitions_any [input_symbol] = (action, next_state)
+
+
     def set_default_transition (self, action, next_state):
 
         """This sets the default transition. This defines an action and
@@ -207,6 +225,8 @@ class ExtFSM:
             return self.state_transitions[(input_symbol, state)]
         elif self.state_transitions_any.has_key (state):
             return self.state_transitions_any[state]
+        elif self.input_transitions_any.has_key(input_symbol):
+            return self.input_transitions_any[input_symbol]
         elif self.default_transition is not None:
             return self.default_transition
         else:
@@ -232,9 +252,11 @@ class ExtFSM:
                 log.debug("executing action [%s]", str(self.action))
                 self.action (device)
             
-            stateChanged = (self.current_state != self.next_state)
-            self.current_state = self.next_state
-            self.next_state = None
+            stateChanged = False
+            if self.next_state != None:
+                stateChanged = (self.current_state != self.next_state)
+                self.current_state = self.next_state
+                self.next_state = None
             return stateChanged
 
     def process_list (self, input_symbols):
