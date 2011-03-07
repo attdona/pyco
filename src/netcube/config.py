@@ -11,16 +11,20 @@ from netcube.exceptions import ConfigFileError
 from validate import Validator #@UnresolvedImport
 
 from configobj import ConfigObj, flatten_errors #@UnresolvedImport
-
-expectLogfile = netcube.pyco_home + "/logs/expect.log"
-
-# create logger
-log = netcube.log.getLogger("config")
-
 import os
 module_path = os.path.dirname(netcube.__file__)
 
-config = ConfigObj(netcube.pyco_home + "/cfg/pyco.cfg", configspec=netcube.pyco_home + '/cfg/pyco_spec.cfg')
+expectLogfile = '/tmp/expect.log'
+cfgFile = module_path + "/cfg/pyco.cfg"
+if hasattr(netcube, 'pyco_home'):
+    expectLogfile = netcube.pyco_home + "/logs/expect.log"
+    cfgFile = netcube.pyco_home + "/cfg/pyco.cfg"
+    
+# create logger
+log = netcube.log.getLogger("config")
+
+
+config = ConfigObj(cfgFile, configspec=module_path + '/cfg/pyco_spec.cfg')
 
 val = Validator()
 results = config.validate(val)

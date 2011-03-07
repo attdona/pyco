@@ -6,8 +6,14 @@ Created on Feb 15, 2011
 import logging
 import logging.config
 import netcube
+import os
 
-logging.config.fileConfig(netcube.pyco_home + "/cfg/log.conf")
+if hasattr(netcube, 'pyco_home'):
+    logfile = netcube.pyco_home + "/cfg/log.conf"
+else:
+    logfile = os.path.dirname(__file__) + "/cfg/log.conf"
+    
+logging.config.fileConfig(logfile)
 
 def getLogger(logId):
     return logging.getLogger(logId)
