@@ -8,7 +8,6 @@ import unittest
 from netcube.master import *
 from netcube.exceptions import *
 
-
 unableToConnectHost = "163.162.155.91"
 loginSuccessfullHost = "127.0.0.1"
 targetCommand = "uname -a"
