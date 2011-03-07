@@ -26,16 +26,14 @@ class TestConstraints(unittest.TestCase):
 
     def setUp(self):
         pass
-   
         
     def tearDown(self):
         pass
     
     def testNoName(self):
         h = Linux(**localhost)
-        
         h.login()
-        
+        #self.failUnlessRaises(NetworkException, h.login)
     
 @unittest.skip("temp skip")
 class Test(unittest.TestCase):

@@ -17,11 +17,14 @@ from netcube import log
 log = log.getLogger("device")
 
 
-def buildPatternsList(model):
+def buildPatternsList(device, model=None):
     from netcube.config import config
     
+    if model is None:
+        model = device.__class__
+        
     if len(model.__bases__):
-        eventMap = buildPatternsList(model.__bases__[0])
+        eventMap = buildPatternsList(device, model.__bases__[0])
     else:
         eventMap = {'*': {}}
          
@@ -29,10 +32,13 @@ def buildPatternsList(model):
     
     for (eventKey, eventData) in config[model.__name__]['events'].items():
        
-        if isinstance(eventData['states'], basestring):
-            states = [eventData['states']]
+        if 'states' in eventData:
+            if isinstance(eventData['states'], basestring):
+                states = [eventData['states']]
+            else:
+                states = eventData['states']
         else:
-            states = eventData['states']
+            states = ['*']
         
         if not eventData['pattern']:
             log.warning("skipped [%s] [%s] event with empty pattern" % (model.__name__, eventKey))
@@ -42,6 +48,11 @@ def buildPatternsList(model):
                     eventMap[state][eventData['pattern']] = eventKey
                 else:
                     eventMap[state] = {eventData['pattern']:eventKey}
+        
+        if 'action' in eventData:
+            log.debug("[%s]: registering handler [%s]" % (eventKey, eventData['action']))
+            action = getCallable(eventData['action'])
+            device.onEvent(eventKey, action)
         
     return eventMap
 
@@ -172,9 +183,10 @@ class Common:
         # the finite state machine
         self.fsm = CommonFSM('GROUND', [])
         
-        self.patternMap = buildPatternsList(self.__class__)
         self.eventCb = {}
         self.prompt = {}
+        self.patternMap = buildPatternsList(self)
+
         
     def close(self):
         
@@ -365,18 +377,20 @@ def getCallable(methodName):
         return None
 
     import netcube.actions
-    try:
-        if isinstance(methodName,str):
+    if isinstance(methodName,str):
+        try:
             return getattr(netcube.actions, methodName)
-        else:
-            def composite(d):
-                for m in methodName:
-                    getCallable(m)(d)
-            return composite
-    except:
-        #log.debug("try to get function [%s] on Common namespace: %s" % (methodName, globals().keys()))
-        return globals()[methodName]
-
+        except:
+            if methodName in globals():
+                return globals()[methodName]
+            else:
+                raise netcube.exceptions.EventHandlerUndefined(methodName)
+    else:
+        def composite(d):
+            for m in methodName:
+                getCallable(m)(d)
+        return composite
+ 
 import netcube.exceptions
 
 def cliDefaultErrorHandler(device):
@@ -384,16 +398,17 @@ def cliDefaultErrorHandler(device):
     The default error handler invoked when an unexpected pattern or a timeout or eof event occurs
     '''
     
-    log.error("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.fsm.current_state, device.currentEvent.name))
+    log.info("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.fsm.current_state, device.currentEvent.name))
 
     event_map = {
                   'timeout': netcube.exceptions.ConnectionTimedOut,
                   'eof'    : netcube.exceptions.ConnectionClosed
                 }
 
-    device.close()
-        
-    raise event_map[device.currentEvent.name]
+    if device.currentEvent.name in event_map:
+        exception = event_map[device.currentEvent.name](device)
+        device.close()
+        raise exception
     
 class CommonFSM(ExtFSM):
     '''
