@@ -24,27 +24,57 @@ if hasattr(netcube, 'pyco_home'):
 log = netcube.log.getLogger("config")
 
 
-config = ConfigObj(cfgFile, configspec=module_path + '/cfg/pyco_spec.cfg')
-
-val = Validator()
-results = config.validate(val)
-
-if results != True:
-    for (section_list, key, _) in flatten_errors(config, results):
-        if key is not None:
-            raise ConfigFileError('The "%s" key in the section "%s" failed validation' % (key, ', '.join(section_list)))
-        else:
-            raise ConfigFileError('The following section was missing:%s ' % ', '.join(section_list))
+def loadFile(cfgfile=cfgFile):
+    '''
+    Load the pyco configuration file
+    '''
+    config = ConfigObj(cfgfile, configspec=module_path + '/cfg/pyco_spec.cfg')
+    return load(config)
 
 
-log.debug("[Common] data: %s" % config.get("Common"))
+def load(config):
+    '''
+    Load the pyco configObj
+    '''
+    
+    val = Validator()
+    results = config.validate(val)
+    
+    if results != True:
+        for (section_list, key, _) in flatten_errors(config, results):
+            if key is not None:
+                raise ConfigFileError('The "%s" key in the section "%s" failed validation' % (key, ', '.join(section_list)))
+            else:
+                raise ConfigFileError('The following section was missing:%s ' % ', '.join(section_list))
+    
+    
+    log.debug("[Common] data: %s" % config.get("Common"))
+    
+    for section in config.keys():
+        for (key,value) in config[section].items():
+            log.debug("settings %s.%s to %s" % (section, key, value))
+           
+            module = netcube.__dict__[section.lower()] #@UndefinedVariable
+            
+            clz = getattr(module, section)
+            if key not in ['events', 'transitions']:
+                setattr(clz, key, value)
+            
+    return config       
 
-for section in config.keys():
-    for (key,value) in config[section].items():
-        log.debug("settings %s.%s to %s" % (section, key, value))
-       
-        module = netcube.__dict__[section.lower()] #@UndefinedVariable
-        
-        clz = getattr(module, section)
-        setattr(clz, key, value)
-        
+
+def reset(config):
+    '''
+    Delete the configuration parameters
+    '''
+    for section in config.keys():
+        for (key,value) in config[section].items():
+            log.debug("settings %s.%s to %s" % (section, key, value))
+           
+            module = netcube.__dict__[section.lower()] #@UndefinedVariable
+            
+            clz = getattr(module, section)
+            if key not in ['events', 'transitions']:
+                delattr(clz, key)
+            
+    return config       

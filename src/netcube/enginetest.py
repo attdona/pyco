@@ -3,12 +3,17 @@ Created on Jan 31, 2011
 
 @author: adona
 '''
-import unittest
+import unittest #@UnresolvedImport
+import re #@UnresolvedImport
 
 from netcube.master import *
 from netcube.exceptions import *
+from netcube import log
 
-unableToConnectHost = "163.162.155.91"
+# create logger
+log = log.getLogger("test")
+
+unableToConnectHost =  "163.162.155.91"
 loginSuccessfullHost = "127.0.0.1"
 targetCommand = "uname -a"
 
@@ -19,8 +24,10 @@ localhost = {
              }
 
 
-skip = True
+skip = False
+#skip = True
 
+@unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
 
     def setUp(self):
@@ -29,66 +36,75 @@ class TestConstraints(unittest.TestCase):
     def tearDown(self):
         pass
     
+    @unittest.skipIf(skip==True,"skipped test")
+    def testGetExactStringForMatch(self):
+        prompts = ['pyco@cencenighe $', 'xxx $$', 'xyz\r\n{} [ ', '% *']
+        
+        for str in prompts:
+            result = getExactStringForMatch(str)
+            
+            p = re.compile(result)
+            
+            m = p.match(str)
+            if not m:
+                self.assertEqual(True,False,'escaped regexp from testGetExactStringForMatch not match')
+            
+            self.assertEqual(m.group(), str)
+        
+    @unittest.skipIf(skip==False,"skipped test")
+    def testRegexp(self):
+        str = 'abc\r\nxyz'
+        p = re.compile('\r\n.*$', re.MULTILINE)
+        m = p.match(str)
+        
+        print m.group()
+        
+    @unittest.skipIf(skip==True,"skipped test")
     def testNoName(self):
         h = Linux(**localhost)
         h.login()
         #self.failUnlessRaises(NetworkException, h.login)
     
-@unittest.skip("temp skip")
+#@unittest.skip("temp skip")
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.unableToConnectHost = "163.162.155.91"
-        self.loginSuccessfullHost = "127.0.0.1"
-        self.targetCommand = "uname -a"
-
-        Linux.loginErrorMessages = "mio errore"
-     
-        #Linux.addEvent("username_event", ('.*username:', '.*login:'), ('GROUND',))
-        #Linux.addEvent("password_event", '.*password:', ('GROUND',))
-        #Linux.addEvent("password_event", '.*[Pp]assword:', ('LOGIN',))
-        #Linux.addEvent("enable_event", 'enable', ('USER_PROMPT',))
+        pass
         
     def tearDown(self):
         pass
 
     @unittest.skipIf(skip==True,"skipped test")
+    def testEmptyPattern(self):
+        log.info("testEmptyPattern ...")
+        h = Linux(username='ipnet', name = unableToConnectHost, password='Hie.g00I')
+        
+        pattern = {'event': 'su_event', 'pattern': '', 'states': 'USER_PROMPT'}
+
+        h.addPattern(**pattern)
+
+
+    @unittest.skipIf(skip==True,"skipped test")
     def testUnableToConnectToRemoteHost(self):
-        kabul = Linux(username='ipnet', name = self.unableToConnectHost, password='Hie.g00I')
-        
-        #print "TIMEOUT = %s" % kabul.timeout
-        
+        log.info("testUnableToConnectToRemoteHost ...")
+        kabul = Linux(username='ipnet', name = unableToConnectHost, password='Hie.g00I')
+    
         self.failUnlessRaises(ConnectionClosed, kabul.login)
-        
-        #kabul.login("telnet", 'username', 'password')
-        #kabul.login("telnet", 'username', 'password')
-        
-        #response = kabul.command(self.targetCommand)
-        #response = "Linux cencenighe 2.6.32-27-generic #49-Ubuntu SMP"
-
-        #self.assertRegexpMatches(response, "Linux .*")
 
 
-    def atestLoginSuccessfull(self):
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
-        
-        linux.login()
-        
-        #device.sendCommand('ls')
-        #print "TIMEOUT = %s" % linx.timeout
-        print "TIMEOUT = %s" % linux.timeout
         
     @unittest.skipIf(skip==True,"skipped test")    
     def testSendCommand(self):
         '''
         Send a simple command without prompt discovery
         '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        log.info("testSendCommand ...")
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         linux.discoverPrompt = False
         linux.login()
         output = linux.send('id')
         
-        print "<%s>" % output
+        log.info("testSendCommand id = [%s]" % output)
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
         self.assertTrue('USER_PROMPT' not in linux.prompt, 'prompt discovered unexpectedly')
         
@@ -96,23 +112,69 @@ class Test(unittest.TestCase):
     def testSendCommandWithPromptDiscovery(self):
         '''
         Send a simple command with prompt discovery
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        '''
+        log.info("testSendCommandWithPromptDiscovery ...")
+        
+        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.login()
         output = linux.send('id')
         
-        print "<%s>" % output
+        log.info("testSendCommandWithPromptDiscovery: id = [%s]" % output)
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(pyco\\)")
+        self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
+
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testSendCommandWithPromptRegexpTc0(self):
+        '''
+        Send a simple command with prompt discovery using the promptRegexp parameter
+        The discovered prompt is a multiline prompt
+        '''
+        log.info("testSendCommandWithPromptRegexpTc0 ...")
+        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.promptRegexp = r"[^\r\n]*@.*\r\n~\$ "
+        
+        linux.discoverPromptWithRegexp(linux.promptRegexp, state='USER_PROMPT')
+        
+        linux.login()
+        output = linux.send('id')
+        
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(pyco\\)")
+        self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testSendCommandWithPromptRegexpTc1(self):
+        '''
+        Send a simple command with prompt discovery using the promptRegexp parameter
+        The discovered prompt is a single line prompt
+        '''  
+        log.info("testSendCommandWithPromptRegexpTc1 ...")  
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        
+        linux.discoverPrompt = True
+        linux.promptRegexp = r"\$ "
+        
+        linux.discoverPromptWithRegexp(linux.promptRegexp, state='USER_PROMPT')
+        
+        linux.login()
+        output = linux.send('id')
+        
+        log.info("testSendCommandWithPromptRegexpTc1: id = [%s]" % output)
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
         self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
+
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testOutputCompleteOnPromptMatch(self):
         '''
         Send simple commands and use prompt match only
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        '''
+        log.info("testOutputCompleteOnPromptMatch ...") 
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = True
@@ -120,7 +182,6 @@ class Test(unittest.TestCase):
         linux.login()
         output = linux.send('id')
         
-        print "<%s>" % output
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
         self.assertTrue('USER_PROMPT' in linux.prompt, 'prompt not discovered')
 
@@ -129,8 +190,9 @@ class Test(unittest.TestCase):
         '''
         Send simple commands and use prompt match only with promptDiscovery disabled
         expected result:  
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        ''' 
+        log.info("testOutputCompleteOnPromptMatchTc2 ...")   
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = False
         linux.checkOnOutputComplete = False
@@ -138,46 +200,46 @@ class Test(unittest.TestCase):
         linux.login()
         output = linux.send('id')
         
-        print "<%s>" % output
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testChangePrompt(self):
         '''
         Change the prompt and rediscover it 
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        '''
+        log.info("testChangePrompt ...")   
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
-        linux.discoverPrompt = False
+        linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
         
         linux.login()
-        output = linux.send('PS1=pippo')
+        linux.send('PS1=pippo')
         
-        print "<%s>" % output
-        self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+        self.assertRegexpMatches(linux.prompt['USER_PROMPT'].value, 'pippo')
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testMultilinePrompt(self):
         '''
         Discover a multiline prompt
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        '''
+        log.info("testMultilinePrompt ...")    
+        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
         
         output = linux.send('id')
         
-        print "<%s>" % output
-        #self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
+        self.assertRegexpMatches(output, "uid=[0-9]+\\(pyco\\)")
 
     @unittest.skipIf(skip==True,"skipped test")    
-    def testChangingPrompt(self):
+    def testDynamicPrompt(self):
         '''
         Ever changing prompt case
-        '''    
-        linux = Linux(name = self.loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        '''
+        log.info("testChangingPrompt ...")    
+        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
@@ -187,27 +249,26 @@ class Test(unittest.TestCase):
         
         self.assertEqual(linux.discoverPrompt, False, "discoverPrompt must be set to FALSE when unable to discover prompt")
         
-        #self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
-
-
 
 
     @unittest.skipIf(skip==True,"skipped test")    
-    def testSendCommandAfterClose(self):    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+    def testSendCommandAfterClose(self):
+        log.info("testSendCommandAfterClose ...")    
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         output = linux.send('uname -a')
-        print "FIRST OUTPUT: <%s>" % output
+        self.assertRegexpMatches(output, "Linux .*")
         try:
             linux.send('exit')
         except:
-                
-            output = linux.send('ls')
-            print "SECOND OUTPUT: <%s>" % output
+            output = linux.send('id')
+            self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
 
-    @unittest.skipIf(skip==False,"skipped test")    
-    def testCommandWithAnswers(self):    
-        linux = Linux(name = self.loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+
+    @unittest.skipIf(skip==True,"skipped test")    
+    def testCommandWithAnswers(self):
+        log.info("testCommandWithAnswers ...")    
+        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         def error(target):
             raise AuthenticationFailed
@@ -215,9 +276,9 @@ class Test(unittest.TestCase):
         def sendSuPassword(target):
             target.sendLine('pyco')
         
-        suPattern = {'event': 'su_event', 'pattern': 'Password: ', 'state': 'USER_PROMPT'}
+        suPattern = {'event': 'su_event', 'pattern': 'Password: ', 'states': 'USER_PROMPT'}
         
-        authFailed = {'event': 'auth_failed', 'pattern': 'Authentication failure', 'state': 'USER_PROMPT', 'action': error}
+        authFailed = {'event': 'auth_failed', 'pattern': 'Authentication failure', 'states': 'USER_PROMPT', 'action': error}
         
         suRule = {
                  'begin_state' : 'USER_PROMPT',
@@ -234,7 +295,7 @@ class Test(unittest.TestCase):
         
         linux.send('su pyco')
         output = linux.send('uname -a')
-        print "OUTPUT: <%s>" % output
+        self.assertRegexpMatches(output, "Linux .*")
       
 
 if __name__ == "__main__":

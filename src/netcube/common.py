@@ -4,12 +4,12 @@ Created on 29/gen/2011
 @author: SO000112
 '''
 
-import re
+import re #@UnresolvedImport
 from netcube.xfsm import ExtFSM
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
 
-from StringIO import StringIO
+from StringIO import StringIO #@UnresolvedImport
 
 from netcube import log
 
@@ -18,7 +18,19 @@ log = log.getLogger("device")
 
 
 def buildPatternsList(device, model=None):
-    from netcube.config import config
+    
+    if model is None:
+        model = device.__class__
+        
+    if len(model.__bases__):
+        buildPatternsList(device, model.__bases__[0])
+    
+    for (eventKey, eventData) in device.config[model.__name__]['events'].items():
+        device.addPattern(event=eventKey, **eventData)
+        
+
+
+def buildPatternsListOLD(device, model=None):
     
     if model is None:
         model = device.__class__
@@ -30,7 +42,7 @@ def buildPatternsList(device, model=None):
          
     #log.debug("[%s] events: %s" % (model.__name__, config[model.__name__]['events']))
     
-    for (eventKey, eventData) in config[model.__name__]['events'].items():
+    for (eventKey, eventData) in device.config[model.__name__]['events'].items():
        
         if 'states' in eventData:
             if isinstance(eventData['states'], basestring):
@@ -78,17 +90,34 @@ def getExactStringForMatch(str):
     '''
     Used for example to escape special characters in prompt strings 
     '''
-    specials = ['(\\$)', '(\\\\)']
+    log.debug("escaping prompt [%s]" % str)
+    specials = ['(\\[)', '(\\$)', '(\\.)', '(\\^)', '(\\*)', '(\\+)', '(\\?)', '(\\{)', '(\\})', '(\\])', '(\\|)', '(\\()', '(\\))']
     orSep = '|'
     pattern = orSep.join(specials)
     
-    p = re.compile(pattern)
+    p = re.compile('(\\\\)')
     match = p.sub(r'\\\1', str)
+    for spec in specials:
+        p = re.compile(spec)
+        match = p.sub(r'\\\1', match)
+    
+    
     
     return match
 
      
 def discoverPromptCallback(device, output):
+    '''
+    The discover prompt algorithm
+    '''
+
+    if device.currentEvent.name == 'prompt-match':
+        output = device.esession.pipe.after
+    elif device.currentEvent.name == 'timeout':
+        output = device.esession.pipe.before
+    else:
+        raise Exception("discover prompt failed; unexpected event [%s]" % device.currentEvent.name)
+    
     # if regular exp succeed then set the prompt
     log.debug("[%s] prompt discovery ..." % (device.name))
 
@@ -102,10 +131,11 @@ def discoverPromptCallback(device, output):
             device.discoveryCounter = 0
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
-            #device.setState('USER_PROMPT')
-            device._addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             
-            device.removeEventHandler('timeout', discoverPromptCallback)
+            device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
+            
+            for ev in ['timeout', 'prompt-match']:
+                device.removeEventHandler(ev, discoverPromptCallback)
             
             # declare the discovery with the event
             device.currentEvent = Event('prompt-match')
@@ -162,15 +192,18 @@ class Prompt:
     def setExactValue(self, value):
         self.value = value
         self.tentative = False
+
     
 class Common:
     '''
     Base class for device configuration 
     '''    
     
+    defaultConfig = None
+    
     telnet_port = 23
 
-    def __init__(self, name, username = None, password = None, protocol='telnet', hops = []):
+    def __init__(self, name, username = None, password = None, protocol='telnet', config=None, hops = []):
         from netcube.expectsession import ExpectSession
         log.debug("[%s] ctor" % name)
         self.name = name
@@ -180,12 +213,21 @@ class Common:
         
         self.esession = ExpectSession(hops,self)
         
-        # the finite state machine
-        self.fsm = CommonFSM('GROUND', [])
-        
         self.eventCb = {}
         self.prompt = {}
-        self.patternMap = buildPatternsList(self)
+
+        if config:
+            self.config = netcube.config.load(config)
+        else:
+            if not Common.defaultConfig:
+                Common.defaultConfig = netcube.config.loadFile()
+        
+            self.config = Common.defaultConfig
+
+        # the finite state machine
+        self.fsm = CommonFSM('GROUND', self.config, [])
+        self.patternMap = {'*':{}}
+        buildPatternsList(self)
 
         
     def close(self):
@@ -198,23 +240,46 @@ class Common:
     def addTransition(self, t):
         self.fsm.add_transition(t['event'], t['begin_state'], t['action'], t['end_state'])    
         
-    def addPattern(self, **pattern):
+#    def addPattern(self, **pattern):
+#        self.addPattern(pattern['event'], pattern['pattern'], pattern['state'])
+        
+    def addPattern(self, event, pattern, states=['*'], action=None):
         '''
         Add a pattern to be matched in the FSM state. If the pattern is matched then event is generated
         '''
-        self._addPattern(pattern['event'], pattern['pattern'], pattern['state'])
+        if not pattern or pattern == '':
+            log.warning("[%s]: skipped [%s] event with empty pattern" % (self.name, event))
+            return
         
-    def _addPattern(self, event, pattern, state='*'):
-        try:
-            self.patternMap[state][pattern] = event
-        except:
-            self.patternMap[state] = {pattern:event}    
+        if isinstance(states, basestring):
+            states = [states]
+        
+        for state in states:
+            try:
+                self.patternMap[state][pattern] = event
+            except:
+                self.patternMap[state] = {pattern:event}
+            
+        if action:
+            log.debug("[%s]: registering handler [%s]" % (event, action))
+            self.onEvent(event, action)
+    
 
     def unregisterPattern(self, pattern, state = '*'):
         del self.patternMap[state][pattern]
       
     def patternFromEvent(self, pattern):
         return 'Password: '
+
+    def discoverPromptWithRegexp(self, regexp, state='*'):
+        '''
+        Use regexp as a hint for prompt discovery 
+        Add the guard '\r\n' to the begin of prompt regexp
+        '''
+        
+        self.addPattern("prompt-match", '\r\n' + regexp, state)
+        self.onEvent('prompt-match', discoverPromptCallback)
+
         
     def setState(self, value):
         self.fsm.current_state = value   
@@ -288,8 +353,11 @@ class Common:
             self.eventCb[eventName] = [callback]
 
     def removeEventHandler(self, eventName, callback):
-        log.debug("[%s] removing event handler [%s]" % (self.name, callback))
-        self.eventCb[eventName].remove(callback)
+        log.debug("[%s] removing [%s] event handler [%s]" % (self.name, eventName, callback))
+        try:
+            self.eventCb[eventName].remove(callback)
+        except:
+            log.debug("[%s] not found [%s] event handler [%s]" % (self.name, eventName, callback))
         
     def login(self):
         """
@@ -331,10 +399,10 @@ class Common:
         self.clearBuffer()
         self.sendLine(command)
 
-        def runUntilTimeout(device):
+        def runUntilPromptMatchOrTimeout(device):
             return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match'
 
-        out = self.esession.processResponseWithTimeout(self, runUntilTimeout)
+        out = self.esession.processResponseWithTimeout(self, runUntilPromptMatchOrTimeout)
         
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
             # rediscover the prompt
@@ -348,7 +416,7 @@ class Common:
                 self.clearBuffer()
                 log.debug("[%s] == [%s]" % (prevOut,out))
                 prevOut = out
-                currOut = self.esession.processResponseWithTimeout(self, runUntilTimeout)
+                currOut = self.esession.processResponseWithTimeout(self, runUntilPromptMatchOrTimeout)
                 if prevOut == None:
                     out = currOut
                 else:
@@ -416,7 +484,7 @@ class CommonFSM(ExtFSM):
     '''
 
 
-    def __init__(self, initial_state, memory=None):
+    def __init__(self, initial_state, config, memory=None):
         '''
         Add the configured transitions
         '''
@@ -428,7 +496,8 @@ class CommonFSM(ExtFSM):
         # simply ignore 'prompt-match' on any state
         self.add_input_any('prompt-match')
         
-        for transitionKey, t in Common.transitions.items():
+#        for transitionKey, t in Common.transitions.items():
+        for transitionKey, t in config['Common']['transitions'].items():
             log.debug("adding transition %s: %s -> %s -> %s (action: %s)" % ( transitionKey, t['begin_state'], t['event'], t['end_state'], t['action'] ))
                 
             self.add_transition(t['event'], t['begin_state'], getCallable(t['action']), t['end_state'])

@@ -11,7 +11,8 @@ class Linux(Common):
     '''
     classdocs
     '''
-    pass
+    def __init__(self, name, username = None, password = None, protocol='telnet', config=None, hops = []):
+        Common.__init__(self, name, username, password, protocol, config, hops)
 
         
         

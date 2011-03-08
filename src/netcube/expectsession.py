@@ -3,7 +3,7 @@ Created on Feb 21, 2011
 
 @author: adona
 '''
-import pexpect
+import pexpect #@UnresolvedImport
 import netcube.common as common
 from netcube import log
 
