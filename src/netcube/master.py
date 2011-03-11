@@ -9,3 +9,5 @@ from netcube.ciscoios import CiscoIOS
 from netcube.common import *
 
 import netcube.config
+
+netcube.config.loadFile()

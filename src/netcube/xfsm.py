@@ -175,7 +175,7 @@ class ExtFSM:
                 (input_symbol) --> (action, next_state)
 
         That is, the input symbol will trigger a transition in any state.
-        The process() method checks the "any state" input_symbol associations after it
+        The process() method checks the input_symbol in "any state" associations after it
         checks for a match of transition_any
 
         The action may be set to None in which case the process() method will
@@ -213,12 +213,15 @@ class ExtFSM:
 
         2. Check state_transitions_any[] that match (state)
             In other words, match a specific state and ANY input_symbol.
+            
+        3. Check if the input_symbol has a (action, next_state) association 
+            in any state 
 
-        3. Check if the default_transition is defined.
+        4. Check if the default_transition is defined.
             This catches any input_symbol and any state.
             This is a handler for errors, undefined states, or defaults.
 
-        4. No transition was defined. If we get here then raise an exception.
+        5. No transition was defined. If we get here then raise an exception.
         """
 
         if self.state_transitions.has_key((input_symbol, state)):
@@ -284,7 +287,7 @@ class ExtFSM:
 #    2003
 ##############################################################################
 
-import sys, os, traceback, optparse, time, string
+import sys, os, traceback, optparse, time, string #@UnresolvedImport
 
 #
 # These define the actions. 

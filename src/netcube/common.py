@@ -6,6 +6,7 @@ Created on 29/gen/2011
 
 import re #@UnresolvedImport
 from netcube.xfsm import ExtFSM
+from netcube.exceptions import *
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
 
@@ -17,7 +18,19 @@ from netcube import log
 log = log.getLogger("device")
 
 
+def path(hops):
+    '''
+    Uniform Device Locator
+    '''
+    target = hops.pop()
+    target.hops = hops
+    return target
+
 def buildPatternsList(device, model=None):
+    '''
+    Setup the expect patterns and the action events from the configobj 
+    '''
+    from netcube.config import configObj
     
     if model is None:
         model = device.__class__
@@ -25,10 +38,45 @@ def buildPatternsList(device, model=None):
     if len(model.__bases__):
         buildPatternsList(device, model.__bases__[0])
     
-    for (eventKey, eventData) in device.config[model.__name__]['events'].items():
-        device.addPattern(event=eventKey, **eventData)
-        
+    if not model or model.__name__ not in configObj:
+        log.debug("[%s]: skipping undefined [%s] configuration section" % (device.name, model.__name__))
+        return
+    
+    for (eventKey, eventData) in configObj[model.__name__]['events'].items():
 
+        action=None
+        if 'action' in eventData:
+            action = buildAction(eventData['action'])
+           
+        states = '*'  
+        if 'state' in eventData:
+            states =  eventData['state']
+            
+        endState = None
+        if 'end_state' in eventData:
+            endState = eventData['end_state']
+     
+        pattern = None
+        if 'pattern' in eventData:
+            pattern = eventData['pattern']
+            
+        device.addPattern(event=eventKey, pattern=pattern, action=action, states=states, endState=endState)
+
+        
+def buildAction(actionString):
+    al = actionString.split()
+    
+    if len(al) > 1:
+        baseAction = getCallable(al[0])
+        def action(target):
+            log.debug("invoking action [%s] with %s" % (baseAction.__name__, al[1:]))
+            baseAction(target,*al[1:])
+            
+    else:
+        action = getCallable(actionString)
+    
+    return action
+    
 
 def buildPatternsListOLD(device, model=None):
     
@@ -69,14 +117,6 @@ def buildPatternsListOLD(device, model=None):
     return eventMap
 
        
-def discoverPrompt(device):
-    """
-    Match the output device against the promptRegexp pattern and set the device prompt
-    """
-    #device.registerPattern('timeout', device.promptRegexp)
-    
-    device.onEvent('timeout', discoverPromptCallback)
-    device.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
 
 # OBSOLETED
 def disableTimeoutEvent(device, output):
@@ -106,7 +146,7 @@ def getExactStringForMatch(str):
     return match
 
      
-def discoverPromptCallback(device, output):
+def discoverPromptCallback(device):
     '''
     The discover prompt algorithm
     '''
@@ -132,7 +172,7 @@ def discoverPromptCallback(device, output):
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
             
-            device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
+            #device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             
             for ev in ['timeout', 'prompt-match']:
                 device.removeEventHandler(ev, discoverPromptCallback)
@@ -203,33 +243,64 @@ class Common:
     
     telnet_port = 23
 
-    def __init__(self, name, username = None, password = None, protocol='telnet', config=None, hops = []):
-        from netcube.expectsession import ExpectSession
+    def __init__(self, name, username = None, password = None, protocol='ssh', hops = []):
         log.debug("[%s] ctor" % name)
         self.name = name
         self.username = username
         self.password = password
         self.protocol = protocol
-        
-        self.esession = ExpectSession(hops,self)
+        self.hops = hops
+        self.loggedin = False
         
         self.eventCb = {}
         self.prompt = {}
 
-        if config:
-            self.config = netcube.config.load(config)
-        else:
-            if not Common.defaultConfig:
-                Common.defaultConfig = netcube.config.loadFile()
-        
-            self.config = Common.defaultConfig
+#        if config:
+#            self.config = netcube.config.load(config)
+#        else:
+#            if not Common.defaultConfig:
+#                Common.defaultConfig = netcube.config.loadFile()
+#        
+#            self.config = Common.defaultConfig
 
         # the finite state machine
-        self.fsm = CommonFSM('GROUND', self.config, [])
+        self.fsm = CommonFSM('GROUND', [])
         self.patternMap = {'*':{}}
         buildPatternsList(self)
 
+    def enablePromptDiscovery(self):
+        """
+        Match the output device against the promptRegexp pattern and set the device prompt
+        """
+        self.onEvent('timeout', discoverPromptCallback)
+        #self.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
+
+
+    def interactionLog(self):
+        return self.esession.logfile.getvalue()
+
+    def isConnected(self):
+        '''
+        If the device is connected return True 
+        '''
+        return self.loggedin
         
+    def whereAmI(self):
+        '''
+        return the hop device actually connected
+        '''
+        from netcube.expectsession import SOURCE_HOST
+        
+        if self.isConnected():
+            return self
+        
+        for d in reversed(self.hops):
+            log.debug("checking if [%s] is connected" % d.name)
+            if d.isConnected():
+                return d
+    
+        return SOURCE_HOST
+    
     def close(self):
         
         if self.currentEvent.name != 'eof':
@@ -243,26 +314,44 @@ class Common:
 #    def addPattern(self, **pattern):
 #        self.addPattern(pattern['event'], pattern['pattern'], pattern['state'])
         
-    def addPattern(self, event, pattern, states=['*'], action=None):
+    def addPattern(self, event, pattern, states=['*'], endState=None, action=None):
         '''
-        Add a pattern to be matched in the FSM state. If the pattern is matched then event is generated
+        Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated
+        If pattern is None a transition_any is generated
         '''
-        if not pattern or pattern == '':
-            log.warning("[%s]: skipped [%s] event with empty pattern" % (self.name, event))
-            return
         
         if isinstance(states, basestring):
             states = [states]
         
         for state in states:
+            
+            if not pattern or pattern == '':
+                if state == '*':
+                    log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
+                else:
+                    log.debug("XXXXXXXXXXXXXX adding transition_any in state [%s-%s-%s]" % (state, action, endState))
+                    self.fsm.add_transition_any(state, action, endState)
+                
+                continue
+            
             try:
                 self.patternMap[state][pattern] = event
             except:
                 self.patternMap[state] = {pattern:event}
+
+            #  add the transition
+            if state == '*':
+                log.debug("[%s]: adding transition in any state [%s-%s-%s]" % (event, state, action, endState))
+                self.fsm.add_input_any(event, action, endState)
+            else:
+                log.debug("[%s]: adding transition [%s-%s-%s]" % (event, state, action, endState))
+                self.fsm.add_transition(event, state, action, endState)
             
-        if action:
-            log.debug("[%s]: registering handler [%s]" % (event, action))
-            self.onEvent(event, action)
+            
+            
+#        if action:
+#            log.debug("[%s]: registering handler [%s]" % (event, action))
+#            self.onEvent(event, action)
     
 
     def unregisterPattern(self, pattern, state = '*'):
@@ -319,9 +408,20 @@ class Common:
             return self.patternMap['*'][pattern]
 
     def connectCommand(self, clientDevice):
+        
+        try:
+            telnetCommand = clientDevice.telnetCommand
+        except:
+            telnetCommand = 'telnet pippo'   
+
+        try:
+            sshCommand = clientDevice.sshCommand
+        except:
+            sshCommand = 'ssh ${device.username}@${device.name}'   
+
         commandTemplates = {
-                        'telnet' : Template(clientDevice.telnetCommand),
-                        'ssh'    : Template(clientDevice.sshCommand)
+                        'telnet' : Template(telnetCommand),
+                        'ssh'    : Template(sshCommand)
                         }
         
         template = commandTemplates.get(self.protocol)
@@ -369,12 +469,26 @@ class Common:
         
         If login has succeeded the device is in USER_PROMPT state and it is ready for consuming commands
         """
+        from netcube.expectsession import ExpectSession
         log.debug("%s login ..." % self.name)
+
+        self.esession = ExpectSession(self.hops,self)
+        log.debug("[%s] session: [%s]" % (self.name, self.esession))
         
-        self.esession.login()
+        try:
+            self.esession.login()
+        except NetworkException as e:
+            # something go wrong, try to find the last connected hop in the path
+            log.info("[%s]: in login phase got [%s] error" % (e.device.name ,e.__class__))
+            
+            log.debug("full interaction: [%s]" % e.interactionLog)
+            raise e
+            
         self.clearBuffer()
-        log.debug("%s logged in !!! ..." % self.name)
- 
+        
+        if self.state() == 'USER_PROMPT':
+            log.debug("%s logged in !!! ..." % self.name)
+            
         
     def expect(self, checkPoint):
         self.esession.patternMatch(self, checkPoint, [], self.responseMaxWaitTime, exactMatch=True)
@@ -383,6 +497,7 @@ class Common:
         """
         send ``stringValue`` to the device cli 
         """
+        log.debug("[%s] sending [%s]" % (self, stringValue))
         self.esession.sendLine(stringValue)
         
     def __call__(self, command):
@@ -407,9 +522,9 @@ class Common:
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
             # rediscover the prompt
             log.debug("[%s] discovering again the prompt ..." % self.name)
-            discoverPrompt(self)
+            self.enablePromptDiscovery()
             
-        if self.timeoutCheckOnOutputComplete == True:
+        if self.checkIfOutputComplete == True:
         
             prevOut = None
             while out != prevOut:
@@ -480,27 +595,29 @@ def cliDefaultErrorHandler(device):
     
 class CommonFSM(ExtFSM):
     '''
-    classdocs
+    The common fsm
     '''
 
 
-    def __init__(self, initial_state, config, memory=None):
+    def __init__(self, initial_state, memory=None):
         '''
         Add the configured transitions
         '''
+        from netcube.config import configObj
+        log.debug("config [%s]" % configObj)
         
         ExtFSM.__init__(self, 'GROUND', memory)
         
-        self.set_default_transition(cliDefaultErrorHandler, 'ERROR')
+        self.set_default_transition(cliDefaultErrorHandler, None)
         
         # simply ignore 'prompt-match' on any state
         self.add_input_any('prompt-match')
         
-#        for transitionKey, t in Common.transitions.items():
-        for transitionKey, t in config['Common']['transitions'].items():
-            log.debug("adding transition %s: %s -> %s -> %s (action: %s)" % ( transitionKey, t['begin_state'], t['event'], t['end_state'], t['action'] ))
+#       for transitionKey, t in Common.transitions.items():
+#        for transitionKey, t in configObj['Common']['transitions'].items():
+#            log.debug("adding transition %s: %s -> %s -> %s (action: %s)" % ( transitionKey, t['begin_state'], t['event'], t['end_state'], t['action'] ))
                 
-            self.add_transition(t['event'], t['begin_state'], getCallable(t['action']), t['end_state'])
+#            self.add_transition(t['event'], t['begin_state'], getCallable(t['action']), t['end_state'])
 
             
 

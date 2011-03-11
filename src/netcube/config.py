@@ -23,19 +23,24 @@ if hasattr(netcube, 'pyco_home'):
 # create logger
 log = netcube.log.getLogger("config")
 
+# the shared configObj
+configObj = None
 
 def loadFile(cfgfile=cfgFile):
     '''
     Load the pyco configuration file
     '''
     config = ConfigObj(cfgfile, configspec=module_path + '/cfg/pyco_spec.cfg')
-    return load(config)
+    return reload(config)
 
 
 def load(config):
     '''
     Load the pyco configObj
     '''
+    global configObj
+    
+    config.configspec = ConfigObj(module_path + '/cfg/pyco_spec.cfg')
     
     val = Validator()
     results = config.validate(val)
@@ -59,16 +64,25 @@ def load(config):
             clz = getattr(module, section)
             if key not in ['events', 'transitions']:
                 setattr(clz, key, value)
+
+    configObj = config
             
     return config       
 
+def reload(config):
+    reset()
+    load(config)
 
-def reset(config):
+def reset():
     '''
-    Delete the configuration parameters
+    Delete the current configuration parameters
     '''
-    for section in config.keys():
-        for (key,value) in config[section].items():
+    
+    if configObj is None:
+        return;
+    
+    for section in configObj.keys():
+        for (key,value) in configObj[section].items():
             log.debug("settings %s.%s to %s" % (section, key, value))
            
             module = netcube.__dict__[section.lower()] #@UndefinedVariable
@@ -77,4 +91,4 @@ def reset(config):
             if key not in ['events', 'transitions']:
                 delattr(clz, key)
             
-    return config       
+           

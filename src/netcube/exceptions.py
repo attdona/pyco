@@ -9,7 +9,8 @@ class NetworkException(Exception):
     def __init__(self, device):
         self.device = device
         self.response = device.esession.pipe.before
-
+        self.interactionLog = device.interactionLog()
+        
     def __str__(self):
         errInfo =  "%s\n\n%s" % (self.device.name, self.response)
         return errInfo
