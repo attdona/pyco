@@ -251,15 +251,20 @@ class ExtFSM:
 
             self.input_symbol = input_symbol.name
             (self.action, self.next_state) = self.get_transition (self.input_symbol, self.current_state)
-            if self.action is not None:
-                log.debug("executing action [%s]", str(self.action))
-                self.action (device)
+            log.debug("selected transition [%s,%s] -> [%s]" % (self.input_symbol, self.current_state, self.next_state))
             
             stateChanged = False
+            log.debug("transition activated for [%s,%s] -> [%s]" % (self.input_symbol, self.current_state, self.next_state))
             if self.next_state != None:
+                
                 stateChanged = (self.current_state != self.next_state)
                 self.current_state = self.next_state
                 self.next_state = None
+                
+            if self.action is not None:
+                log.debug("[%s] executing action [%s]" % (self.input_symbol, str(self.action)))
+                self.action (device)
+           
             return stateChanged
 
     def process_list (self, input_symbols):

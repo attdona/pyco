@@ -173,7 +173,7 @@ def discoverPromptCallback(device):
             device.prompt[sts].setExactValue(device.prompt[sts].value)
             
             #device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
-            
+            device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             for ev in ['timeout', 'prompt-match']:
                 device.removeEventHandler(ev, discoverPromptCallback)
             
@@ -273,8 +273,8 @@ class Common:
         Match the output device against the promptRegexp pattern and set the device prompt
         """
         self.onEvent('timeout', discoverPromptCallback)
+        
         #self.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
-
 
     def interactionLog(self):
         return self.esession.logfile.getvalue()
@@ -314,10 +314,10 @@ class Common:
 #    def addPattern(self, **pattern):
 #        self.addPattern(pattern['event'], pattern['pattern'], pattern['state'])
         
-    def addPattern(self, event, pattern, states=['*'], endState=None, action=None):
+    def addPattern(self, event, pattern=None, states=['*'], endState=None, action=None):
         '''
         Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated
-        If pattern is None a transition_any is generated
+        If pattern is None only a transition is configured
         '''
         
         if isinstance(states, basestring):
@@ -329,8 +329,8 @@ class Common:
                 if state == '*':
                     log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
                 else:
-                    log.debug("XXXXXXXXXXXXXX adding transition_any in state [%s-%s-%s]" % (state, action, endState))
-                    self.fsm.add_transition_any(state, action, endState)
+                    log.debug("[%s] adding transition [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
+                    self.fsm.add_transition(event, state, action, endState)
                 
                 continue
             
@@ -341,18 +341,24 @@ class Common:
 
             #  add the transition
             if state == '*':
-                log.debug("[%s]: adding transition in any state [%s-%s-%s]" % (event, state, action, endState))
+                log.debug("[%s]: adding pattern driven transition in any state [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
                 self.fsm.add_input_any(event, action, endState)
             else:
-                log.debug("[%s]: adding transition [%s-%s-%s]" % (event, state, action, endState))
+                log.debug("[%s]: adding pattern driven transition [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
                 self.fsm.add_transition(event, state, action, endState)
             
+
+    def addExpectPattern(self, event, pattern, state):
+        log.debug("[%s]: adding expect pattern [%s], event [%s], state [%s]" % (self.name, pattern, event, state))
+        if not pattern or pattern == '':
+            log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
+            return
+        
+        try:
+            self.patternMap[state][pattern] = event
+        except:
+            self.patternMap[state] = {pattern:event}
             
-            
-#        if action:
-#            log.debug("[%s]: registering handler [%s]" % (event, action))
-#            self.onEvent(event, action)
-    
 
     def unregisterPattern(self, pattern, state = '*'):
         del self.patternMap[state][pattern]
@@ -523,6 +529,8 @@ class Common:
             # rediscover the prompt
             log.debug("[%s] discovering again the prompt ..." % self.name)
             self.enablePromptDiscovery()
+            discoverPromptCallback(self)
+            
             
         if self.checkIfOutputComplete == True:
         

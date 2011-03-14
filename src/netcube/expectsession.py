@@ -93,6 +93,11 @@ class ExpectSession:
         self.pipe.sendline(command)
     
     def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
+        self.patternExpectLoop(target, checkPoint, patternsExt, maxWaitTime, exactMatch)
+        #stateChanged = target.fsm.process(target, target.currentEvent)
+        return self.pipe.before
+        
+    def patternExpectLoop(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
         
         target.currentEvent = common.Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))

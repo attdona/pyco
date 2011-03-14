@@ -21,6 +21,9 @@ def sendPassword(target):
     log.debug("[%s] sending password [%s] ..." % (target.name, target.password))
     target.sendLine(target.password)
 
+    # check if the expect session detect a cli shell 
+    cliIsConnected(target)
+
 def cliIsConnected(target):
     log.debug("[%s] [%s] checking if CLI is connected ..." % (target.name, target.currentEvent.name))
 
@@ -37,11 +40,18 @@ def cliIsConnected(target):
         target.expect(isTimeoutOrPromptMatch)
         
     elif target.currentEvent.name != 'timeout':
+        
+        # if discoverPrompt is false then the timeout event is not an error but the trigger
+        # that all the output is received 
+        
+        target.addPattern('timeout', states=target.fsm.current_state)
+        
         def isTimeout(d):
             return d.currentEvent.name == 'timeout'
         
         target.expect(isTimeout)
 
+    
 
 def connectionRefused(target):
     log.debug("[%s] connectionRefused: [%s]" % (target.name, target.esession.pipe.before))

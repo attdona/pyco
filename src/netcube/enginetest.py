@@ -25,6 +25,12 @@ fakeLocalhost = {
              'password':'netcube'
              }
 
+localhost = {
+             'name'    :'localhost', 
+             'username':'netbox',
+             'password':'netbox'
+             }
+
 hop1 = {
             'name'     : '163.162.155.60',
             'username' : 'riccardo',
@@ -45,8 +51,8 @@ hop3 = {
 
 
 
-#skip = False
-skip = True
+skip = False
+#skip = True
 
 @unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
@@ -129,7 +135,7 @@ class Test(unittest.TestCase):
         self.assertRegexpMatches(output, "uid=[0-9]+\\(netbox\\)")
         self.assertTrue('USER_PROMPT' not in linux.prompt, 'prompt discovered unexpectedly')
         
-    @unittest.skipIf(skip==False,"skipped test")    
+    @unittest.skipIf(skip==True,"skipped test")    
     def testSendCommandWithPromptDiscovery(self):
         '''
         Send a simple command with prompt discovery
@@ -358,11 +364,12 @@ class TestHops(unittest.TestCase):
         This triggers a expect detection loop and a TimedOut exception
         
         '''
+        log.info("testHopConnection ...") 
         hop = Linux(**hop1)
         
         host = Linux(hops = [hop], **hop2)
+        self.assertRaises(ConnectionTimedOut, host.login)
         
-        host.login()
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testWhereAmI(self):
@@ -379,8 +386,7 @@ class TestHops(unittest.TestCase):
             d = host.whereAmI()
             log.debug("target host: [%s], connected host: [%s]" % (host.name, d.name))
 
-            out = host('uname -a')
-            print "[%s]" % out
+            self.assertEqual(d.name, hop1['name'], 'whereAmI unexpected result')
 
 
     @unittest.skipIf(skip==True,"skipped test")    
@@ -404,8 +410,7 @@ class TestHops(unittest.TestCase):
             d = host.whereAmI()
             log.debug("target host: [%s], connected host: [%s]" % (host.name, d.name))
 
-            out = d('uname -a')
-            print "[%s]" % out
+            self.assertRaises((ConnectionClosed), host, 'uname -a')
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testMinimalCfg(self):
@@ -414,7 +419,7 @@ class TestHops(unittest.TestCase):
         '''
         import netcube.config
         
-        log.info("testExpectLoop ...")    
+        log.info("testMinimalCfg ...")    
        
         config = ConfigObj()
         
@@ -426,11 +431,7 @@ class TestHops(unittest.TestCase):
                                                                     'state' : 'GROUND',
                                                                     'action': 'sendPassword',
                                                                     'end_state': 'USER_PROMPT'
-                                                                  },
-                                                'permission_denied': {
-                                                                      'pattern' : 'Permission denied',
-                                                                      'action'  : 'permissionDenied'
-                                                                      }
+                                                                  }
                                                                   
                                            }
                            }
@@ -439,12 +440,11 @@ class TestHops(unittest.TestCase):
         # reload the configuration
         netcube.config.reload(config)
         
-        host = Linux(**fakeLocalhost)
+        host = Linux(**localhost)
         
         try:
-            host.login()
-            log.debug('------------------------------')
-            host.send('uname -a')
+            out = host('id')
+            self.assertRegexpMatches(out, 'uid=[0-9]+')
         finally:
             netcube.config.loadFile()
             
