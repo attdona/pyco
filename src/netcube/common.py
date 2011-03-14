@@ -1,9 +1,4 @@
 # coding=utf-8-sig
-'''
-Created on 29/gen/2011
-
-@author: Attilio Donà
-'''
 
 import re #@UnresolvedImport
 from netcube.xfsm import ExtFSM
@@ -17,7 +12,6 @@ from netcube import log
 
 # create logger
 log = log.getLogger("device")
-
 
 def path(hops):
     '''

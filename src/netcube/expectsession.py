@@ -26,7 +26,10 @@ class ExpectSession:
     
     def __init__(self, hops, target):
         self.hops = hops + [target]
-        
+
+        # in memory log
+        self.logfile = StringIO.StringIO()
+
         # key is a hop object, value is the hop fsm current state
         #self.currentState = {}
         
@@ -67,7 +70,7 @@ class ExpectSession:
         cmd = target.connectCommand(prevDevice)
         
         # in memory log
-        self.logfile = StringIO.StringIO()
+        #self.logfile = StringIO.StringIO()
         
         #logfile = file(netcube.config.expectLogfile, "w")
 

@@ -1,7 +1,10 @@
 '''
 Created on Jan 31, 2011
-
 @author: adona
+
+The suggested way to run the tests are throught nosetest:
+ ``nosetests --with-coverage --cover-html --cover-package=netcube``
+
 '''
 import unittest #@UnresolvedImport
 import re #@UnresolvedImport
@@ -19,6 +22,7 @@ unableToConnectHost =  "163.162.155.91"
 loginSuccessfullHost = "127.0.0.1"
 targetCommand = "uname -a"
 
+# a host with wrong username/password
 fakeLocalhost = {
              'name'    :'localhost', 
              'username':'netcube',
@@ -43,6 +47,7 @@ hop2 = {
             'password' : 'netbox'
         }
 
+# unknown host (ssh command generates No route to host)
 hop3 = {
             'name'     : '163.162.155.91',
             'username' : 'netbox',
@@ -350,7 +355,7 @@ class TestHops(unittest.TestCase):
         
         host = Linux(hops = [hop], **fakeLocalhost)
         
-        self.failUnlessRaises(ConnectionTimedOut, host.login)
+        self.failUnlessRaises((ConnectionTimedOut,PermissionDenied), host.login)
 
     @unittest.skipIf(skip==True,"skipped test")    
     def testHopConnection(self):
@@ -368,7 +373,8 @@ class TestHops(unittest.TestCase):
         hop = Linux(**hop1)
         
         host = Linux(hops = [hop], **hop2)
-        self.assertRaises(ConnectionTimedOut, host.login)
+        out = host('id')
+        self.assertRegexpMatches(out, hop2['username'])
         
 
     @unittest.skipIf(skip==True,"skipped test")    
@@ -386,7 +392,7 @@ class TestHops(unittest.TestCase):
             d = host.whereAmI()
             log.debug("target host: [%s], connected host: [%s]" % (host.name, d.name))
 
-            self.assertEqual(d.name, hop1['name'], 'whereAmI unexpected result')
+            self.assertEqual(d.name, hop2['name'], 'whereAmI unexpected result')
 
 
     @unittest.skipIf(skip==True,"skipped test")    
