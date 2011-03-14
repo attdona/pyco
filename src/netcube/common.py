@@ -1,7 +1,8 @@
+# coding=utf-8-sig
 '''
 Created on 29/gen/2011
 
-@author: SO000112
+@author: Attilio Donà
 '''
 
 import re #@UnresolvedImport
@@ -20,7 +21,9 @@ log = log.getLogger("device")
 
 def path(hops):
     '''
-    Uniform Device Locator
+    Get the target device from the list of hops that define the path to the device.
+
+    The target device must be the last list item.
     '''
     target = hops.pop()
     target.hops = hops
@@ -77,55 +80,6 @@ def buildAction(actionString):
     
     return action
     
-
-def buildPatternsListOLD(device, model=None):
-    
-    if model is None:
-        model = device.__class__
-        
-    if len(model.__bases__):
-        eventMap = buildPatternsList(device, model.__bases__[0])
-    else:
-        eventMap = {'*': {}}
-         
-    #log.debug("[%s] events: %s" % (model.__name__, config[model.__name__]['events']))
-    
-    for (eventKey, eventData) in device.config[model.__name__]['events'].items():
-       
-        if 'states' in eventData:
-            if isinstance(eventData['states'], basestring):
-                states = [eventData['states']]
-            else:
-                states = eventData['states']
-        else:
-            states = ['*']
-        
-        if not eventData['pattern']:
-            log.warning("skipped [%s] [%s] event with empty pattern" % (model.__name__, eventKey))
-        else:
-            for state in states:
-                if state in eventMap:
-                    eventMap[state][eventData['pattern']] = eventKey
-                else:
-                    eventMap[state] = {eventData['pattern']:eventKey}
-        
-        if 'action' in eventData:
-            log.debug("[%s]: registering handler [%s]" % (eventKey, eventData['action']))
-            action = getCallable(eventData['action'])
-            device.onEvent(eventKey, action)
-        
-    return eventMap
-
-       
-
-# OBSOLETED
-def disableTimeoutEvent(device, output):
-    '''
-    Prevent the propagation of timeout event to fsm engine
-    '''
-    device.currentEvent.stopPropagation()
-
-# TODO: add all the regexp special chars
 def getExactStringForMatch(str):
     '''
     Used for example to escape special characters in prompt strings 
@@ -316,7 +270,8 @@ class Common:
         
     def addPattern(self, event, pattern=None, states=['*'], endState=None, action=None):
         '''
-        Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated
+        Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated.
+        
         If pattern is None only a transition is configured
         '''
         
@@ -369,7 +324,7 @@ class Common:
     def discoverPromptWithRegexp(self, regexp, state='*'):
         '''
         Use regexp as a hint for prompt discovery 
-        Add the guard '\r\n' to the begin of prompt regexp
+        Add the guard \'\\\\r\\\\n\' to the begin of prompt regexp
         '''
         
         self.addPattern("prompt-match", '\r\n' + regexp, state)
