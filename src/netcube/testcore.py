@@ -56,8 +56,8 @@ hop3 = {
 
 
 
-#skip = False
-skip = True
+skip = False
+#skip = True
 
 @unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
@@ -339,7 +339,7 @@ class TestHops(unittest.TestCase):
     def tearDown(self):
         pass
     
-    @unittest.skipIf(skip==True,"skipped test")      
+    @unittest.skipIf(skip==False,"skipped test")      
     def testLoopDetection(self):
         '''
         try to connect to fakeLocalhost from a device that responds:

@@ -5,7 +5,7 @@ The config module parse the cosmos.cfg properties file and initialize the class 
 
 @author: adona
 '''
-import netcube
+import netcube.devices
 
 from netcube.exceptions import ConfigFileError
 from validate import Validator #@UnresolvedImport
@@ -61,18 +61,22 @@ def load(config):
     
     for section in config.keys():
         for (key,value) in config[section].items():
+            if value is None:
+                log.debug("skipping [%s.%s] undefined value" % (section, key))
+                continue
+            
             log.debug("settings %s.%s to %s" % (section, key, value))
            
             try:
                 module = netcube.__dict__[section.lower()] #@UndefinedVariable
                 clz = getattr(module, section)
+                if key not in ['events', 'transitions']:
+                    log.debug("[%s.%s] = [%s]" % (clz,key,value))
+                    setattr(clz, key, value)
             except KeyError:
-                # create at runtime the device class
-                clz = type(section, (netcube.common.Common,object), dict())
-                setattr(netcube.common, section, clz)
+                netcube.devices.deviceClassBuilder(section)
+                netcube.devices.setAttribute(section, key, value)
                 
-            if key not in ['events', 'transitions']:
-                setattr(clz, key, value)
 
     configObj = config
             
@@ -92,12 +96,18 @@ def reset():
     
     for section in configObj.keys():
         for (key,value) in configObj[section].items():
-            log.debug("settings %s.%s to %s" % (section, key, value))
+            log.debug("deleting %s.%s to %s" % (section, key, value))
            
-            module = netcube.__dict__[section.lower()] #@UndefinedVariable
+            try:
+                module = netcube.__dict__[section.lower()] #@UndefinedVariable
+                clz = getattr(module, section)
+            except KeyError:
+                clz = getattr(netcube.devices, section)
             
-            clz = getattr(module, section)
             if key not in ['events', 'transitions']:
-                delattr(clz, key)
-            
-           
+                try:
+                    delattr(clz, key)
+                except AttributeError:
+                    log.debug("[%s] attribute [%s] not found (not directly defined?)" % (clz,key))
+                    
+       
