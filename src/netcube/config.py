@@ -30,9 +30,13 @@ def loadFile(cfgfile=cfgFile):
     '''
     Load the pyco configuration file
     '''
-    config = ConfigObj(cfgfile, configspec=module_path + '/cfg/pyco_spec.cfg')
-    return reload(config)
-
+    
+    import os.path
+    if os.path.isfile(cfgfile):
+        config = ConfigObj(cfgfile, configspec=module_path + '/cfg/pyco_spec.cfg')
+        return reload(config)
+    else:
+        raise Exception('pyco configuration file not found: ' + cfgfile)
 
 def load(config):
     '''
