@@ -6,7 +6,7 @@ The config module parse the cosmos.cfg properties file and initialize the class 
 @author: adona
 '''
 import netcube
-import netcube.telnet
+
 from netcube.exceptions import ConfigFileError
 from validate import Validator #@UnresolvedImport
 
@@ -63,9 +63,14 @@ def load(config):
         for (key,value) in config[section].items():
             log.debug("settings %s.%s to %s" % (section, key, value))
            
-            module = netcube.__dict__[section.lower()] #@UndefinedVariable
-            
-            clz = getattr(module, section)
+            try:
+                module = netcube.__dict__[section.lower()] #@UndefinedVariable
+                clz = getattr(module, section)
+            except KeyError:
+                # create at runtime the device class
+                clz = type(section, (netcube.common.Common,object), dict())
+                setattr(netcube.common, section, clz)
+                
             if key not in ['events', 'transitions']:
                 setattr(clz, key, value)
 

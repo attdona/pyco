@@ -56,8 +56,8 @@ hop3 = {
 
 
 
-skip = False
-#skip = True
+#skip = False
+skip = True
 
 @unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
@@ -466,7 +466,6 @@ class TestHops(unittest.TestCase):
         
         self.assertRaises(PermissionDenied, host.login)
    
-
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
