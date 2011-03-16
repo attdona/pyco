@@ -18,7 +18,7 @@ import netcube.config
 # create logger
 log = log.getLogger("test")
 
-unableToConnectHost =  "163.162.155.91"
+unableToConnectHost =  "128.0.0.1"
 loginSuccessfullHost = "127.0.0.1"
 targetCommand = "uname -a"
 
@@ -56,8 +56,8 @@ hop3 = {
 
 
 
-skip = False
-#skip = True
+#skip = False
+skip = True
 
 @unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
@@ -116,12 +116,12 @@ class Test(unittest.TestCase):
         h.addPattern(**pattern)
 
 
-    @unittest.skipIf(skip==True,"skipped test")
+    @unittest.skipIf(skip==False,"skipped test")
     def testUnableToConnectToRemoteHost(self):
         log.info("testUnableToConnectToRemoteHost ...")
-        kabul = Linux(username='ipnet', name = unableToConnectHost, password='Hie.g00I')
-    
-        self.failUnlessRaises(ConnectionClosed, kabul.login)
+        h = Linux(username='ipnet', name = unableToConnectHost, password='ipnet')
+        
+        self.failUnlessRaises((ConnectionClosed,ConnectionTimedOut), h.login)
 
 
         
@@ -339,7 +339,7 @@ class TestHops(unittest.TestCase):
     def tearDown(self):
         pass
     
-    @unittest.skipIf(skip==False,"skipped test")      
+    @unittest.skipIf(skip==True,"skipped test")      
     def testLoopDetection(self):
         '''
         try to connect to fakeLocalhost from a device that responds:

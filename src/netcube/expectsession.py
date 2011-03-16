@@ -7,7 +7,7 @@ import StringIO #@UnresolvedImport
 import pexpect #@UnresolvedImport
 import netcube.common as common
 from netcube import log
-
+from netcube.exceptions import ConnectionTimedOut
 
 
 # create logger
@@ -15,10 +15,18 @@ log = log.getLogger("exp-session")
 
        
 def loginSuccessfull(device):
+    '''
+    The checkpoint loginSuccessfull has 3 exit point:
+     * return True if the state is 'USER_PROMPT'
+     * raise the ConnectionTimedOut exception if the current event is timeout
+     * return False otherwise
+    '''
     log.debug("[%s] loginSuccessfull: current_state [%s]" % (device.name, device.fsm.current_state))
     if device.fsm.current_state == 'USER_PROMPT':
         device.loggedin = True
         return True
+    if device.currentEvent.name == 'timeout':
+        raise ConnectionTimedOut(device)
     return False
 
 
@@ -116,9 +124,9 @@ class ExpectSession:
                 log.debug("[%s] matching [%s]" % (target.fsm.current_state, patterns))
                 #log.debug("PRE exp before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
                 if target.exactPatternMatch:
-                    index = self.pipe.expect_exact(patterns, int(maxWaitTime))
+                    index = self.pipe.expect_exact(patterns, maxWaitTime)
                 else:
-                    index = self.pipe.expect(patterns, int(maxWaitTime))
+                    index = self.pipe.expect(patterns, maxWaitTime)
                
                 try:    
                     target.currentEvent = common.Event(target.getEvent(patterns[index]))
@@ -128,7 +136,7 @@ class ExpectSession:
                         log.debug("[%s]: expect timeout triggered" % target.name)
                         
                         if prevEvent.name == 'timeout' and prevOutput == self.pipe.before:
-                            from netcube.exceptions import ConnectionTimedOut
+                            #from netcube.exceptions import ConnectionTimedOut
                             log.info("[%s] detected expect loop, output: [%s]" % (target.name, prevOutput))
                             raise ConnectionTimedOut(target)
                         else:
@@ -177,13 +185,13 @@ class ExpectSession:
 
     def processResponseWithTimeout(self, target, checkPoint):
         patterns = [pexpect.TIMEOUT]
-        return self.patternMatch(target, checkPoint, patterns, target.responseMaxWaitTime, exactMatch=True)
+        return self.patternMatch(target, checkPoint, patterns, target.maxWait, exactMatch=True)
         
     def processResponse(self, target, checkPoint):
         '''
         '''
         
-        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.responseMaxWaitTime, exactMatch=False)
+        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
         
         
  

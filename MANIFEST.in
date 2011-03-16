@@ -1,3 +1,2 @@
 include  README
-include src/netcube/ *.cfg
 recursive-include src/netcube/cfg *

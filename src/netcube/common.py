@@ -203,14 +203,6 @@ class Common:
         self.eventCb = {}
         self.prompt = {}
 
-#        if config:
-#            self.config = netcube.config.load(config)
-#        else:
-#            if not Common.defaultConfig:
-#                Common.defaultConfig = netcube.config.loadFile()
-#        
-#            self.config = Common.defaultConfig
-
         # the finite state machine
         self.fsm = CommonFSM('GROUND', [])
         self.patternMap = {'*':{}}
@@ -235,7 +227,7 @@ class Common:
         
     def whereAmI(self):
         '''
-        return the hop device actually connected
+        return the hop device actually connected. 
         '''
         from netcube.expectsession import SOURCE_HOST
         
@@ -446,7 +438,7 @@ class Common:
             
         
     def expect(self, checkPoint):
-        self.esession.patternMatch(self, checkPoint, [], self.responseMaxWaitTime, exactMatch=True)
+        self.esession.patternMatch(self, checkPoint, [], self.maxWait, exactMatch=True)
         
     def sendLine(self, stringValue):
         """
