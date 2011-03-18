@@ -34,6 +34,7 @@ class Test(unittest.TestCase):
         pass
 
     def testScript(self):
+        from netcube.devices import *
         h = Marconi(**localhost)
         h('id')
 
