@@ -13,6 +13,11 @@ from netcube import log
 # create logger
 log = log.getLogger("device")
 
+def getAccount(device):
+    
+    # it is always the last function in the plugin group
+    return False
+
 def path(hops):
     '''
     Get the target device from the list of hops that define the path to the device.
@@ -164,6 +169,9 @@ class Event:
         
     def isActive(self):
         return self.propagate
+    
+    def isTimeout(self):
+        return self.name == 'timeout'
             
 class Prompt:
     
@@ -356,10 +364,19 @@ class Common:
 
     def connectCommand(self, clientDevice):
         
+        from pkg_resources import iter_entry_points
+        
+        for ep in iter_entry_points(group='pyco.plugin', name=None):
+            log.debug("found [%s] plugin into module [%s]" % (ep.name, ep.module_name))
+            authFunction = ep.load()
+            if authFunction(self):
+                break
+
+        
         try:
             telnetCommand = clientDevice.telnetCommand
         except:
-            telnetCommand = 'telnet pippo'   
+            telnetCommand = 'telnet ${device.username}'   
 
         try:
             sshCommand = clientDevice.sshCommand

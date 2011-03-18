@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         pass
 
     def testScript(self):
-        from netcube.devices import *
+        from netcube.devices import Marconi #@UnresolvedImport
         h = Marconi(**localhost)
         h('id')
 

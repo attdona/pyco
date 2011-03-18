@@ -113,10 +113,10 @@ class ExpectSession:
         target.currentEvent = common.Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
         
-        prevOutput = None
-        prevEvent =  target.currentEvent
+#        prevOutput = None
+#        prevEvent =  target.currentEvent
         
-        while not checkPoint (target):
+        while not (checkPoint (target) or target.currentEvent.isTimeout()):
             
             patterns = target.patterns(target.fsm.current_state) + patternsExt
             # expect and match 
@@ -134,15 +134,16 @@ class ExpectSession:
                     
                     if patterns[index] == pexpect.TIMEOUT:
                         log.debug("[%s]: expect timeout triggered" % target.name)
+                        target.currentEvent = common.Event('timeout', propagateToFsm = False)
                         
-                        if prevEvent.name == 'timeout' and prevOutput == self.pipe.before:
-                            #from netcube.exceptions import ConnectionTimedOut
-                            log.info("[%s] detected expect loop, output: [%s]" % (target.name, prevOutput))
-                            raise ConnectionTimedOut(target)
-                        else:
-                            target.currentEvent = common.Event('timeout', propagateToFsm = False)
-                            prevOutput = self.pipe.before
-                            prevEvent = target.currentEvent
+#                        if prevEvent.name == 'timeout' and prevOutput == self.pipe.before:
+#                            #from netcube.exceptions import ConnectionTimedOut
+#                            log.info("[%s] detected expect loop, output: [%s]" % (target.name, prevOutput))
+#                            raise ConnectionTimedOut(target)
+#                        else:
+#                            target.currentEvent = common.Event('timeout', propagateToFsm = False)
+#                            prevOutput = self.pipe.before
+#                            prevEvent = target.currentEvent
                     else:
                         log.error("[%s]: event not registered for pattern: [%s]" % (target.name, patterns[index]))
                         raise
