@@ -7,14 +7,14 @@ import unittest #@UnresolvedImport
 import os
 
 #from netcube.devices import *
-from netcube.master import *
+from netcube.devices import *
 
 from netcube import log
 
 #netcube.config.loadFile()
 
 # create logger
-log = log.getLogger("testlinux")
+log = log.getLogger("testmarconi")
 
 
 localhost = {
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         module_path = os.path.dirname(netcube.__file__)
         log.debug("module_path: %s" % module_path)
-        netcube.config.loadFile(module_path + '/test/testmarconi.cfg')
+        loadFile(module_path + '/test/testmarconi.cfg')
         
     def tearDown(self):
         pass

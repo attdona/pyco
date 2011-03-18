@@ -10,10 +10,10 @@ import unittest #@UnresolvedImport
 import re #@UnresolvedImport
 from configobj import ConfigObj #@UnresolvedImport
 
-from netcube.master import *
+from netcube.devices import *
 from netcube.exceptions import *
 from netcube import log
-import netcube.config
+
 
 from fixture import *
 

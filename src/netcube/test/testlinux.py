@@ -6,7 +6,7 @@ Created on Mar 14, 2011
 import unittest #@UnresolvedImport
 import os
 
-from netcube.master import *
+from netcube.devices import *
 from netcube import log
 
 # create logger
@@ -25,8 +25,8 @@ class Test(unittest.TestCase):
     def testScript(self):
         module_path = os.path.dirname(netcube.__file__)
         log.debug("module_path: %s" % module_path)
-        netcube.config.loadFile(module_path + '/test/testcore.cfg')
-        h = Linux(**localhost)
+        loadFile(module_path + '/test/testcore.cfg')
+        h = Linux(**localhost) #@UndefinedVariable
         h(module_path + '/test/script.py')
 
 

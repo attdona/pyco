@@ -32,7 +32,7 @@ def buildPatternsList(device, model=None):
     '''
     Setup the expect patterns and the action events from the configobj 
     '''
-    from netcube.config import configObj
+    from netcube.devices import configObj
     
     if model is None:
         model = device.__class__
@@ -569,8 +569,8 @@ class CommonFSM(ExtFSM):
         '''
         Add the configured transitions
         '''
-        from netcube.config import configObj
-        log.debug("config [%s]" % configObj)
+#        from netcube.devices import configObj
+#        log.debug("config [%s]" % configObj)
         
         ExtFSM.__init__(self, 'GROUND', memory)
         

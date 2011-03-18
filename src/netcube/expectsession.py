@@ -57,7 +57,6 @@ class ExpectSession:
         """
         Connect to the device in the hops position index
         """
-        import netcube.config
         prevPos = position - 1
         if prevPos < 0:
             prevDevice = SOURCE_HOST
