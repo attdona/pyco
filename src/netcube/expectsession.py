@@ -5,7 +5,8 @@ Created on Feb 21, 2011
 '''
 import StringIO #@UnresolvedImport
 import pexpect #@UnresolvedImport
-import netcube.common as common
+
+from netcube.device import Event, device
 from netcube import log
 from netcube.exceptions import ConnectionTimedOut
 
@@ -109,7 +110,7 @@ class ExpectSession:
         
     def patternExpectLoop(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
         
-        target.currentEvent = common.Event('do-nothing-event')
+        target.currentEvent = Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
         
 #        prevOutput = None
@@ -128,12 +129,12 @@ class ExpectSession:
                     index = self.pipe.expect(patterns, maxWaitTime)
                
                 try:    
-                    target.currentEvent = common.Event(target.getEvent(patterns[index]))
+                    target.currentEvent = Event(target.getEvent(patterns[index]))
                 except:
                     
                     if patterns[index] == pexpect.TIMEOUT:
                         log.debug("[%s]: expect timeout triggered" % target.name)
-                        target.currentEvent = common.Event('timeout', propagateToFsm = False)
+                        target.currentEvent = Event('timeout', propagateToFsm = False)
                         
 #                        if prevEvent.name == 'timeout' and prevOutput == self.pipe.before:
 #                            #from netcube.exceptions import ConnectionTimedOut
@@ -151,10 +152,10 @@ class ExpectSession:
                 log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
             except pexpect.EOF:
                 log.debug("[%s] connection unexpectedly closed (%s)" % (target.name, self.pipe.before))
-                target.currentEvent = common.Event('eof')
+                target.currentEvent = Event('eof')
             except pexpect.TIMEOUT:
                 log.debug("[%s] connection timed out, unmatched output: [%s]" % (target.name, self.pipe.before))
-                target.currentEvent = common.Event('timeout')
+                target.currentEvent = Event('timeout')
 
             #log.debug("detected event [%s]" % target.currentEvent)
             if target.hasEventHandlers(target.currentEvent):
@@ -190,15 +191,14 @@ class ExpectSession:
     def processResponse(self, target, checkPoint):
         '''
         '''
-        
-        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
+        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.driver.maxWait, exactMatch=False)
         
         
  
 
 
 # The source point of all paths        
-SOURCE_HOST = common.Common('__source_host__')
+SOURCE_HOST = device('__source_host__')
 
 # the source is connected for definition 
 SOURCE_HOST.isConnected = lambda : True

@@ -23,7 +23,7 @@ setup(name='pyco',
       
       entry_points="""
         [pyco.plugin]
-            auth=netcube.common:getAccount
+            auth=netcube.device:getAccount
         """
 
 
