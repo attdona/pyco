@@ -65,19 +65,6 @@ def buildPatternsList(device, model=None):
         device.addPattern(event=eventKey, pattern=pattern, action=action, states=states, endState=endState)
 
         
-def buildAction(actionString):
-    al = actionString.split()
-    
-    if len(al) > 1:
-        baseAction = getCallable(al[0])
-        def action(target):
-            log.debug("invoking action [%s] with %s" % (baseAction.__name__, al[1:]))
-            baseAction(target,*al[1:])
-            
-    else:
-        action = getCallable(actionString)
-    
-    return action
     
 def getExactStringForMatch(str):
     '''
@@ -212,6 +199,8 @@ class Common:
         self.prompt = {}
 
         # the finite state machine
+        self.state = 'GROUND'
+
         self.fsm = CommonFSM('GROUND', [])
         self.patternMap = {'*':{}}
         buildPatternsList(self)
@@ -328,9 +317,6 @@ class Common:
     def setState(self, value):
         self.fsm.current_state = value   
         
-    def state(self):
-        return self.fsm.current_state
-    
     def getPrompt(self):
         '''
         Get the current device prompt
@@ -518,27 +504,6 @@ class Common:
 
         
 
-def getCallable(methodName):
-    '''
-    From the methodName string get the callable object from netcube.actions or netcube.common name space
-    '''
-    if methodName == '' or methodName is None:
-        return None
-
-    import netcube.actions
-    if isinstance(methodName,str):
-        try:
-            return getattr(netcube.actions, methodName)
-        except:
-            if methodName in globals():
-                return globals()[methodName]
-            else:
-                raise netcube.exceptions.EventHandlerUndefined(methodName)
-    else:
-        def composite(d):
-            for m in methodName:
-                getCallable(m)(d)
-        return composite
  
 import netcube.exceptions
 
@@ -569,8 +534,6 @@ class CommonFSM(ExtFSM):
         '''
         Add the configured transitions
         '''
-#        from netcube.devices import configObj
-#        log.debug("config [%s]" % configObj)
         
         ExtFSM.__init__(self, 'GROUND', memory)
         
@@ -579,11 +542,6 @@ class CommonFSM(ExtFSM):
         # simply ignore 'prompt-match' on any state
         self.add_input_any('prompt-match')
         
-#       for transitionKey, t in Common.transitions.items():
-#        for transitionKey, t in configObj['Common']['transitions'].items():
-#            log.debug("adding transition %s: %s -> %s -> %s (action: %s)" % ( transitionKey, t['begin_state'], t['event'], t['end_state'], t['action'] ))
-                
-#            self.add_transition(t['event'], t['begin_state'], getCallable(t['action']), t['end_state'])
 
             
 

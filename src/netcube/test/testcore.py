@@ -41,7 +41,7 @@ class TestConstraints(unittest.TestCase):
         prompts = ['pyco@cencenighe $', 'xxx $$', 'xyz\r\n{} [ ', '% *']
         
         for str in prompts:
-            result = getExactStringForMatch(str)
+            result = getExactStringForMatch(str) #@UndefinedVariable
             
             p = re.compile(result)
             
