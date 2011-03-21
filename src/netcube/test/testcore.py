@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
         h.addPattern(**pattern)
 
 
-    @unittest.skipIf(skip==False,"skipped test")
+    @unittest.skipIf(skip==True,"skipped test")
     def testUnableToConnectToRemoteHost(self):
         log.info("testUnableToConnectToRemoteHost ...")
         h = Linux(username='ipnet', name = unableToConnectHost, password='ipnet')
@@ -350,6 +350,7 @@ class TestHops(unittest.TestCase):
         '''
         
         '''
+        from netcube.common import path
         log.info("testWhereAmI ...")    
         
         host = path([Linux(**hop1), Linux(**hop2), Linux(**hop3)])
@@ -368,6 +369,7 @@ class TestHops(unittest.TestCase):
         '''
         
         '''
+        from netcube.common import path
         log.info("testExpectLoop ...")    
        
         config = ConfigObj()
@@ -391,7 +393,6 @@ class TestHops(unittest.TestCase):
         '''
         test a minimal configuration
         '''
-        import netcube.config
         
         log.info("testMinimalCfg ...")    
        
@@ -409,10 +410,9 @@ class TestHops(unittest.TestCase):
                                                                   
                                            }
                            }
-        oldCfg = netcube.config.configObj
         
         # reload the configuration
-        netcube.config.reload(config)
+        reload(config)
         
         host = Linux(**localhost)
         
@@ -420,7 +420,7 @@ class TestHops(unittest.TestCase):
             out = host('id')
             self.assertRegexpMatches(out, 'uid=[0-9]+')
         finally:
-            netcube.config.loadFile()
+            loadFile()
             
     @unittest.skipIf(skip==True,"skipped test")    
     def testPermissionDenied(self):
