@@ -22,8 +22,8 @@ def loginSuccessfull(device):
      * raise the ConnectionTimedOut exception if the current event is timeout
      * return False otherwise
     '''
-    log.debug("[%s] loginSuccessfull: current_state [%s]" % (device.name, device.fsm.current_state))
-    if device.fsm.current_state == 'USER_PROMPT':
+    log.debug("[%s] loginSuccessfull: current_state [%s]" % (device.name, device.state))
+    if device.state == 'USER_PROMPT':
         device.loggedin = True
         return True
     if device.currentEvent.name == 'timeout':
@@ -102,13 +102,9 @@ class ExpectSession:
         """
         log.debug("sending line [%s] using session [%s]" % (command, self))
         self.pipe.sendline(command)
-    
-    def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
-        self.patternExpectLoop(target, checkPoint, patternsExt, maxWaitTime, exactMatch)
-        #stateChanged = target.fsm.process(target, target.currentEvent)
-        return self.pipe.before
+ 
         
-    def patternExpectLoop(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
+    def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
         
         target.currentEvent = Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
@@ -118,10 +114,10 @@ class ExpectSession:
         
         while not (checkPoint (target) or target.currentEvent.isTimeout()):
             
-            patterns = target.patterns(target.fsm.current_state) + patternsExt
+            patterns = target.patterns(target.state) + patternsExt
             # expect and match 
             try:
-                log.debug("[%s] matching [%s]" % (target.fsm.current_state, patterns))
+                log.debug("[%s] matching [%s]" % (target.state, patterns))
                 #log.debug("PRE exp before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
                 if target.exactPatternMatch:
                     index = self.pipe.expect_exact(patterns, maxWaitTime)
@@ -163,7 +159,7 @@ class ExpectSession:
                 for eh in target.getEventHandlers(target.currentEvent):
                     eh(target)
            
-            stateChanged = target.fsm.process(target, target.currentEvent)
+            stateChanged = target.process(target.currentEvent)
 
             # check if state_transition_any has a entry
 #            if stateChanged and target.fsm.current_state in target.fsm.state_transitions_any:

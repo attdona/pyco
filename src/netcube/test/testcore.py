@@ -10,19 +10,13 @@ import unittest #@UnresolvedImport
 import re #@UnresolvedImport
 from configobj import ConfigObj #@UnresolvedImport
 
-from netcube.devices import *
-from netcube.exceptions import *
+from netcube.device import *
 from netcube import log
-
 
 from fixture import *
 
-from netcube.devices import Linux #@UnresolvedImport
-
 # create logger
 log = log.getLogger("test")
-
-
 
 skip = False
 #skip = True
@@ -61,7 +55,7 @@ class TestConstraints(unittest.TestCase):
         
     @unittest.skipIf(skip==True,"skipped test")
     def testNoName(self):
-        h = Linux(**fakeLocalhost)
+        h = Device(**fakeLocalhost)
         h.login()
         #self.failUnlessRaises(NetworkException, h.login)
     
@@ -77,7 +71,7 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")
     def testEmptyPattern(self):
         log.info("testEmptyPattern ...")
-        h = Linux(username='ipnet', name = unableToConnectHost, password='Hie.g00I')
+        h = device('ssh://ipnet:Hie.g00I@' + unableToConnectHost)
         
         pattern = {'event': 'su_event', 'pattern': '', 'states': 'USER_PROMPT'}
 
@@ -87,7 +81,7 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")
     def testUnableToConnectToRemoteHost(self):
         log.info("testUnableToConnectToRemoteHost ...")
-        h = Linux(username='ipnet', name = unableToConnectHost, password='ipnet')
+        h = Device(username='ipnet', name = unableToConnectHost, password='ipnet')
         
         self.failUnlessRaises((ConnectionClosed,ConnectionTimedOut), h.login)
 
@@ -99,7 +93,7 @@ class Test(unittest.TestCase):
         Send a simple command without prompt discovery
         '''    
         log.info("testSendCommand ...")
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         linux.discoverPrompt = False
         linux.login()
         output = linux.send('id')
@@ -115,7 +109,7 @@ class Test(unittest.TestCase):
         '''
         log.info("testSendCommandWithPromptDiscovery ...")
         
-        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.login()
@@ -133,7 +127,7 @@ class Test(unittest.TestCase):
         The discovered prompt is a multiline prompt
         '''
         log.info("testSendCommandWithPromptRegexpTc0 ...")
-        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.promptRegexp = r"[^\r\n]*@.*\r\n~\$ "
@@ -153,7 +147,7 @@ class Test(unittest.TestCase):
         The discovered prompt is a single line prompt
         '''  
         log.info("testSendCommandWithPromptRegexpTc1 ...")  
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.promptRegexp = r"\$ "
@@ -174,7 +168,7 @@ class Test(unittest.TestCase):
         Send simple commands and use prompt match only
         '''
         log.info("testOutputCompleteOnPromptMatch ...") 
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = True
@@ -192,7 +186,7 @@ class Test(unittest.TestCase):
         expected result:  
         ''' 
         log.info("testOutputCompleteOnPromptMatchTc2 ...")   
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = False
         linux.checkOnOutputComplete = False
@@ -208,7 +202,7 @@ class Test(unittest.TestCase):
         Change the prompt and rediscover it 
         '''
         log.info("testChangePrompt ...")   
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
@@ -224,7 +218,7 @@ class Test(unittest.TestCase):
         Discover a multiline prompt
         '''
         log.info("testMultilinePrompt ...")    
-        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
@@ -239,7 +233,7 @@ class Test(unittest.TestCase):
         Ever changing prompt case
         '''
         log.info("testChangingPrompt ...")    
-        linux = Linux(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='pyco', password='pyco', protocol='ssh')
         
         linux.discoverPrompt = True
         linux.checkOnOutputComplete = False
@@ -254,7 +248,7 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")    
     def testSendCommandAfterClose(self):
         log.info("testSendCommandAfterClose ...")    
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         output = linux.send('uname -a')
         self.assertRegexpMatches(output, "Linux .*")
@@ -268,7 +262,7 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")    
     def testCommandWithAnswers(self):
         log.info("testCommandWithAnswers ...")    
-        linux = Linux(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
+        linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         def error(target):
             raise AuthenticationFailed
@@ -319,9 +313,9 @@ class TestHops(unittest.TestCase):
         This triggers a expect detection loop and a TimedOut exception
         
         '''
-        hop = Linux(**hop1)
+        hop = Device(**hop1)
         
-        host = Linux(hops = [hop], **fakeLocalhost)
+        host = Device(hops = [hop], **fakeLocalhost)
         
         self.failUnlessRaises((ConnectionTimedOut,PermissionDenied), host.login)
 
@@ -338,9 +332,9 @@ class TestHops(unittest.TestCase):
         
         '''
         log.info("testHopConnection ...") 
-        hop = Linux(**hop1)
+        hop = Device(**hop1)
         
-        host = Linux(hops = [hop], **hop2)
+        host = Device(hops = [hop], **hop2)
         out = host('id')
         self.assertRegexpMatches(out, hop2['username'])
         
@@ -350,10 +344,9 @@ class TestHops(unittest.TestCase):
         '''
         
         '''
-        from netcube.common import path
         log.info("testWhereAmI ...")    
         
-        host = path([Linux(**hop1), Linux(**hop2), Linux(**hop3)])
+        host = path([Device(**hop1), Device(**hop2), Device(**hop3)])
         
         try:
             host.login()
@@ -369,7 +362,6 @@ class TestHops(unittest.TestCase):
         '''
         
         '''
-        from netcube.common import path
         log.info("testExpectLoop ...")    
        
         config = ConfigObj()
@@ -378,7 +370,7 @@ class TestHops(unittest.TestCase):
                                 'sshCommand' : 'ssh ${device.username}@${device.name}'
                            }
         
-        host = path([Linux(**hop1), Linux(**hop2), Linux(**hop3)])
+        host = path([Device(**hop1), Device(**hop2), Device(**hop3)])
         
         try:
             host.login()
@@ -414,13 +406,14 @@ class TestHops(unittest.TestCase):
         # reload the configuration
         reload(config)
         
-        host = Linux(**localhost)
+        host = Device(**localhost)
         
         try:
             out = host('id')
             self.assertRegexpMatches(out, 'uid=[0-9]+')
         finally:
-            loadFile()
+            import netcube.drivers
+            netcube.drivers.loadFile()
             
     @unittest.skipIf(skip==True,"skipped test")    
     def testPermissionDenied(self):
@@ -430,7 +423,7 @@ class TestHops(unittest.TestCase):
         log.info("testPermissionDenied ...")    
         
         
-        host = Linux(**fakeLocalhost)
+        host = Device(**fakeLocalhost)
         
         self.assertRaises(PermissionDenied, host.login)
    

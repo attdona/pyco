@@ -31,7 +31,7 @@ def cliIsConnected(target):
         return True
 
     if target.discoverPrompt:
-        log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.fsm.current_state))
+        log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.state))
         target.enablePromptDiscovery()
         
         def isTimeoutOrPromptMatch(d):
@@ -44,7 +44,7 @@ def cliIsConnected(target):
         # if discoverPrompt is false then the timeout event is not an error but the trigger
         # that all the output is received 
         
-        target.addPattern('timeout', states=target.fsm.current_state)
+        target.addPattern('timeout', states=target.state)
         
         def isTimeout(d):
             return d.currentEvent.name == 'timeout'
