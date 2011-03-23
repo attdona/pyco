@@ -390,7 +390,7 @@ class TestHops(unittest.TestCase):
        
         config = ConfigObj()
         
-        config['Common'] = {
+        config['common'] = {
                                 # 'sshCommand' : 'ssh ${device.username}@${device.name}'
                                 'events' : {
                                                 'password_event': {
@@ -412,8 +412,7 @@ class TestHops(unittest.TestCase):
             out = host('id')
             self.assertRegexpMatches(out, 'uid=[0-9]+')
         finally:
-            import netcube.drivers
-            netcube.drivers.loadFile()
+            loadFile()
             
     @unittest.skipIf(skip==True,"skipped test")    
     def testPermissionDenied(self):

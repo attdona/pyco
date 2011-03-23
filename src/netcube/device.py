@@ -13,7 +13,7 @@ from validate import Validator #@UnresolvedImport
 
 from netcube.exceptions import ConfigFileError
 
-import netcube
+import netcube.log
 from netcube.exceptions import *
 
 # create logger
@@ -208,8 +208,7 @@ def buildPatternsList(device, driver=None):
     '''
     Setup the expect patterns and the action events from the configobj 
     '''
-    from netcube.drivers import Driver, configObj
-    
+   
     if driver == None:
         driver = device.driver
    
@@ -810,7 +809,10 @@ class Device:
                 continue
             
             try:
+                reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
                 self.patternMap[state][pattern] = event
+                if event in reverseMap:
+                    del self.patternMap[state][reverseMap[event]]
             except:
                 self.patternMap[state] = {pattern:event}
 
@@ -881,7 +883,7 @@ def load(config):
     
     configObj = config
     
-    log.debug("[Common] data: %s" % config.get("common"))
+    log.debug("[common] driver data: %s" % config.get("common"))
     
     for section in config.keys():
         for (key,value) in config[section].items():

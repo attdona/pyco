@@ -16,6 +16,13 @@ localhost = {
              'username':'netbox',
              'password':'netbox'
              }
+             
+             
+asa1 = {
+			 'name'    : '163.162.61.21',
+			 'username': 'cisco',
+			 'password': 'cisco'
+}
 
 hop1 = {
             'name'     : '163.162.155.60',
