@@ -112,6 +112,7 @@ class ExpectSession:
 #        prevOutput = None
 #        prevEvent =  target.currentEvent
         
+        response = ''        
         while not (checkPoint (target) or target.currentEvent.isTimeout()):
             
             patterns = target.patterns(target.state) + patternsExt
@@ -131,15 +132,6 @@ class ExpectSession:
                     if patterns[index] == pexpect.TIMEOUT:
                         log.debug("[%s]: expect timeout triggered" % target.name)
                         target.currentEvent = Event('timeout', propagateToFsm = False)
-                        
-#                        if prevEvent.name == 'timeout' and prevOutput == self.pipe.before:
-#                            #from netcube.exceptions import ConnectionTimedOut
-#                            log.info("[%s] detected expect loop, output: [%s]" % (target.name, prevOutput))
-#                            raise ConnectionTimedOut(target)
-#                        else:
-#                            target.currentEvent = common.Event('timeout', propagateToFsm = False)
-#                            prevOutput = self.pipe.before
-#                            prevEvent = target.currentEvent
                     else:
                         log.error("[%s]: event not registered for pattern: [%s]" % (target.name, patterns[index]))
                         raise
@@ -160,25 +152,11 @@ class ExpectSession:
                     eh(target)
            
             stateChanged = target.process(target.currentEvent)
+            response += self.pipe.before
+            if isinstance(self.pipe.after, basestring):
+                response += self.pipe.after
 
-            # check if state_transition_any has a entry
-#            if stateChanged and target.fsm.current_state in target.fsm.state_transitions_any:
-#                log.debug("[%s]: any state action is defined for state [%s]" % (target.name, target.fsm.current_state))
-#                target.fsm.process(target, target.currentEvent)
-
-#            if stateChanged and target.discoverPrompt and target.fsm.current_state.endswith('PROMPT'):
-#                log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.fsm.current_state))
-#                common.discoverPrompt(target)
-
-        return self.pipe.before
-        
-#    def processResponseWithPromptSync(self, target, checkPoint):
-
-#        patterns = [target.prompt.value]
-#        log.debug("[%s]; matching %s", target.fsm.current_state, patterns)
-#        self.patternMatch(target, checkPoint, patterns, target.responseCompleteTimePeriod, exactMatch=True)
-        
-#        log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
+        return response
 
     def processResponseWithTimeout(self, target, checkPoint):
         patterns = [pexpect.TIMEOUT]

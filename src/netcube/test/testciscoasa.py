@@ -21,7 +21,9 @@ class Test(unittest.TestCase):
         
         h = device(url)
         h.login()
-        h.send('show version')
+        out = h.send('show version')
+        
+        log.debug('[[%s]]' % out)
 
 
 if __name__ == "__main__":
