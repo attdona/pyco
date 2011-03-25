@@ -159,14 +159,14 @@ class ExpectSession:
 
         return response
 
-    def processResponseWithTimeout(self, target, checkPoint):
-        patterns = [pexpect.TIMEOUT]
-        return self.patternMatch(target, checkPoint, patterns, target.maxWait, exactMatch=True)
+#    def processResponseWithTimeout(self, target, checkPoint):
+#        patterns = [pexpect.TIMEOUT]
+#        return self.patternMatch(target, checkPoint, patterns, target.maxWait, exactMatch=True)
         
     def processResponse(self, target, checkPoint):
         '''
         '''
-        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
+        return self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
         
         
  

@@ -8,16 +8,10 @@ import os
 
 from netcube.device import *
 from netcube import log
+from fixture import *
 
 # create logger
 log = log.getLogger("testlinux")
-
-
-localhost = {
-             'name'    :'localhost', 
-             'username':'netbox',
-             'password':'netbox'
-             }
 
 class Test(unittest.TestCase):
 

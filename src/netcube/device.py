@@ -443,7 +443,7 @@ class Device:
     Base class for device configuration 
     '''    
     
-    #defaultConfig = None
+    processResponseg = None
     
     # the default telnet port 
     telnet_port = 23
@@ -703,14 +703,13 @@ class Device:
         def runUntilPromptMatchOrTimeout(device):
             return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match'
 
-        out = self.esession.processResponseWithTimeout(self, runUntilPromptMatchOrTimeout)
+        out = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
         
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
             # rediscover the prompt
             log.debug("[%s] discovering again the prompt ..." % self.name)
             self.enablePromptDiscovery()
             discoverPromptCallback(self)
-            
             
         if self.checkIfOutputComplete == True:
         
@@ -719,7 +718,7 @@ class Device:
                 self.clearBuffer()
                 log.debug("[%s] == [%s]" % (prevOut,out))
                 prevOut = out
-                currOut = self.esession.processResponseWithTimeout(self, runUntilPromptMatchOrTimeout)
+                currOut = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
                 if prevOut == None:
                     out = currOut
                 else:
