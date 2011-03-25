@@ -11,15 +11,10 @@ from mako.runtime import Context #@UnresolvedImport
 from StringIO import StringIO #@UnresolvedImport
 from validate import Validator #@UnresolvedImport
 
-from netcube.exceptions import ConfigFileError
-
 import netcube.log
-from netcube.exceptions import *
 
 # create logger
 log = netcube.log.getLogger("device")
-
-
 
 from configobj import ConfigObj, flatten_errors #@UnresolvedImport
 import os
@@ -42,56 +37,62 @@ class DeviceException(Exception):
 
     """This is the Device base exception class."""
 
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return `self.value`
-
-class WrongDeviceUrl(DeviceException):
-    pass
-
-class NetworkException(Exception):
-    
-    def __init__(self, device):
+    def __init__(self, device, msg=''):
+        self.msg = msg
         self.device = device
-        self.response = device.esession.pipe.before
-        self.interactionLog = device.interactionLog()
+        device.close()
         
     def __str__(self):
-        errInfo =  "%s\n\n%s" % (self.device.name, self.response)
-        return errInfo
+        return self.msg
 
-class ConnectionClosed(NetworkException):
+class WrongDeviceUrl(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+class MissingDeviceParameter(DeviceException):
+    pass
+
+class UnsupportedProtocol(DeviceException):
+    pass
+
+class ExpectException(DeviceException):
+    
+    def __init__(self, device, msg=''):
+        self.interactionLog = device.interactionLog()
+        DeviceException.__init__(self, device, msg)
+
+
+class ConnectionClosed(ExpectException):
     '''
     Raised when EOF is read from a pexpect child. This usually means the child has exited
     '''
     pass
 
-class ConnectionRefused(NetworkException):
+class ConnectionRefused(ExpectException):
     '''
     Thrown when the connection was refused by the remote endpoint
     '''
-    def __init__(self, device):
-        NetworkException.__init__(self, device)
-        device.close()
+    pass        
 
-class PermissionDenied(NetworkException):
+class PermissionDenied(ExpectException):
     '''
     Thrown when the connection is unauthorized (wrong username(/password)
     '''
-    def __init__(self, device):
-        NetworkException.__init__(self, device)
-        device.close()
+    pass
 
-
-class ConnectionTimedOut(NetworkException):
+class ConnectionTimedOut(ExpectException):
     '''
     Thrown when the connection timed out expecting a pattern match
     '''
     pass
 
-class AuthenticationFailed(NetworkException):
+class LoginFailed(ExpectException):
+    '''
+    Thrown when the login phase in not successful
+    '''
+    pass
+
+class AuthenticationFailed(ExpectException):
     '''
     Thrown when the connection timed out expecting a pattern match
     '''
@@ -180,12 +181,12 @@ def parseUrl(url):
     return (items.path, items.hostname, items.username, items.password, items.scheme, items.port)
 
 
-def cliDefaultErrorHandler(device):
+def defaultEventHandler(device):
     '''
-    The default error handler invoked when an unexpected pattern or a timeout or eof event occurs
+    The default event handler is invoked if and only if the fsm (event,current_state) 
+    fall back on the fsm default_transition 
     '''
-    
-    log.info("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.state, device.currentEvent.name))
+    log.debug("[%s] in state [%s] got [%s] event" % (device.name, device.state, device.currentEvent.name))
 
     event_map = {
                   'timeout': ConnectionTimedOut,
@@ -193,6 +194,7 @@ def cliDefaultErrorHandler(device):
                 }
 
     if device.currentEvent.name in event_map:
+        log.info("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.state, device.currentEvent.name))
         exception = event_map[device.currentEvent.name](device)
         device.close()
         raise exception
@@ -350,13 +352,42 @@ def getCallable(methodName):
             if methodName in globals():
                 return globals()[methodName]
             else:
-                raise netcube.exceptions.EventHandlerUndefined(methodName)
+                raise EventHandlerUndefined(methodName)
     else:
         def composite(d):
             for m in methodName:
                 getCallable(m)(d)
         return composite
 
+
+def cliIsConnected(target):
+    log.debug("[%s] [%s] state, [%s] event: checking if CLI is connected ..." % (target.name, target.state, target.currentEvent.name))
+
+    if target.currentEvent.name == 'prompt-match':
+        return True
+
+    if target.discoverPrompt:
+        log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.state))
+        target.enablePromptDiscovery()
+        
+        def isTimeoutOrPromptMatch(d):
+            return d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match'
+        
+        target.expect(isTimeoutOrPromptMatch)
+        
+#    target.process(Event('cli_connected'))
+        
+#    elif target.currentEvent.name != 'timeout':
+        
+        # if discoverPrompt is false then the timeout event is not an error: it points out
+        # that all the output is received
+        
+#        target.addPattern('timeout', states=target.state)
+        
+#        def isTimeout(d):
+#            return d.currentEvent.name == 'timeout'
+        
+#        target.expect(isTimeout)
 
 
 class Event:
@@ -376,6 +407,9 @@ class Event:
     def isTimeout(self):
         return self.name == 'timeout'
             
+    def isPromptMatch(self):
+        return self.name == 'prompt-match'
+    
 class Prompt:
     
     def __init__(self, promptValue, tentative=False):
@@ -409,8 +443,9 @@ class Device:
     Base class for device configuration 
     '''    
     
-    defaultConfig = None
+    #defaultConfig = None
     
+    # the default telnet port 
     telnet_port = 23
 
     def __init__(self, name, driver=None, username = None, password = None, protocol='ssh', port=22, hops = []):
@@ -433,20 +468,8 @@ class Device:
         else:
             self.driver = driver
 
-        # Map (input_symbol, current_state) --> (action, next_state).
-        self.state_transitions = {}
-        # Map (current_state) --> (action, next_state).
-        self.state_transitions_any = {}
-        self.input_transitions_any = {}
-        self.default_transition = None
-
-        self.patternMap = {'*':{}}
-        buildPatternsList(self)
-
-        self.set_default_transition(cliDefaultErrorHandler, None)
+        self.setDriver(self.driver.name)
         
-        # simply ignore 'prompt-match' on any state
-        self.add_input_any('prompt-match')
 
     # TODO: return the device url
     def __str__(self):
@@ -468,6 +491,25 @@ class Device:
 
     def getDriver(self):
         return self.driver.name
+
+    def setDriver(self, driverName):
+        
+        self.driver = Driver.get(driverName)
+        
+        # Map (input_symbol, current_state) --> (action, next_state).
+        self.state_transitions = {}
+        # Map (current_state) --> (action, next_state).
+        self.state_transitions_any = {}
+        self.input_transitions_any = {}
+        self.default_transition = None
+
+        self.patternMap = {'*':{}}
+        buildPatternsList(self)
+
+        self.set_default_transition(defaultEventHandler, None)
+        
+        # simply ignore 'prompt-match' on any state
+        self.add_input_any('prompt-match')
 
     def enablePromptDiscovery(self):
         """
@@ -504,9 +546,10 @@ class Device:
     
     def close(self):
         
-        if self.currentEvent.name != 'eof':
-            self.esession.close()
-        del self.esession.pipe    
+        if hasattr(self, 'esession'):
+            if self.currentEvent.name != 'eof':
+                self.esession.close()
+
         self.state = 'GROUND'
         
 
@@ -553,22 +596,26 @@ class Device:
                 break
 
         
-        try:
-            telnetCommand = clientDevice.telnetCommand
-        except:
-            telnetCommand = 'telnet ${device.username}'   
+        if self.protocol == 'ssh':
+            # the username must be defined for ssh connections
+            if self.username == None:
+                raise MissingDeviceParameter(self, '%s username undefined' % self.name)
+            try:
+                command = clientDevice.sshCommand
+            except:
+                command = 'ssh ${device.username}@${device.name}'
+                
+        elif self.protocol == 'telnet':
+            
+            try:
+                command = clientDevice.telnetCommand
+            except:
+                command = 'telnet ${device.username}'   
+        else:
+            raise UnsupportedProtocol(self, 'unsupported protocol: %s' % self.protocol)
 
-        try:
-            sshCommand = clientDevice.sshCommand
-        except:
-            sshCommand = 'ssh ${device.username}@${device.name}'   
+        template = Template(command)
 
-        commandTemplates = {
-                        'telnet' : Template(telnetCommand),
-                        'ssh'    : Template(sshCommand)
-                        }
-        
-        template = commandTemplates.get(self.protocol)
         clicommand = StringIO()
         context = Context(clicommand, device=self)
 
@@ -576,11 +623,6 @@ class Device:
         
         return clicommand.getvalue()
  
- 
-#    def registerPattern(self, eventName, pattern, state = '*'):
-#        self.patternMap[state][pattern] = eventName
-
-
         
     def hasEventHandlers(self, event):
         return event.name in self.eventCb
@@ -606,32 +648,32 @@ class Device:
     def login(self):
         """
         open a network connection using protocol. Currently supported protocols are telnet and ssh.
-        
-        The final state is one of:
-            * LOGIN_ERROR
-            * USER_PROMPT
-        
         If login has succeeded the device is in USER_PROMPT state and it is ready for consuming commands
         """
         from netcube.expectsession import ExpectSession
         log.debug("%s login ..." % self.name)
 
         self.esession = ExpectSession(self.hops,self)
+        self.currentEvent = Event('do-nothing-event')
+        
         log.debug("[%s] session: [%s]" % (self.name, self.esession))
         
         try:
             self.esession.login()
-        except NetworkException as e:
+        except ExpectException as e:
             # something go wrong, try to find the last connected hop in the path
             log.info("[%s]: in login phase got [%s] error" % (e.device.name ,e.__class__))
-            
             log.debug("full interaction: [%s]" % e.interactionLog)
             raise e
             
         self.clearBuffer()
         
-        if self.state == 'USER_PROMPT':
+        if self.state == 'GROUND':
+            raise LoginFailed(self, 'unable to connect: %s' % self.currentEvent.name)
+        else:
             log.debug("%s logged in !!! ..." % self.name)
+        
+
             
         
     def expect(self, checkPoint):
@@ -693,8 +735,8 @@ class Device:
         # wait for a 1 second timeout period and then consider cleared the buffer
         try: 
             self.esession.pipe.expect('.*', timeout=1)    
-        except:
-            log.debug("[%s] clearBuffer timeout: cleared expect buffer" % self.name) 
+        except Exception as e:
+            log.debug("[%s] clearBuffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__)) 
 
     def add_transition (self, input_symbol, state, action=None, next_state=None):
 
@@ -815,7 +857,7 @@ class Device:
             raise FSMException ('Transition is undefined: (%s, %s).' %
                 (str(input_symbol), str(state)) )
 
-    def process (self, event):
+    def process (self, event, ext=True):
 
         """This is the main method that you call to process input. This may
         cause the driver to change state and call an action. The action callable
@@ -827,6 +869,10 @@ class Device:
         (or a string) by calling process_list(). """
 
         if event.isActive():
+            
+            # disactive the event
+            event.stopPropagation()
+            
             input_symbol = event.name
             #self.input_symbol = input_symbol.name
             (action, next_state) = self.get_transition (input_symbol, self.state)
@@ -842,6 +888,9 @@ class Device:
             if action is not None:
                 log.debug("[%s]: executing [%s] action [%s]" % (self.name, input_symbol, str(action)))
                 action (self)
+                if ext:
+                    self.currentEvent = Event(self.state.lower())
+                    self.process(self.currentEvent,ext=False)
            
             return stateChanged
 
@@ -887,7 +936,9 @@ class Device:
             try:
                 reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
                 self.patternMap[state][pattern] = event
-                if event in reverseMap:
+                log.debug('[%s-%s]: configuring [%s] event [%s]' % (self.name, state, pattern, event))
+                if event in reverseMap and pattern != reverseMap[event]:
+                    log.debug('[%s]: deleting event [%s]' % (self.name, event))
                     del self.patternMap[state][reverseMap[event]]
             except:
                 self.patternMap[state] = {pattern:event}
@@ -1085,21 +1136,4 @@ loadFile()
 
 
     
-if __name__ == '__main__':
-#    host = device('telnet://myuser:mypasswd@localhost:21/linux')
-#    try:
-#        host.login()
-#    except ConnectionClosed:
-#        log.debug('test OK')
-        
-    host = device('ssh://netbox:netbox@localhost/linux')
-    host.login()
-    host.send('id')
-    #host = device('localhost')
-    
-    #device('telnet://u:p:1@localhost:21/linux')
-    #device('ssh://user@localhost:22/linux')
-    #device('ssh://user@localhost/linux')
-    #device('ssh://user@localhost')
-
         

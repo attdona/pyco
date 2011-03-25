@@ -7,7 +7,7 @@ import unittest #@UnresolvedImport
 import os
 
 #from netcube.devices import *
-from netcube.devices import *
+from netcube.device import *
 
 from netcube import log
 
@@ -34,8 +34,8 @@ class Test(unittest.TestCase):
         pass
 
     def testScript(self):
-        from netcube.devices import Marconi #@UnresolvedImport
-        h = Marconi(**localhost)
+        h = Device(**localhost)
+        h.setDriver('marconi')
         h('id')
 
 

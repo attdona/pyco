@@ -82,8 +82,8 @@ class Test(unittest.TestCase):
     def testUnableToConnectToRemoteHost(self):
         log.info("testUnableToConnectToRemoteHost ...")
         h = Device(username='ipnet', name = unableToConnectHost, password='ipnet')
-        
-        self.failUnlessRaises((ConnectionClosed,ConnectionTimedOut), h.login)
+        #h.maxWait = 60
+        self.failUnlessRaises((ConnectionClosed,LoginFailed), h.login)
 
 
         

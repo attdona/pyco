@@ -27,7 +27,7 @@ asa1 = {
 hop1 = {
             'name'     : '163.162.155.60',
             'username' : 'riccardo',
-            'password' : 'mario'
+            'password' : 'scanjet$11'
         }
 
 hop2 = {

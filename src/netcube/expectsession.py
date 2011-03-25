@@ -6,9 +6,8 @@ Created on Feb 21, 2011
 import StringIO #@UnresolvedImport
 import pexpect #@UnresolvedImport
 
-from netcube.device import Event, device
+from netcube.device import Event, device, ConnectionTimedOut
 from netcube import log
-from netcube.exceptions import ConnectionTimedOut
 
 
 # create logger
@@ -26,8 +25,8 @@ def loginSuccessfull(device):
     if device.state == 'USER_PROMPT':
         device.loggedin = True
         return True
-    if device.currentEvent.name == 'timeout':
-        raise ConnectionTimedOut(device)
+#    if device.currentEvent.name == 'timeout':
+#        raise ConnectionTimedOut(device)
     return False
 
 
@@ -51,8 +50,10 @@ class ExpectSession:
             self.logfile.close()
         except ValueError:
             log.warning("trying to close an already closed expect logfile")
-        self.pipe.close(force=True)
-          
+            
+        if hasattr(self, 'pipe'):    
+            self.pipe.close(force=True)
+            del self.pipe
         
     def connect(self, position):
         """
@@ -153,7 +154,7 @@ class ExpectSession:
            
             stateChanged = target.process(target.currentEvent)
             response += self.pipe.before
-            if isinstance(self.pipe.after, basestring):
+            if isinstance(self.pipe.after, basestring) and not target.currentEvent.isPromptMatch():
                 response += self.pipe.after
 
         return response
@@ -165,7 +166,7 @@ class ExpectSession:
     def processResponse(self, target, checkPoint):
         '''
         '''
-        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.driver.maxWait, exactMatch=False)
+        self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
         
         
  
