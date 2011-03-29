@@ -163,7 +163,7 @@ def device(url):
     
 def parseUrl(url):
     '''
-    the device url is compliant with the RFC syntax defined by [http://tools.ietf.org/html/rfc3986]
+    the device url is compliant with the RFC syntax defined by http://tools.ietf.org/html/rfc3986
     the telnet and ssh scheme are extended with a path item defining the host specific driver to be used for connecting 
     
     valid device url:
@@ -375,20 +375,6 @@ def cliIsConnected(target):
         
         target.expect(isTimeoutOrPromptMatch)
         
-#    target.process(Event('cli_connected'))
-        
-#    elif target.currentEvent.name != 'timeout':
-        
-        # if discoverPrompt is false then the timeout event is not an error: it points out
-        # that all the output is received
-        
-#        target.addPattern('timeout', states=target.state)
-        
-#        def isTimeout(d):
-#            return d.currentEvent.name == 'timeout'
-        
-#        target.expect(isTimeout)
-
 
 class Event:
     def __init__(self, name, propagateToFsm=True):
@@ -668,7 +654,7 @@ class Device:
             
         self.clearBuffer()
         
-        if self.state == 'GROUND':
+        if self.state == 'GROUND' or self.currentEvent.isTimeout():
             raise LoginFailed(self, 'unable to connect: %s' % self.currentEvent.name)
         else:
             log.debug("%s logged in !!! ..." % self.name)
@@ -712,7 +698,7 @@ class Device:
             discoverPromptCallback(self)
             
         if self.checkIfOutputComplete == True:
-        
+            log.debug("Checking if [%s] response [%s] is complete" % (command,out))
             prevOut = None
             while out != prevOut:
                 self.clearBuffer()
@@ -723,7 +709,7 @@ class Device:
                     out = currOut
                 else:
                     out = prevOut + currOut
-                log.debug("Checking if [%s] response [%s] is complete" % (command,out))
+                log.debug("Rechecking if [%s] response [%s] is complete" % (command,out))
         
         out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
         log.debug("[%s:%s]: captured response [%s]" % (self.name, command, out))
@@ -950,12 +936,11 @@ class Device:
                 log.debug("[%s]: adding pattern driven transition [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
                 self.add_transition(event, state, action, endState)
 
+
     def addTransition(self, t):
         self.add_transition(t['event'], t['begin_state'], t['action'], t['end_state'])    
         
-#    def addPattern(self, **pattern):
-#        self.addPattern(pattern['event'], pattern['pattern'], pattern['state'])
-        
+ 
 
     def addExpectPattern(self, event, pattern, state):
         log.debug("[%s]: adding expect pattern [%s], event [%s], state [%s]" % (self.name, pattern, event, state))
@@ -988,6 +973,7 @@ def loadFile(cfgfile=cfgFile):
         return reload(config)
     else:
         raise Exception('pyco configuration file not found: ' + cfgfile)
+
 
 def load(config):
     '''
@@ -1031,9 +1017,11 @@ def load(config):
                 
     return config       
 
+
 def reload(config):
     reset()
     load(config)
+
 
 def reset():
     '''

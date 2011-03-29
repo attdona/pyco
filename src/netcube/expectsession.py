@@ -3,10 +3,15 @@ Created on Feb 21, 2011
 
 @author: adona
 '''
+import sys
 import StringIO #@UnresolvedImport
-import pexpect #@UnresolvedImport
+if sys.platform != 'win32':
+    from pexpect import spawn #@UnresolvedImport
+else:
+    from winpexpect import winspawn as spawn #@UnresolvedImport
 
-from netcube.device import Event, device, ConnectionTimedOut
+    
+from netcube.device import Event, device, ConnectionTimedOut #@UnresolvedImport
 from netcube import log
 
 
@@ -92,9 +97,9 @@ class ExpectSession:
         else:
             # TODO: close the spawned session
             # send the connect string to pexpect
-            log.debug("[%s]: spawning a new [%s] session ..." % (target, self)) 
-            self.pipe = pexpect.spawn(cmd, logfile=self.logfile)
-        
+            log.debug("[%s]: spawning a new [%s] session ..." % (target, cmd)) 
+            self.pipe = spawn(cmd, logfile=self.logfile)
+            log.debug('spawned!')
         self.processResponse(target, loginSuccessfull)
 
     def sendLine(self, command):

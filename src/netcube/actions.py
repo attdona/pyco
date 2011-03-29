@@ -37,7 +37,7 @@ def initCiscoCli(target):
     log.debug('[%s] [%s]: initializing cisco ios cli shell' % (target.name, target.state))    
 
 def connectionRefused(target):
-    log.debug("[%s] connectionRefused: [%s]" % (target.name, target.esession.pipe.before))
+    log.debug("[%s] connectionRefused: [%s]" % (target.name, target.interactionLog()))
     raise ConnectionRefused(target)
 
 def permissionDenied(target):
