@@ -23,6 +23,7 @@ class Test(unittest.TestCase):
         out = h('id')
         self.assertRegexpMatches(out, 'uid=[0-9]+\(pyco\).*')
  
+ 
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

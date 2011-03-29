@@ -6,9 +6,9 @@ Created on Feb 21, 2011
 import sys
 import StringIO #@UnresolvedImport
 if sys.platform != 'win32':
-    from pexpect import spawn #@UnresolvedImport
+    from pexpect import spawn, TIMEOUT, EOF #@UnresolvedImport
 else:
-    from winpexpect import winspawn as spawn #@UnresolvedImport
+    from winpexpect import winspawn as spawn, TIMEOUT, EOF #@UnresolvedImport
 
     
 from netcube.device import Event, device, ConnectionTimedOut #@UnresolvedImport
@@ -135,7 +135,7 @@ class ExpectSession:
                     target.currentEvent = Event(target.getEvent(patterns[index]))
                 except:
                     
-                    if patterns[index] == pexpect.TIMEOUT:
+                    if patterns[index] == TIMEOUT:
                         log.debug("[%s]: expect timeout triggered" % target.name)
                         target.currentEvent = Event('timeout', propagateToFsm = False)
                     else:
@@ -144,10 +144,10 @@ class ExpectSession:
                         
                 log.debug("matched pattern [%s] --> [%s]" % (patterns[index], target.currentEvent.name))
                 log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
-            except pexpect.EOF:
+            except EOF:
                 log.debug("[%s] connection unexpectedly closed (%s)" % (target.name, self.pipe.before))
                 target.currentEvent = Event('eof')
-            except pexpect.TIMEOUT:
+            except TIMEOUT:
                 log.debug("[%s] connection timed out, unmatched output: [%s]" % (target.name, self.pipe.before))
                 target.currentEvent = Event('timeout')
 
@@ -171,7 +171,7 @@ class ExpectSession:
     def processResponse(self, target, checkPoint):
         '''
         '''
-        return self.patternMatch(target, checkPoint, [pexpect.TIMEOUT], target.maxWait, exactMatch=False)
+        return self.patternMatch(target, checkPoint, [TIMEOUT], target.maxWait, exactMatch=False)
         
         
  
