@@ -14,8 +14,10 @@ from mock import Mock, patch, patch_object, sentinel
 import sys
 if sys.platform != 'win32':
     from pexpect import TIMEOUT, EOF #@UnresolvedImport
+    spawnFunction = 'pexpect.spawn'
 else:
     from winpexpect import TIMEOUT, EOF #@UnresolvedImport
+    spawnFunction = 'winpexpect.winspawn'
 
 # create logger
 log = log.getLogger("test")
@@ -37,7 +39,7 @@ def pindex(device, state, event):
         
 class Test(unittest.TestCase):
 
-    @patch('winpexpect.winspawn')    
+    @patch(spawnFunction)    
     def testTC1(self, MockExpect):
         log.info("testTC1 ...")
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
