@@ -16,8 +16,6 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")
     def testWrongUrl(self):
         
-        device('linux:localhost')
-        
         self.failUnlessRaises((WrongDeviceUrl), device, 'linux:localhost')
 
 
