@@ -18,8 +18,8 @@ from fixture import *
 # create logger
 log = log.getLogger("test")
 
-#skip = False
-skip = True
+skip = False
+#skip = True
 
 #@unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
@@ -46,7 +46,7 @@ class TestConstraints(unittest.TestCase):
             self.assertEqual(m.group(), str)
         
        
-    @unittest.skipIf(skip==False,"skipped test")
+    @unittest.skipIf(skip==True,"skipped test")
     def testPermissionDenied(self):
         h = Device(**fakeLocalhost)
         self.failUnlessRaises(PermissionDenied, h.login)
