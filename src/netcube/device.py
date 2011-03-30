@@ -181,7 +181,6 @@ def parseUrl(url):
     if items.scheme == '':
         items = urlparse('ssh://' + url)
     
-    print items
     return (items.path, items.hostname, items.username, items.password, items.scheme, items.port)
 
 
