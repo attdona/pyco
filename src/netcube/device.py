@@ -5,11 +5,12 @@ Created on Mar 15, 2011
 @author: Attilio Donà
 '''
 import sys
-import re
+import re #@UnresolvedImport
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
 from StringIO import StringIO #@UnresolvedImport
 from validate import Validator #@UnresolvedImport
+from pkg_resources import resource_filename, resource_string, iter_entry_points #@UnresolvedImport
 
 import netcube.log
 
@@ -17,15 +18,12 @@ import netcube.log
 log = netcube.log.getLogger("device")
 
 from configobj import ConfigObj, flatten_errors #@UnresolvedImport
-import os
-module_path = os.path.dirname(netcube.__file__)
 
 expectLogfile = '/tmp/expect.log'
-cfgFile = module_path + "/cfg/pyco.cfg"
+cfgFile = resource_filename('netcube', 'cfg/pyco.cfg')
 if hasattr(netcube, 'pyco_home'):
     expectLogfile = netcube.pyco_home + "/logs/expect.log"
     cfgFile = netcube.pyco_home + "/cfg/pyco.cfg"
-    
 
 # the shared configObj
 configObj = None
@@ -48,6 +46,10 @@ class DeviceException(Exception):
 class WrongDeviceUrl(Exception):
     def __init__(self, msg):
         self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
 
 class MissingDeviceParameter(DeviceException):
     pass
@@ -142,8 +144,10 @@ def device(url):
         pass
     else:
         url = 'ssh://' + url
-    
-    (driverName, host, user, password, protocol, port) = parseUrl(url)
+    try:
+        (driverName, host, user, password, protocol, port) = parseUrl(url)
+    except:
+        raise WrongDeviceUrl('invalid url %s' % url)
     
     if host == None:
         raise WrongDeviceUrl('hostname not defined')
@@ -253,13 +257,16 @@ def discoverPromptCallback(device):
             return
             
         else:
+            device.removePattern(getExactStringForMatch(device.prompt[sts].value), sts)
             if device.discoveryCounter == 2:
                 log.debug("[%s] [%s] unable to found the prompt, unsetting discovery. last output: [%s]" % (device.name, sts, output))
                 device.discoverPrompt = False
+                
                 device.removeEventHandler('timeout', discoverPromptCallback)
                 return
             else:
                 log.debug("[%s] [%s] prompt not match, retrying discovery with pointer [%s]" % (device.name, sts, output))
+                
                 device.prompt[sts].value = output.replace('\r\n', '', 1)
                 device.discoveryCounter += 1
     else:
@@ -268,6 +275,7 @@ def discoverPromptCallback(device):
         device.discoveryCounter = 0
         log.debug("[%s] tentativePrompt: [%s]" % (device.name, tentativePrompt))
         device.prompt[sts] = Prompt(tentativePrompt, tentative=True)
+        device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
         
     device.clearBuffer()
     device.sendLine('')
@@ -573,8 +581,6 @@ class Device:
 
     def connectCommand(self, clientDevice):
         
-        from pkg_resources import iter_entry_points
-        
         for ep in iter_entry_points(group='pyco.plugin', name=None):
             log.debug("found [%s] plugin into module [%s]" % (ep.name, ep.module_name))
             authFunction = ep.load()
@@ -873,9 +879,10 @@ class Device:
             if action is not None:
                 log.debug("[%s]: executing [%s] action [%s]" % (self.name, input_symbol, str(action)))
                 action (self)
-                if ext:
-                    self.currentEvent = Event(self.state.lower())
-                    self.process(self.currentEvent,ext=False)
+                
+            if stateChanged:
+                self.currentEvent = Event(self.state.lower())
+                self.process(self.currentEvent,ext=False)
            
             return stateChanged
 
@@ -912,6 +919,7 @@ class Device:
             if not pattern or pattern == '':
                 if state == '*':
                     log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
+                    self.add_input_any(event, action, endState)
                 else:
                     log.debug("[%s] adding transition [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
                     self.add_transition(event, state, action, endState)
@@ -954,25 +962,28 @@ class Device:
             self.patternMap[state] = {pattern:event}
             
 
-    def unregisterPattern(self, pattern, state = '*'):
-        del self.patternMap[state][pattern]
-      
+    def removePattern(self, pattern, state = '*'):
+        try:
+            del self.patternMap[state][pattern]
+        except KeyError:
+            log.info('[%s] failed to delete patternMap[%s] entry [%s]: item not found' % (self.name, state, pattern))
 
 
 # end Device class
 
 
-def loadFile(cfgfile=cfgFile):
+def loadConfiguration(cfgfile=cfgFile):
     '''
     Load the pyco configuration file
     '''
     
-    import os.path
-    if os.path.isfile(cfgfile):
-        config = ConfigObj(cfgfile, configspec=module_path + '/cfg/pyco_spec.cfg')
-        return reload(config)
-    else:
-        raise Exception('pyco configuration file not found: ' + cfgfile)
+    #import os.path
+    #if os.path.isfile(cfgfile):
+    #try:
+    config = ConfigObj(cfgfile, configspec=resource_filename('netcube', 'cfg/pyco_spec.cfg'))
+    return reload(config)
+    #except:
+    #    raise Exception('pyco configuration file not found: ' + cfgfile)
 
 
 def load(config):
@@ -981,7 +992,9 @@ def load(config):
     '''
     global configObj
     
-    config.configspec = ConfigObj(module_path + '/cfg/pyco_spec.cfg')
+    pyco_spec = resource_filename('netcube', 'cfg/pyco_spec.cfg')
+    
+    config.configspec = ConfigObj(pyco_spec)
     
     val = Validator()
     results = config.validate(val)
@@ -1118,7 +1131,7 @@ class Driver:
         
   
 # finally and only finally load the configuration
-loadFile()     
+loadConfiguration()     
 
 
 

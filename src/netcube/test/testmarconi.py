@@ -11,7 +11,7 @@ from netcube.device import *
 
 from netcube import log
 
-#netcube.config.loadFile()
+#netcube.config.loadConfiguration()
 
 # create logger
 log = log.getLogger("testmarconi")
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         module_path = os.path.dirname(netcube.__file__)
         log.debug("module_path: %s" % module_path)
-        loadFile(module_path + '/test/testmarconi.cfg')
+        loadConfiguration(module_path + '/test/testmarconi.cfg')
         
     def tearDown(self):
         pass

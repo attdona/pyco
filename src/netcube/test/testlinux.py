@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
     def testScript(self):
         module_path = os.path.dirname(netcube.__file__)
         log.debug("module_path: %s" % module_path)
-        loadFile(module_path + '/test/testcore.cfg')
+        loadConfiguration(module_path + '/test/testcore.cfg')
         h = Device(**localhost) #@UndefinedVariable
         h(module_path + '/test/script.py')
 

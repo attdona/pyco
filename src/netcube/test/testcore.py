@@ -21,7 +21,7 @@ log = log.getLogger("test")
 skip = False
 #skip = True
 
-@unittest.skip("temp skip")
+#@unittest.skip("temp skip")
 class TestConstraints(unittest.TestCase):
 
     def setUp(self):
@@ -45,19 +45,12 @@ class TestConstraints(unittest.TestCase):
             
             self.assertEqual(m.group(), str)
         
+       
     @unittest.skipIf(skip==True,"skipped test")
-    def testRegexp(self):
-        str = 'abc\r\nxyz'
-        p = re.compile('\r\n.*$', re.MULTILINE)
-        m = p.match(str)
-        
-        print m.group()
-        
-    @unittest.skipIf(skip==True,"skipped test")
-    def testNoName(self):
+    def testPermissionDenied(self):
         h = Device(**fakeLocalhost)
         h.login()
-        #self.failUnlessRaises(NetworkException, h.login)
+        self.failUnlessRaises(PermissionDenied, h.login)
     
 #@unittest.skip("temp skip")
 class Test(unittest.TestCase):
@@ -412,7 +405,7 @@ class TestHops(unittest.TestCase):
             out = host('id')
             self.assertRegexpMatches(out, 'uid=[0-9]+')
         finally:
-            loadFile()
+            loadConfiguration()
             
     @unittest.skipIf(skip==True,"skipped test")    
     def testPermissionDenied(self):

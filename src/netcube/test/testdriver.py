@@ -7,8 +7,8 @@ import unittest #@UnresolvedImport
 from netcube.device import device
 from netcube.device import *
 
-#skip = False
-skip = True
+skip = False
+#skip = True
 
 
 class Test(unittest.TestCase):
@@ -16,10 +16,12 @@ class Test(unittest.TestCase):
     @unittest.skipIf(skip==True,"skipped test")
     def testWrongUrl(self):
         
+        device('linux:localhost')
+        
         self.failUnlessRaises((WrongDeviceUrl), device, 'linux:localhost')
 
 
-    @unittest.skipIf(skip==False,"skipped test")
+    @unittest.skipIf(skip==True,"skipped test")
     def testEmptyPattern(self):
         log.info("testEmptyPattern ...")
         h = device('ipnet@myhost.com')

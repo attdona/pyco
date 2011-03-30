@@ -9,7 +9,7 @@ from netcube.device import device, ConnectionRefused, ConnectionTimedOut
 from netcube import log
 
 from fixture import *
-from mock import Mock, patch, patch_object, sentinel
+from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import sys
 if sys.platform != 'win32':
@@ -40,7 +40,7 @@ def pindex(device, state, event):
 class Test(unittest.TestCase):
 
     @patch(spawnFunction)    
-    def testTC1(self, MockExpect):
+    def _testTC1(self, MockExpect):
         log.info("testTC1 ...")
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
         h.maxWait = 20
