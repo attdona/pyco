@@ -30,10 +30,13 @@ def responder(mock, responses, patterns, maxTime):
     while toBeMatched and idx < len(patterns):
         
         search = '(.*)(%s)' % patterns[idx]
-        print "re: [%s]" % search
+        print "[%d] re: [%s]" % (idx, search)
         if patterns[idx] == TIMEOUT:
             print 'BINGO !!!!!!!!!!'
             toBeMatched = False
+            mock.before = response
+            mock.after  = TIMEOUT
+
             break
         match = re.match(search, response)
         if match:

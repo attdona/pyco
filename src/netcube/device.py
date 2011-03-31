@@ -192,9 +192,9 @@ def defaultEventHandler(device):
     log.debug("[%s] in state [%s] got [%s] event" % (device.name, device.state, device.currentEvent.name))
 
     event_map = {
-                  'timeout': ConnectionTimedOut,
                   'eof'    : ConnectionClosed
                 }
+    #'timeout': ConnectionTimedOut,
 
     if device.currentEvent.name in event_map:
         log.info("[%s] unexpected communication error in state [%s] got [%s] event" % (device.name, device.state, device.currentEvent.name))
@@ -323,8 +323,6 @@ def buildPatternsList(device, driver=None):
 def buildAction(actionString):
     
     if actionString.startswith(':'):
-        for chunk in actionString.split(':'):
-            log.debug('chunk [%s]' % chunk)
         al = actionString.split(':')
         al = al[1:-1]
     else:        
@@ -909,7 +907,6 @@ class Device:
         
         If pattern is None only a transition is configured
         '''
-        
         if isinstance(states, basestring):
             states = [states]
         
@@ -917,7 +914,7 @@ class Device:
             
             if not pattern or pattern == '':
                 if state == '*':
-                    log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
+                    log.debug("[%s]: [%s] event with empty pattern activated in any state" % (self.name, event))
                     self.add_input_any(event, action, endState)
                 else:
                     log.debug("[%s] adding transition [%s-%s (action:%s)-%s]" % (self.name, state, event, action, endState))
@@ -961,6 +958,12 @@ class Device:
             self.patternMap[state] = {pattern:event}
             
 
+    def removeEvent(self, event, state = '*'):
+        reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
+        if event in reverseMap:
+            pattern = reverseMap[event]
+            self.removePattern(pattern, state)
+        
     def removePattern(self, pattern, state = '*'):
         try:
             del self.patternMap[state][pattern]

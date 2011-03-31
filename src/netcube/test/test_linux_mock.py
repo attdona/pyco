@@ -25,8 +25,14 @@ else:
 # create logger
 log = log.getLogger("test")
 
-responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
-            '$ ', '$ ']
+responses = ['pyco@localhost password: ', 
+            '''Linux cencenighe 2.6.32-30-generic #59-Ubuntu SMP Tue Mar 1 21:30:46 UTC 2011 x86_64 GNU/Linux\r
+Ubuntu 10.04.2 LTS\r
+\r
+Welcome to Ubuntu!\r
+ * Documentation:  https://help.ubuntu.com/\r
+\r
+Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ''']
   
 def pindex(device, state, event):
     reverseMap = dict(map(lambda item: (item[1],item[0]), device.patternMap[state].items()))
@@ -44,8 +50,8 @@ def pindex(device, state, event):
 class Test(unittest.TestCase):
 
     @patch(spawnFunction)    
-    def testNoPassword(self, MockExpect):
-        log.info("testNoPassword ...")
+    def testTC1(self, MockExpect):
+        log.info("testTC1 ...")
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
         h.maxWait = 20
 
