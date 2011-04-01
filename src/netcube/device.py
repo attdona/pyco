@@ -206,7 +206,6 @@ def getExactStringForMatch(str):
     '''
     Used for example to escape special characters in prompt strings 
     '''
-    log.debug("escaping prompt [%s]" % str)
     specials = ['(\\[)', '(\\$)', '(\\.)', '(\\^)', '(\\*)', '(\\+)', '(\\?)', '(\\{)', '(\\})', '(\\])', '(\\|)', '(\\()', '(\\))']
     orSep = '|'
     pattern = orSep.join(specials)
@@ -219,12 +218,14 @@ def getExactStringForMatch(str):
     
     return match
 
-def discoverPromptCallback(device):
+def discoverPromptCallback(device, tentativePrompt=None):
     '''
     The discover prompt algorithm
     '''
 
-    if device.currentEvent.name == 'prompt-match':
+    if tentativePrompt is not None:
+        output = tentativePrompt
+    elif device.currentEvent.name == 'prompt-match':
         output = device.esession.pipe.after
     elif device.currentEvent.name == 'timeout':
         output = device.esession.pipe.before
@@ -248,6 +249,7 @@ def discoverPromptCallback(device):
             #device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
             for ev in ['timeout', 'prompt-match']:
+                log.debug('removing discoverPromptCallback')
                 device.removeEventHandler(ev, discoverPromptCallback)
             
             # declare the discovery with the event
@@ -257,16 +259,17 @@ def discoverPromptCallback(device):
             
         else:
             device.removePattern(getExactStringForMatch(device.prompt[sts].value), sts)
+            
             if device.discoveryCounter == 2:
                 log.debug("[%s] [%s] unable to found the prompt, unsetting discovery. last output: [%s]" % (device.name, sts, output))
                 device.discoverPrompt = False
-                
                 device.removeEventHandler('timeout', discoverPromptCallback)
                 return
             else:
-                log.debug("[%s] [%s] prompt not match, retrying discovery with pointer [%s]" % (device.name, sts, output))
-                
+                device.prompt[sts].tentative = True
                 device.prompt[sts].value = output.replace('\r\n', '', 1)
+                log.debug("[%s] [%s] no prompt match, retrying discovery with pointer %s" % (device.name, sts, [device.prompt[sts].value]))
+                device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
                 device.discoveryCounter += 1
     else:
         rows = output.split('\r\n')
@@ -507,6 +510,7 @@ class Device:
         Match the output device against the promptRegexp pattern and set the device prompt
         """
         self.onEvent('timeout', discoverPromptCallback)
+        self.onEvent('prompt-match', discoverPromptCallback)
         
         #self.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
 
@@ -686,7 +690,7 @@ class Device:
         if self.state == 'GROUND':
             self.login()
         
-        self.clearBuffer()
+        #self.clearBuffer()
         self.sendLine(command)
 
         def runUntilPromptMatchOrTimeout(device):
@@ -697,8 +701,10 @@ class Device:
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
             # rediscover the prompt
             log.debug("[%s] discovering again the prompt ..." % self.name)
+            tentativePrompt = out.split('\r\n')[-1]
+            log.debug('[%s] taking last line as tentativePrompt: [%s]' % (self.name, tentativePrompt))
             self.enablePromptDiscovery()
-            discoverPromptCallback(self)
+            discoverPromptCallback(self, tentativePrompt)
             
         if self.checkIfOutputComplete == True:
             log.debug("Checking if [%s] response [%s] is complete" % (command,out))
@@ -720,6 +726,7 @@ class Device:
         return out 
            
     def clearBuffer(self):
+        log.debug('clearing buffer ...')
         # wait for a 1 second timeout period and then consider cleared the buffer
         try: 
             self.esession.pipe.expect('.*', timeout=1)    
@@ -864,7 +871,7 @@ class Device:
             input_symbol = event.name
             #self.input_symbol = input_symbol.name
             (action, next_state) = self.get_transition (input_symbol, self.state)
-            log.debug("selected transition [%s,%s] -> [%s]" % (input_symbol, self.state, next_state))
+            log.debug("selected transition [event:%s,state:%s] -> [action:%s, endState:%s]" % (input_symbol, self.state, action, next_state))
             
             stateChanged = False
             
@@ -878,6 +885,7 @@ class Device:
                 action (self)
                 
             if stateChanged:
+                log.debug('generating event [%s]' % self.state.lower())
                 self.currentEvent = Event(self.state.lower())
                 self.process(self.currentEvent,ext=False)
            
@@ -947,7 +955,7 @@ class Device:
  
 
     def addExpectPattern(self, event, pattern, state):
-        log.debug("[%s]: adding expect pattern [%s], event [%s], state [%s]" % (self.name, pattern, event, state))
+        log.debug("[%s]: adding expect pattern %s, event [%s], state [%s]" % (self.name, [pattern], event, state))
         if not pattern or pattern == '':
             log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
             return

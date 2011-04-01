@@ -15,6 +15,7 @@ Contents:
    common
    config
    fsm_model
+   example
 
 Indices and tables
 ==================

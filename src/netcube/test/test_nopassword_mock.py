@@ -25,25 +25,16 @@ else:
 # create logger
 log = log.getLogger("test")
 
-responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
-            '$ ', '$ ']
   
-def pindex(device, state, event):
-    reverseMap = dict(map(lambda item: (item[1],item[0]), device.patternMap[state].items()))
-
-    try:
-        pattern = reverseMap[event]
-    except:
-        if event == 'timeout':
-            raise TIMEOUT, 'timeout exceeded'
-        else:
-            raise
-        
-    return device.patterns(state).index(pattern)
-        
+@patch(spawnFunction)    
 class Test(unittest.TestCase):
 
-    @patch(spawnFunction)    
+    def setUp(self):
+        self.responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
+            '$ ', '$ ']
+
+
+
     def testNoPassword(self, MockExpect):
         from netcube.device import cliIsConnected
         log.info("testNoPassword ...")
@@ -53,11 +44,25 @@ class Test(unittest.TestCase):
         h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
         
         MockExpect.side_effect = simulator.side_effect
-        simulator.side_effect.responses = responses
+        simulator.side_effect.responses = self.responses
 
         out = h.login()
     
         #h.send('id')
+
+    def _testSshNoPassword(self, MockExpect):
+        from netcube.device import cliIsConnected
+        log.info("testSshNoPassword ...")
+        h = device('ssh://%s@%s' % (hop1['username'], hop1['name']))
+        
+        h.removeEvent('username_event', 'GROUND')
+        h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        
+        MockExpect.side_effect = simulator.side_effect
+        simulator.side_effect.responses = self.responses
+
+        out = h.login()
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

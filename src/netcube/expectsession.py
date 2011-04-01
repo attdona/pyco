@@ -134,9 +134,8 @@ class ExpectSession:
                 try:    
                     target.currentEvent = Event(target.getEvent(patterns[index]))
                 except Exception as e:
-                    log.debug('patternMatch %s: %s' % (e.__class__, e))
                     if patterns[index] == TIMEOUT:
-                        log.debug("[%s]: expect timeout triggered" % target.name)
+                        log.debug("[%s]: exception timeout triggered" % target.name)
                         target.currentEvent = Event('timeout', propagateToFsm = True)
                     else:
                         log.error("[%s]: event not registered for pattern: [%s]" % (target.name, patterns[index]))

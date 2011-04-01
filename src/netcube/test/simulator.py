@@ -14,25 +14,29 @@ else:
     spawnFunction = 'winpexpect.winspawn'
 
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
+from netcube import log
+
+# create logger
+log = log.getLogger("sim")
 
 
 def responder(mock, responses, patterns, maxTime):
     
-    print 'XXXXXXXXXXXXXXXXXX'
+    log.debug('entering MOCK responder')
     print patterns
 
     #return the index relative to event_name
     response = responses.pop(0)
-    print 'response [%s]' % (response)
+    log.debug('current response [%s]' % (response))
     
     idx = 0
     toBeMatched = True
     while toBeMatched and idx < len(patterns):
         
         search = '(.*)(%s)' % patterns[idx]
-        print "[%d] re: [%s]" % (idx, search)
+        log.debug("checking [%d] regexp: [%s]" % (idx, search))
         if patterns[idx] == TIMEOUT:
-            print 'BINGO !!!!!!!!!!'
+            
             toBeMatched = False
             mock.before = response
             mock.after  = TIMEOUT
@@ -47,7 +51,7 @@ def responder(mock, responses, patterns, maxTime):
         idx+=1
     
     if idx < len(patterns):
-        print 'returning index [%d]' % idx
+        log.debug('returning index [%d]' % idx)
         return idx
     else:
         mock.before = response
@@ -55,8 +59,6 @@ def responder(mock, responses, patterns, maxTime):
         raise TIMEOUT, 'wait time exceeded'
 
 def side_effect(*args, **kwargs):
-    print 'SIDE EFFECT'
-    #h.state = 'USER_PROMPT'
     
     m = Mock()
     
