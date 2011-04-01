@@ -5,12 +5,12 @@ Ok, let's build step by step the right FSM machine to interact with a new device
 
 For semplicity imagine that you have to connect for the first time to a CiscoIOS router::
 
-cisco = device('telnet://cisco:cisco@163.162.155.61')
+ cisco = device('telnet://cisco:cisco@163.162.155.61')
 
-from netcube.actions import sendUsername
-cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
+ from netcube.actions import sendUsername
+ cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
 
-cisco.login()
+ cisco.login()
 
 the console, with DEBUG log level enabled, says at the end something like::
 
@@ -31,14 +31,10 @@ The login phase succeeded, now let's try to send the command *show version*::
 
 Uhmm ..., a lot of unexpected things happened, the most evident thing is that the command output is incomplete and ends with a `--More--` string
 
-Ok, after clearing the channel [#f1]_, send the command line to the device::
+Ok, after clearing the channel, send the command line to the device::
 
- 2011-04-01 12:41:30,976 - device - DEBUG - [163.162.155.61] clearBuffer timeout: cleared expect buffer (<class 'pexpect.TIMEOUT'>)
  2011-04-01 12:41:30,976 - device - DEBUG - [163.162.155.61] sending [show version]
  2011-04-01 12:41:30,976 - exp-session - DEBUG - sending line [show version] using session [<netcube.expectsession.ExpectSession instance at 0x26f7cf8>]
-
-
-.. [#f1] to be seen if the clearing phase can be safely removed
 
 
 In the `USER_PROMPT` state wait for a device response that match the above patterns. Note that the prompt is one of the patterns::
@@ -88,16 +84,17 @@ There is no transition for `[event=timeout, state=USER_PROMPT`] [#f2]_::
 .. [#f2] For convention if endState==None then no state change happens.
 
 
-The `defaultEventHandler` aparte logging does nothing except in case an `eof` event is detected:: 
+The `defaultEventHandler` apart logging does nothing (the only exception is when `eof` event is detected):: 
 
  2011-04-01 14:18:38,003 - device - DEBUG - [163.162.155.61]: executing [timeout] action [<function defaultEventHandler at 0x15d2500>]
  2011-04-01 14:18:38,003 - device - DEBUG - [163.162.155.61] in state [USER_PROMPT] got [timeout] event
 
-Ok, pyco try to do something intelligent: a `timeout` event after sending a command signal that the prompt previously discovered is lost, so try to rediscover it:: 
+A `timeout` event after sending a command signal that the prompt previously discovered is lost: it seems that some disaster recovery must be attempted.
+Pyco will try to do something intelligent: rediscover the prompt:: 
 
  2011-04-01 14:18:38,003 - device - DEBUG - [163.162.155.61] discovering again the prompt ...
  
-Continuing with the assumptions, the tentative prompt is the last device resopnse line::  
+Continuing with the assumptions, the tentative prompt is the last device response line::  
  
  2011-04-01 14:18:38,003 - device - DEBUG - [163.162.155.61] taking last line as tentativePrompt: [ --More-- ]
  
@@ -106,6 +103,9 @@ Enable again the discovering algorithm::
  2011-04-01 14:18:38,004 - device - DEBUG - [163.162.155.61] adding [<function discoverPromptCallback at 0x15d25f0>] for [timeout] event
  2011-04-01 14:18:38,004 - device - DEBUG - [163.162.155.61] adding [<function discoverPromptCallback at 0x15d25f0>] for [prompt-match] event
  2011-04-01 15:14:55,102 - device - DEBUG - [163.162.155.61] prompt discovery ...
+ 
+Pyco take the last output line as the tentative prompt, but this is a wrong hint:: 
+ 
  2011-04-01 15:14:55,102 - device - DEBUG - [163.162.155.61] [USER_PROMPT] no prompt match, retrying discovery with pointer [' --More-- ']
  2011-04-01 15:14:55,103 - device - DEBUG - [163.162.155.61]: adding expect pattern [' --More-- '], event [prompt-match], state [USER_PROMPT]
  2011-04-01 15:14:55,103 - device - DEBUG - clearing buffer ...
@@ -128,12 +128,15 @@ Enable again the discovering algorithm::
  r1>]
  2011-04-01 15:15:05,320 - exp-session - DEBUG - [163.162.155.61] got [timeout] event; invoking handlers: [[<function discoverPromptCallback at 0x2c345f0>]]
  2011-04-01 15:15:05,321 - device - DEBUG - [163.162.155.61] prompt discovery ...
+
+Infact, the prompt can not be found and Pyco unset the prompt discovery:: 
+ 
  2011-04-01 15:15:05,321 - device - DEBUG - [163.162.155.61] [USER_PROMPT] unable to found the prompt, unsetting discovery. last output: [
  r1>]
  2011-04-01 15:15:05,321 - device - DEBUG - [163.162.155.61] removing [timeout] event handler [<function discoverPromptCallback at 0x2c345f0>]
  
  
-Finally the (wrong) response captured is::
+Finally this is the (wrong) response captured and returned::
  
  2011-04-01 14:51:23,121 - device - DEBUG - [163.162.155.61:show version]: captured response [Cisco IOS Software, 7200 Software (C7200-JS-M), Version 12.4(3), RELEASE SOFTWARE (fc2)
  Technical Support: http://www.cisco.com/techsupport
@@ -157,4 +160,4 @@ Finally the (wrong) response captured is::
  PCI bus mb0_mb1 (Slots 0, 1, 3 and 5) has a capacity of 600 bandwidth points.
   --More-- ]
 
-
+How to manage correctly the ``-- More --`` pattern?
