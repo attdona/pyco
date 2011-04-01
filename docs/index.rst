@@ -14,6 +14,7 @@ Contents:
    intro
    common
    config
+   fsm_model
 
 Indices and tables
 ==================
