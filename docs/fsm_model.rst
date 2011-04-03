@@ -26,5 +26,26 @@ The input action sendPassword is executed entering in the PASSWORD_SENT.
 
 sendPassword is a pyhton callable, ie. a function or a class with __call__ method.
 
+The signature of the action function is::
+
+ def actionFunction(target)
+
+
+where target is the device object being accessed by pyco.
+The function logic must be whatever but in the usual case
+it is realized with few lines of code.
+
+For example the following snippet send the password string to the requesting device after doing some
+checking and log the action::
+
+ def sendPassword(target):
+    
+    if target.password is None:
+        raise MissingDeviceParameter(target, '%s password undefined' % target.name)
+    
+    log.debug("[%s] sending password [%s] ..." % (target.name, target.password))
+    target.sendLine(target.password)
+ 
+
 
   

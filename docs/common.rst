@@ -10,7 +10,7 @@ asd asdd as das das d
 .. automodule:: netcube.device
 	:members:
 
-.. autoclass:: netcube.device.Device
-	:members:
+#.. autoclass:: netcube.device.Device
+#	:members:
 	
 	
