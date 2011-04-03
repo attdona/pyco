@@ -267,7 +267,9 @@ def discoverPromptCallback(device, tentativePrompt=None):
                 return
             else:
                 device.prompt[sts].tentative = True
-                device.prompt[sts].value = output.replace('\r\n', '', 1)
+                if output.startswith('\r\n'):
+                    output = output.replace('\r\n', '', 1)
+                device.prompt[sts].value = output
                 log.debug("[%s] [%s] no prompt match, retrying discovery with pointer %s" % (device.name, sts, [device.prompt[sts].value]))
                 device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
                 device.discoveryCounter += 1
@@ -731,7 +733,7 @@ class Device:
         try: 
             self.esession.pipe.expect('.*', timeout=1)    
         except Exception as e:
-            log.debug("[%s] clearBuffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__)) 
+            log.debug("[%s] clearBuffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
 
     def add_transition (self, input_symbol, state, action=None, next_state=None):
 

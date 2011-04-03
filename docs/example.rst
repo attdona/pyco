@@ -7,7 +7,7 @@ For semplicity imagine that you have to connect for the first time to a CiscoIOS
 
  cisco = device('telnet://cisco:cisco@163.162.155.61')
 
- from netcube.actions import sendUsername
+ from pyco.actions import sendUsername
  cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
 
  cisco.login()

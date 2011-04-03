@@ -30,37 +30,23 @@ log = log.getLogger("test")
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
-            '$ ', '$ ']
+        self.responses = ['Username: ', 'password: ', 'router> ', 'router> ', 
+                          'some output\r\n -- More -- \r\n', 'more output \r\n -- More --\r\n', 'more and more\r\n -- More -- \r\n' ]
 
     def testNoPassword(self, MockExpect):
         from pyco.device import cliIsConnected
         log.info("testNoPassword ...")
-        h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
+        cisco = device('telnet://%s:%s@%s' % (cisco1['username'], cisco1['password'], cisco1['name']))
         
-        h.removeEvent('username_event', 'GROUND')
-        h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        from pyco.actions import sendUsername
+        cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses
 
-        out = h.login()
+        out = cisco.login()
     
-        #h.send('id')
-
-    def _testSshNoPassword(self, MockExpect):
-        from pyco.device import cliIsConnected
-        log.info("testSshNoPassword ...")
-        h = device('ssh://%s@%s' % (hop1['username'], hop1['name']))
-        
-        h.removeEvent('username_event', 'GROUND')
-        h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
-        
-        MockExpect.side_effect = simulator.side_effect
-        simulator.side_effect.responses = self.responses
-
-        out = h.login()
-
+        cisco.send('show version')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
