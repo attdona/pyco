@@ -5,10 +5,10 @@ Created on Mar 21, 2011
 '''
 import os
 import unittest #@UnresolvedImport
-from netcube.device import device, loadConfiguration, ConnectionRefused
-import netcube
+from pyco.device import device, loadConfiguration, ConnectionRefused
+import pyco
 
-from netcube import log
+from pyco import log
 
 from fixture import *
 
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
     def testManyTransitions(self):
         
         log.info("testManyTransitions ...")
-        module_path = os.path.dirname(netcube.__file__)
+        module_path = os.path.dirname(pyco.__file__)
         log.debug("module_path: %s" % module_path)
         loadConfiguration(module_path + '/test/pyco_many_transitions.cfg')
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))

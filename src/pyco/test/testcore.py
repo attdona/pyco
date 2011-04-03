@@ -3,15 +3,15 @@ Created on Jan 31, 2011
 @author: adona
 
 The suggested way to run the tests are throught nosetest:
- ``nosetests --with-coverage --cover-html --cover-package=netcube``
+ ``nosetests --with-coverage --cover-html --cover-package=pyco``
 
 '''
 import unittest #@UnresolvedImport
 import re #@UnresolvedImport
 from configobj import ConfigObj #@UnresolvedImport
 
-from netcube.device import *
-from netcube import log
+from pyco.device import *
+from pyco import log
 
 from fixture import *
 

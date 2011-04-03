@@ -6,8 +6,8 @@ Created on Mar 14, 2011
 import unittest #@UnresolvedImport
 import os
 
-from netcube.device import *
-from netcube import log
+from pyco.device import *
+from pyco import log
 from fixture import *
 
 # create logger
@@ -16,7 +16,7 @@ log = log.getLogger("testlinux")
 class Test(unittest.TestCase):
 
     def testScript(self):
-        module_path = os.path.dirname(netcube.__file__)
+        module_path = os.path.dirname(pyco.__file__)
         log.debug("module_path: %s" % module_path)
         loadConfiguration(module_path + '/test/testcore.cfg')
         h = Device(**localhost) #@UndefinedVariable

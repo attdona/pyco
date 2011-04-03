@@ -5,11 +5,11 @@ Created on Feb 15, 2011
 '''
 import logging #@UnresolvedImport
 import logging.config #@UnresolvedImport
-import netcube
+import pyco
 import os
 
-if hasattr(netcube, 'pyco_home'):
-    logfile = netcube.pyco_home + "/cfg/log.conf"
+if hasattr(pyco, 'pyco_home'):
+    logfile = pyco.pyco_home + "/cfg/log.conf"
 else:
     logfile = os.path.dirname(__file__) + "/cfg/log.conf"
     

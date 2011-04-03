@@ -6,12 +6,12 @@ Created on Mar 14, 2011
 import unittest #@UnresolvedImport
 import os
 
-#from netcube.devices import *
-from netcube.device import *
+#from pyco.devices import *
+from pyco.device import *
 
-from netcube import log
+from pyco import log
 
-#netcube.config.loadConfiguration()
+#pyco.config.loadConfiguration()
 
 # create logger
 log = log.getLogger("testmarconi")
@@ -26,7 +26,7 @@ localhost = {
 class Test(unittest.TestCase):
 
     def setUp(self):
-        module_path = os.path.dirname(netcube.__file__)
+        module_path = os.path.dirname(pyco.__file__)
         log.debug("module_path: %s" % module_path)
         loadConfiguration(module_path + '/test/testmarconi.cfg')
         

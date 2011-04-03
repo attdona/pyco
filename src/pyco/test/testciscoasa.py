@@ -6,8 +6,8 @@ Created on Mar 14, 2011
 import unittest #@UnresolvedImport
 import os
 
-from netcube.device import *
-from netcube import log
+from pyco.device import *
+from pyco import log
 from fixture import *
 
 # create logger

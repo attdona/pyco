@@ -4,8 +4,8 @@ Created on Mar 21, 2011
 @author: adona
 '''
 import unittest #@UnresolvedImport
-from netcube.device import device
-from netcube.device import *
+from pyco.device import device
+from pyco.device import *
 
 skip = False
 #skip = True

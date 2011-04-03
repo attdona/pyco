@@ -3,8 +3,8 @@ Created on Feb 22, 2011
 
 @author: adona
 '''
-from netcube import log
-from netcube.device import ConnectionRefused, PermissionDenied, MissingDeviceParameter
+from pyco import log
+from pyco.device import ConnectionRefused, PermissionDenied, MissingDeviceParameter
 
 
 log = log.getLogger("actions")

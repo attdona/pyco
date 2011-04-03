@@ -4,12 +4,12 @@ Created on Mar 21, 2011
 @author: adona
 '''
 import unittest #@UnresolvedImport
-from netcube.device import device, ConnectionRefused, ConnectionTimedOut
+from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
-from netcube import log
+from pyco import log
 
 from fixture import *
-from mock import Mock, patch, patch_object, sentinel
+from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 # create logger
 log = log.getLogger("test")
@@ -22,7 +22,7 @@ def processResponse(self, f):
         
 class Test(unittest.TestCase):
 
-    @patch('netcube.expectsession.ExpectSession')    
+    @patch('pyco.expectsession.ExpectSession')    
     def testTC1(self, MockExpect):
         log.info("testTC1 ...")
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))

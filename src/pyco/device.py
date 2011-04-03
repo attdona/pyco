@@ -12,18 +12,18 @@ from StringIO import StringIO #@UnresolvedImport
 from validate import Validator #@UnresolvedImport
 from pkg_resources import resource_filename, resource_string, iter_entry_points #@UnresolvedImport
 
-import netcube.log
+import pyco.log
 
 # create logger
-log = netcube.log.getLogger("device")
+log = pyco.log.getLogger("device")
 
 from configobj import ConfigObj, flatten_errors #@UnresolvedImport
 
 expectLogfile = '/tmp/expect.log'
-cfgFile = resource_filename('netcube', 'cfg/pyco.cfg')
-if hasattr(netcube, 'pyco_home'):
-    expectLogfile = netcube.pyco_home + "/logs/expect.log"
-    cfgFile = netcube.pyco_home + "/cfg/pyco.cfg"
+cfgFile = resource_filename('pyco', 'cfg/pyco.cfg')
+if hasattr(pyco, 'pyco_home'):
+    expectLogfile = pyco.pyco_home + "/logs/expect.log"
+    cfgFile = pyco.pyco_home + "/cfg/pyco.cfg"
 
 # the shared configObj
 configObj = None
@@ -347,15 +347,15 @@ def buildAction(actionString):
 
 def getCallable(methodName):
     '''
-    From the methodName string get the callable object from netcube.actions or netcube.common name space
+    From the methodName string get the callable object from pyco.actions or pyco.common name space
     '''
     if methodName == '' or methodName is None:
         return None
 
-    import netcube.actions
+    import pyco.actions
     if isinstance(methodName,str):
         try:
-            return getattr(netcube.actions, methodName)
+            return getattr(pyco.actions, methodName)
         except:
             if methodName in globals():
                 return globals()[methodName]
@@ -527,7 +527,7 @@ class Device:
         '''
         return the hop device actually connected. 
         '''
-        from netcube.expectsession import SOURCE_HOST
+        from pyco.expectsession import SOURCE_HOST
         
         if self.isConnected():
             return self
@@ -643,7 +643,7 @@ class Device:
         open a network connection using protocol. Currently supported protocols are telnet and ssh.
         If login has succeeded the device is in USER_PROMPT state and it is ready for consuming commands
         """
-        from netcube.expectsession import ExpectSession
+        from pyco.expectsession import ExpectSession
         log.debug("%s login ..." % self.name)
 
         self.esession = ExpectSession(self.hops,self)
@@ -990,7 +990,7 @@ def loadConfiguration(cfgfile=cfgFile):
     #import os.path
     #if os.path.isfile(cfgfile):
     #try:
-    config = ConfigObj(cfgfile, configspec=resource_filename('netcube', 'cfg/pyco_spec.cfg'))
+    config = ConfigObj(cfgfile, configspec=resource_filename('pyco', 'cfg/pyco_spec.cfg'))
     return reload(config)
     #except:
     #    raise Exception('pyco configuration file not found: ' + cfgfile)
@@ -1002,7 +1002,7 @@ def load(config):
     '''
     global configObj
     
-    pyco_spec = resource_filename('netcube', 'cfg/pyco_spec.cfg')
+    pyco_spec = resource_filename('pyco', 'cfg/pyco_spec.cfg')
     
     config.configspec = ConfigObj(pyco_spec)
     

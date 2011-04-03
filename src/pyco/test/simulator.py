@@ -14,7 +14,7 @@ else:
     spawnFunction = 'winpexpect.winspawn'
 
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
-from netcube import log
+from pyco import log
 
 # create logger
 log = log.getLogger("sim")

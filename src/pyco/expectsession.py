@@ -11,8 +11,8 @@ else:
     from winpexpect import winspawn as spawn, TIMEOUT, EOF #@UnresolvedImport
 
     
-from netcube.device import Event, device, ConnectionTimedOut #@UnresolvedImport
-from netcube import log
+from pyco.device import Event, device, ConnectionTimedOut #@UnresolvedImport
+from pyco import log
 
 
 # create logger
@@ -86,7 +86,7 @@ class ExpectSession:
         # in memory log
         #self.logfile = StringIO.StringIO()
         
-        #logfile = file(netcube.config.expectLogfile, "w")
+        #logfile = file(pyco.config.expectLogfile, "w")
 
         log.debug("connecting using %s" % cmd)
         

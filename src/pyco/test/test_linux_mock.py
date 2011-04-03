@@ -4,9 +4,9 @@ Created on Mar 21, 2011
 @author: adona
 '''
 import unittest #@UnresolvedImport
-from netcube.device import device, ConnectionRefused, ConnectionTimedOut
+from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
-from netcube import log
+from pyco import log
 import simulator
 
 from fixture import *

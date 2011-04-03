@@ -4,9 +4,9 @@ Created on Mar 21, 2011
 @author: adona
 '''
 import unittest #@UnresolvedImport
-from netcube.device import device, ConnectionRefused, ConnectionTimedOut
+from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
-from netcube import log
+from pyco import log
 import simulator
 
 from fixture import *
@@ -36,12 +36,14 @@ class Test(unittest.TestCase):
 
 
     def testNoPassword(self, MockExpect):
-        from netcube.device import cliIsConnected
+        from pyco.device import cliIsConnected
         log.info("testNoPassword ...")
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
         
         h.removeEvent('username_event', 'GROUND')
+        log.debug('***********************************************************')
         h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        log.debug('***********************************************************')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses
@@ -51,7 +53,7 @@ class Test(unittest.TestCase):
         #h.send('id')
 
     def _testSshNoPassword(self, MockExpect):
-        from netcube.device import cliIsConnected
+        from pyco.device import cliIsConnected
         log.info("testSshNoPassword ...")
         h = device('ssh://%s@%s' % (hop1['username'], hop1['name']))
         
