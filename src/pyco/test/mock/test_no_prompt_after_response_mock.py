@@ -9,7 +9,6 @@ from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 from pyco import log
 import simulator
 
-from fixture import *
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
@@ -36,7 +35,7 @@ class Test(unittest2.TestCase):
     def testNoPromptAfterResponse(self, MockExpect):
         from pyco.device import cliIsConnected
         log.info("testNoPromptAfterResponse ...")
-        cisco = device('telnet://%s:%s@%s' % (cisco1['username'], cisco1['password'], cisco1['name']))
+        cisco = device('telnet://u:p@h')
         
         from pyco.actions import sendUsername
         cisco.addEventAction('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')

@@ -9,7 +9,6 @@ from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 from pyco import log
 import simulator
 
-from fixture import *
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
