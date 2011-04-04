@@ -105,7 +105,7 @@ class Test(unittest2.TestCase):
     @unittest2.skipIf(skip==True,"skipped test")    
     def testSendCommandWithPromptRegexpTc0(self):
         '''
-        Send a simple command with prompt discovery using the promptRegexp parameter
+        multi line prompt discovery using the promptRegexp parameter
         The discovered prompt is a multiline prompt
         '''
         log.info("testSendCommandWithPromptRegexpTc0 ...")
@@ -125,7 +125,7 @@ class Test(unittest2.TestCase):
     @unittest2.skipIf(skip==True,"skipped test")    
     def testSendCommandWithPromptRegexpTc1(self):
         '''
-        Send a simple command with prompt discovery using the promptRegexp parameter
+        one line prompt discovery using the promptRegexp parameter
         The discovered prompt is a single line prompt
         '''  
         log.info("testSendCommandWithPromptRegexpTc1 ...")  

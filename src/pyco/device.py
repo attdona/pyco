@@ -605,7 +605,7 @@ class Device:
             try:
                 command = clientDevice.telnetCommand
             except:
-                command = 'telnet ${device.username}'   
+                command = 'telnet ${device.name} ${device.telnet_port}'   
         else:
             raise UnsupportedProtocol(self, 'unsupported protocol: %s' % self.protocol)
 

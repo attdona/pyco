@@ -4,7 +4,7 @@ Created on Mar 14, 2011
 @author: adona
 '''
 import unittest2 #@UnresolvedImport
-import os
+from pkg_resources import resource_filename #@UnresolvedImport
 
 #from pyco.devices import *
 from pyco.device import *
@@ -21,9 +21,7 @@ log = log.getLogger("testmarconi")
 class Test(unittest2.TestCase):
 
     def setUp(self):
-        module_path = os.path.dirname(pyco.__file__)
-        log.debug("module_path: %s" % module_path)
-        loadConfiguration(module_path + '/test/testmarconi.cfg')
+        loadConfiguration(resource_filename('pyco.test.unit', 'testmarconi.cfg'))
         
     def tearDown(self):
         loadConfiguration()

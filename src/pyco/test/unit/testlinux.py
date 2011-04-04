@@ -4,7 +4,7 @@ Created on Mar 14, 2011
 @author: adona
 '''
 import unittest2 #@UnresolvedImport
-import os
+from pkg_resources import resource_filename #@UnresolvedImport
 
 from pyco.device import *
 from pyco import log
@@ -19,11 +19,9 @@ class Test(unittest2.TestCase):
         loadConfiguration()
 
     def testScript(self):
-        module_path = os.path.dirname(pyco.__file__)
-        log.debug("module_path: %s" % module_path)
-        loadConfiguration(module_path + '/test/testcore.cfg')
+        loadConfiguration(resource_filename('pyco.test.unit','testcore.cfg'))
         h = Device(**localhost) #@UndefinedVariable
-        h(module_path + '/test/script.py')
+        h(resource_filename('pyco.test.unit', 'script.py'))
 
 
 if __name__ == "__main__":
