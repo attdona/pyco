@@ -3,7 +3,7 @@ Created on Mar 21, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device
 from pyco.device import *
 
@@ -11,15 +11,15 @@ skip = False
 #skip = True
 
 
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
     
-    @unittest.skipIf(skip==True,"skipped test")
+    @unittest2.skipIf(skip==True,"skipped test")
     def testWrongUrl(self):
         
         self.failUnlessRaises((WrongDeviceUrl), device, 'linux:localhost')
 
 
-    @unittest.skipIf(skip==True,"skipped test")
+    @unittest2.skipIf(skip==True,"skipped test")
     def testEmptyPattern(self):
         log.info("testEmptyPattern ...")
         h = device('ipnet@myhost.com')
@@ -28,4 +28,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

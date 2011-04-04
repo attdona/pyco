@@ -30,9 +30,6 @@ The design and implementation philosophy of pyco is based upon the following poi
  	Pyco goal is to come out of the box with a number of driver [#f]_ configurations
  	for interacting with many device platforms: linux, ciscoIOS, juniper, ...
  	
- 	
- 	The community contribution about new devices drivers is expected! 
- 	
  * API for finite state machine configuration
  
 	It must be easy define the behavoir of the communication pattern with a device through an

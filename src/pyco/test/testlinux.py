@@ -3,7 +3,7 @@ Created on Mar 14, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 import os
 
 from pyco.device import *
@@ -13,7 +13,10 @@ from fixture import *
 # create logger
 log = log.getLogger("testlinux")
 
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
+
+    def tearDown(self):
+        loadConfiguration()
 
     def testScript(self):
         module_path = os.path.dirname(pyco.__file__)
@@ -25,4 +28,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

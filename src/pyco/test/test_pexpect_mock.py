@@ -3,7 +3,7 @@ Created on Mar 21, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
@@ -20,7 +20,7 @@ def processResponse(self, f):
     return 'mocked output'
     #raise ConnectionTimedOut(target)
         
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
 
     @patch('pyco.expectsession.ExpectSession')    
     def testTC1(self, MockExpect):
@@ -44,4 +44,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

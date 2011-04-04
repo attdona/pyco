@@ -3,7 +3,7 @@ Created on Mar 14, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 import os
 
 from pyco.device import *
@@ -13,8 +13,8 @@ from fixture import *
 # create logger
 log = log.getLogger("testciscoasa")
 
-
-class Test(unittest.TestCase):
+@unittest2.skip("skip because device not more available")
+class Test(unittest2.TestCase):
 
     def testTelnet(self):
         url = "telnet://%s:%s@%s/ciscoios" % (asa1['username'], asa1['password'],asa1['name'])
@@ -28,4 +28,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

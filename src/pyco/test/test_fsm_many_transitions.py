@@ -4,7 +4,7 @@ Created on Mar 21, 2011
 @author: adona
 '''
 import os
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device, loadConfiguration, ConnectionRefused
 import pyco
 
@@ -15,7 +15,7 @@ from fixture import *
 # create logger
 log = log.getLogger("test")
 
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
     
     def testManyTransitions(self):
         
@@ -34,4 +34,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

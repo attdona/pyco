@@ -3,7 +3,7 @@ Created on Mar 21, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
@@ -26,28 +26,28 @@ else:
 log = log.getLogger("test")
 
   
-@patch(spawnFunction)    
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
 
     def setUp(self):
         self.responses = ['Username: ', 'password: ', 'router> ', 'router> ', 
                           'some output\r\n -- More -- \r\n', 'more output \r\n -- More --\r\n', 'more and more\r\n -- More -- \r\n' ]
 
-    def testNoPassword(self, MockExpect):
+    @patch(spawnFunction)    
+    def testNoPromptAfterResponse(self, MockExpect):
         from pyco.device import cliIsConnected
-        log.info("testNoPassword ...")
+        log.info("testNoPromptAfterResponse ...")
         cisco = device('telnet://%s:%s@%s' % (cisco1['username'], cisco1['password'], cisco1['name']))
         
         from pyco.actions import sendUsername
-        cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
+        cisco.addEventAction('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses
 
         out = cisco.login()
     
-        cisco.send('show version')
+        self.failUnlessRaises(ConnectionTimedOut, cisco.send, 'show version')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

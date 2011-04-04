@@ -246,7 +246,7 @@ def discoverPromptCallback(device, tentativePrompt=None):
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
             
-            #device.addPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
+            #device.addEventAction('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
             device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
             for ev in ['timeout', 'prompt-match']:
                 log.debug('removing discoverPromptCallback')
@@ -310,18 +310,18 @@ def buildPatternsList(device, driver=None):
             action = buildAction(eventData['action'])
            
         states = '*'  
-        if 'state' in eventData:
-            states =  eventData['state']
+        if 'beginState' in eventData:
+            states =  eventData['beginState']
             
         endState = None
-        if 'end_state' in eventData:
-            endState = eventData['end_state']
+        if 'endState' in eventData:
+            endState = eventData['endState']
      
         pattern = None
         if 'pattern' in eventData:
             pattern = eventData['pattern']
             
-        device.addPattern(event=eventKey, pattern=pattern, action=action, states=states, endState=endState)
+        device.addEventAction(event=eventKey, pattern=pattern, action=action, beginState=states, endState=endState)
 
 
 
@@ -556,7 +556,7 @@ class Device:
         Add the guard \'\\\\r\\\\n\' to the begin of prompt regexp
         '''
         
-        self.addPattern("prompt-match", '\r\n' + regexp, state)
+        self.addEventAction("prompt-match", '\r\n' + regexp, state)
         self.onEvent('prompt-match', discoverPromptCallback)
 
         
@@ -701,13 +701,19 @@ class Device:
         out = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
         
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
-            # rediscover the prompt
-            log.debug("[%s] discovering again the prompt ..." % self.name)
-            tentativePrompt = out.split('\r\n')[-1]
-            log.debug('[%s] taking last line as tentativePrompt: [%s]' % (self.name, tentativePrompt))
-            self.enablePromptDiscovery()
-            discoverPromptCallback(self, tentativePrompt)
             
+            if hasattr(self, 'rediscoverPrompt') and self.rediscoverPrompt:
+            
+                # rediscover the prompt
+                log.debug("[%s] discovering again the prompt ..." % self.name)
+                tentativePrompt = out.split('\r\n')[-1]
+                log.debug('[%s] taking last line as tentativePrompt: [%s]' % (self.name, tentativePrompt))
+                self.enablePromptDiscovery()
+                discoverPromptCallback(self, tentativePrompt)
+            else:
+                raise ConnectionTimedOut(self, 'prompt not hooked')
+
+        # TODO: to be evaluated if this check is useful            
         if self.checkIfOutputComplete == True:
             log.debug("Checking if [%s] response [%s] is complete" % (command,out))
             prevOut = None
@@ -873,7 +879,7 @@ class Device:
             input_symbol = event.name
             #self.input_symbol = input_symbol.name
             (action, next_state) = self.get_transition (input_symbol, self.state)
-            log.debug("selected transition [event:%s,state:%s] -> [action:%s, endState:%s]" % (input_symbol, self.state, action, next_state))
+            log.debug("selected transition [event:%s,beginState:%s] -> [action:%s, endState:%s]" % (input_symbol, self.state, action, next_state))
             
             stateChanged = False
             
@@ -910,17 +916,16 @@ class Device:
         except:
             return self.patternMap['*'].keys()
 
-
-    def addPattern(self, event, pattern=None, states=['*'], endState=None, action=None):
+    def addEventAction(self, event, pattern=None, beginState=['*'], endState=None, action=None):
         '''
         Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated.
         
         If pattern is None only a transition is configured
         '''
-        if isinstance(states, basestring):
-            states = [states]
+        if isinstance(beginState, basestring):
+            beginState = [beginState]
         
-        for state in states:
+        for state in beginState:
             
             if not pattern or pattern == '':
                 if state == '*':
@@ -952,7 +957,7 @@ class Device:
 
 
     def addTransition(self, t):
-        self.add_transition(t['event'], t['begin_state'], t['action'], t['end_state'])    
+        self.add_transition(t['event'], t['beginState'], t['action'], t['endState'])    
         
  
 
@@ -1020,7 +1025,7 @@ def load(config):
     
     configObj = config
     
-    log.debug("[common] driver data: %s" % config.get("common"))
+    #log.debug("[common] driver data: %s" % config.get("common"))
     
     for section in config.keys():
         for (key,value) in config[section].items():
@@ -1036,8 +1041,7 @@ def load(config):
                 log.debug("creating driver [%s]" % section)
                 driver = driverBuilder(section)
                 
-            log.debug("settings %s.%s to %s" % (section, key, value))
-            log.debug("[%s.%s] = [%s]" % (driver,key,value))
+            log.debug("setting [%s.%s] = [%s]" % (driver,key,value))
             setattr(driver, key, value)
                 
     return config       
@@ -1058,7 +1062,7 @@ def reset():
     
     for section in configObj.keys():
         for (key,value) in configObj[section].items():
-            log.debug("deleting %s.%s to %s" % (section, key, value))
+            log.debug("deleting %s.%s (was %s)" % (section, key, value))
            
             try:
                 driver = Driver.get(section)

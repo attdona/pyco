@@ -3,7 +3,7 @@ Created on Mar 21, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
@@ -26,20 +26,21 @@ else:
 log = log.getLogger("test")
 
   
-@patch(spawnFunction)    
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
 
     def setUp(self):
         self.responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
-            '$ ', '$ ']
+            '\r\n$ ', '\r\n$ ']
 
+    @patch(spawnFunction)    
     def testNoPassword(self, MockExpect):
         from pyco.device import cliIsConnected
         log.info("testNoPassword ...")
-        h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
+        #h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
+        h = device('telnet://u:u@h')
         
         h.removeEvent('username_event', 'GROUND')
-        h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        h.addEventAction('timeout', action=cliIsConnected, endState='USER_PROMPT')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses
@@ -54,7 +55,7 @@ class Test(unittest.TestCase):
         h = device('ssh://%s@%s' % (hop1['username'], hop1['name']))
         
         h.removeEvent('username_event', 'GROUND')
-        h.addPattern('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        h.addEventAction('timeout', action=cliIsConnected, endState='USER_PROMPT')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses
@@ -64,4 +65,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()

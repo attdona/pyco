@@ -4,11 +4,14 @@ Build a Interaction
 Ok, let's build step by step the right FSM machine to interact with a new device type.
 
 For semplicity imagine that you have to connect for the first time to a CiscoIOS router::
-
+ 
+ from pyco.device import device
  cisco = device('telnet://cisco:cisco@163.162.155.61')
 
  from pyco.actions import sendUsername
- cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
+ #cisco.addPattern('username-event', pattern='Username: ', action=sendUsername, states='GROUND')
+
+ cisco.addEventAction('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND', endState='GROUND')
 
  cisco.login()
 

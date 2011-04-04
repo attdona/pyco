@@ -42,7 +42,7 @@ def responder(mock, responses, patterns, maxTime):
             mock.after  = TIMEOUT
 
             break
-        match = re.match(search, response)
+        match = re.match(search, response, re.DOTALL)
         if match:
             toBeMatched = False
             mock.before = match.group(1)

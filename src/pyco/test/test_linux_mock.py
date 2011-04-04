@@ -3,7 +3,7 @@ Created on Mar 21, 2011
 
 @author: adona
 '''
-import unittest #@UnresolvedImport
+import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
@@ -32,22 +32,11 @@ Ubuntu 10.04.2 LTS\r
 Welcome to Ubuntu!\r
  * Documentation:  https://help.ubuntu.com/\r
 \r
-Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ''']
+Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ''',
+'$ ', 'mocked id response\r\n$ ']
   
-def pindex(device, state, event):
-    reverseMap = dict(map(lambda item: (item[1],item[0]), device.patternMap[state].items()))
-
-    try:
-        pattern = reverseMap[event]
-    except:
-        if event == 'timeout':
-            raise TIMEOUT, 'timeout exceeded'
-        else:
-            raise
         
-    return device.patterns(state).index(pattern)
-        
-class Test(unittest.TestCase):
+class Test(unittest2.TestCase):
 
     @patch(spawnFunction)    
     def testTC1(self, MockExpect):
@@ -66,4 +55,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    unittest2.main()
