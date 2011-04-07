@@ -44,7 +44,7 @@ The design and implementation philosophy of pyco is based upon the following poi
  	for assuring a robust and reliable automatic machine interaction.  
  	
 
-Pyco is shipped with a :term:`dic` catalog
+Pyco is shipped with a interaction case study :term:`DIC` catalog documenting the most common interactions patterns that can arises in device automation.
 
 For the impatients: the pyco short story
 ----------------------------------------
