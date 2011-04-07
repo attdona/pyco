@@ -7,10 +7,10 @@ asd asdd as das das d
 
 .. highlight:: python
 
-.. automodule:: netcube.device
+.. automodule:: pyco.device
 	:members:
 
-#.. autoclass:: netcube.device.Device
+#.. autoclass:: pyco.device.Device
 #	:members:
 	
 	
