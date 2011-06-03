@@ -23,10 +23,6 @@ class MyDaemon(Daemon):
     def run(self):
         main(sys.argv[2])
   
- 
-  
-  
-
 
 # create a thread object that will do the counting in a separate thread
 class Counter(threading.Thread):

@@ -8,7 +8,7 @@ The suggested way to run the tests are throught nosetest:
 '''
 import unittest2 #@UnresolvedImport
 import re #@UnresolvedImport
-from configobj import ConfigObj #@UnresolvedImport
+from configobj import ConfigObj
 
 from pyco.device import *
 from pyco import log

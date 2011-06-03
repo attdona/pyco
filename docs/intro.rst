@@ -56,9 +56,9 @@ Install pyco::
 
 and then try a simple remote command::
 
-	from netcube.device import device
-	device = device('ssh://myUser:myPassword@myhost.acme.org')
-	response = device('uname -a')
+	from pyco.device import device
+	my_host = device('ssh://myUser:myPassword@myhost.acme.org')
+	response = my_host('uname -a')
 
 The response string will contain the command output, something like:
 

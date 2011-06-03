@@ -78,13 +78,13 @@ class ConnectionRefused(ExpectException):
 
 class PermissionDenied(ExpectException):
     '''
-    Thrown when the connection is unauthorized (wrong username(/password)
+    Thrown when the device login fails because username token or password token or both are wrong. 
     '''
     pass
 
 class ConnectionTimedOut(ExpectException):
     '''
-    Thrown when the connection timed out expecting a pattern match
+    Typically occurs when there is no response or when none of the expected patterns match with the device response
     '''
     pass
 
@@ -93,13 +93,6 @@ class LoginFailed(ExpectException):
     Thrown when the login phase in not successful
     '''
     pass
-
-class AuthenticationFailed(ExpectException):
-    '''
-    Thrown when the connection timed out expecting a pattern match
-    '''
-    pass
-
 
 class EventHandlerUndefined(Exception):
     '''
@@ -139,7 +132,98 @@ def path(hops):
     return target
 
 def device(url):
+    '''
+    Returns a Device instance builded from a url.
+
+    the device url is compliant with the RFC syntax defined by http://tools.ietf.org/html/rfc3986
+    the telnet and ssh scheme are extended with a path item defining the host specific driver to be used for connecting:
+
+        *[protocol://][user][:password]@hostname[:port][/driver]*
     
+    valid examples of device url:
+        * telnet://u:p@localhost:21/linux
+        * ssh://user@localhost:21/linux
+        * ssh://localhost
+
+        
+    where *protocol* is one of:
+      * telnet
+      * ssh    
+
+    for example:
+    
+      >>> h = device('ssh://jack:secret@myhost/linux')
+      >>> h.username
+      'jack'
+      >>> h.password
+      'secret'
+      >>> h.name
+      'myhost'
+      >>> h.protocol
+      'ssh'
+      >>> h.driver
+      driver:linux
+
+
+    *protocol* is optional, it defaults to *ssh*
+
+    *driver* is optional. If not defined it defaults to the common driver:
+    
+      >>> h = device('jack:secret@myhost')
+      >>> h.username
+      'jack'
+      >>> h.password
+      'secret'
+      >>> h.name
+      'myhost'
+      >>> h.protocol
+      'ssh'
+      >>> h.driver
+      driver:common
+      
+    if username or password is not defined they are set to the null value None:
+      
+      >>> h = device('ssh://foo@myhost')
+      >>> h.username
+      'foo'
+      >>> h.password
+      >>> h.password is None
+      True
+      >>> h.name
+      'myhost'
+      >>> h.protocol
+      'ssh'
+      >>> h.port
+      22
+
+      >>> h = device('telnet://:secret@myhost:2222')
+      >>> h.username
+      >>> h.username is None
+      True
+      >>> h.password
+      'secret'
+      >>> h.name
+      'myhost'
+      >>> h.protocol
+      'telnet'
+      >>> h.port
+      2222
+      
+    The *driver* name has to be one of the [section] name found into the pyco configuration file :ref:`driver-configuration`.
+    At the momento the configured driver are:
+      
+      * common
+      * linux
+      * ciscoios 
+      
+    If a driver is not configured this way an exception is thrown in the device factory function:
+      
+      >>> h1 = device('ssh://jack:secret@myhost/zdriver')
+      Traceback (most recent call last):
+        ...
+      DriverNotFound: 'zdriver driver not defined'
+        
+    '''
     if url.startswith('telnet://') or url.startswith('ssh://'):
         pass
     else:
@@ -152,6 +236,13 @@ def device(url):
     if host == None:
         raise WrongDeviceUrl('hostname not defined')
     
+    if user == '':
+        user = None
+    
+    if port is None:
+        if protocol == 'ssh': port = 22
+        elif protocol == 'telnet' : port = 23
+        
     if driverName.startswith('/'):
         driverName=driverName.lstrip('/')
     
@@ -167,13 +258,6 @@ def device(url):
     
 def parseUrl(url):
     '''
-    the device url is compliant with the RFC syntax defined by http://tools.ietf.org/html/rfc3986
-    the telnet and ssh scheme are extended with a path item defining the host specific driver to be used for connecting 
-    
-    valid device url:
-        * telnet://u:p@localhost:21/linux
-        * ssh://user@localhost:21/linux
-        * ssh://localhost
     '''
     from urlparse import urlparse #@UnresolvedImport
 
@@ -441,15 +525,13 @@ class Device:
     
     processResponseg = None
     
-    # the default telnet port 
-    telnet_port = 23
-
     def __init__(self, name, driver=None, username = None, password = None, protocol='ssh', port=22, hops = []):
         log.debug("[%s] ctor" % name)
         self.name = name
         self.username = username
         self.password = password
         self.protocol = protocol
+        self.port = port
         self.hops = hops
         self.loggedin = False
         
@@ -605,7 +687,7 @@ class Device:
             try:
                 command = clientDevice.telnetCommand
             except:
-                command = 'telnet ${device.name} ${device.telnet_port}'   
+                command = 'telnet ${device.name} ${device.port}'   
         else:
             raise UnsupportedProtocol(self, 'unsupported protocol: %s' % self.protocol)
 
@@ -728,7 +810,8 @@ class Device:
                     out = prevOut + currOut
                 log.debug("Rechecking if [%s] response [%s] is complete" % (command,out))
         
-        out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
+        if out.startswith(command):
+            out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
         log.debug("[%s:%s]: captured response [%s]" % (self.name, command, out))
         
         return out 
@@ -1150,6 +1233,9 @@ class Driver:
 loadConfiguration()     
 
 
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
     
         
