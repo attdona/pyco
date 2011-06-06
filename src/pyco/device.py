@@ -562,7 +562,7 @@ class Device:
         if attrname == 'driver':
             raise AttributeError, attrname
         else:
-            log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.driver))
+            #log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.driver))
             try:
                 return getattr(self.driver, attrname)
             except AttributeError:
@@ -796,7 +796,7 @@ class Device:
             else:
                 raise ConnectionTimedOut(self, 'prompt not hooked')
 
-        # TODO: to be evaluated if this check is useful            
+        # TODO: to be evaluated if this check is useful   
         if self.checkIfOutputComplete == True:
             log.debug("Checking if [%s] response [%s] is complete" % (command,out))
             prevOut = None

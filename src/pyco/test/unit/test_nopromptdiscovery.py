@@ -16,12 +16,27 @@ log = log.getLogger("test_no_prompt_discovery")
 
 class Test(unittest2.TestCase):
 
-    def testWithPromptDiscovery(self):
+    def setUp(self):
+        loadConfiguration(resource_filename('pyco.test.unit', 'test_nopromptdiscovery.cfg'))
+        
+    def tearDown(self):
+        #loadConfiguration()
+        pass
+    
+    def _testWithPromptDiscovery(self):
         url = "ssh://%s:%s@%s/linux" % (localhost['username'], localhost['password'], localhost['name'])
         
         h = device(url)
         
-        #h.discoverPrompt = True
+        h.login()
+        out = h.send('id')
+        
+        log.debug('[[%s]]' % out)
+
+    def testWithPromptDiscoveryDisabled(self):
+        url = "ssh://%s:%s@%s/no-discovery" % (localhost['username'], localhost['password'], localhost['name'])
+        
+        h = device(url)
         
         h.login()
         out = h.send('id')
