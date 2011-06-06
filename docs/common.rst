@@ -7,10 +7,11 @@ asd asdd as das das d
 
 .. highlight:: python
 
-.. automodule:: pyco.device
-	:members:
+.. 
+	automodule:: pyco.device
+		:members:
 
-#.. autoclass:: pyco.device.Device
-#	:members:
+.. autoclass:: pyco.device.Device
+	:members:
 	
 	

@@ -110,11 +110,11 @@ class ExpectSession:
         self.pipe.sendline(command)
  
         
-    def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime, exactMatch=False):
+    def patternMatch(self, target, checkPoint, patternsExt, maxWaitTime):
         
         target.currentEvent = Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
-        
+        log.debug("exactPatternMatch [%s]" % target.exactPatternMatch)
 #        prevOutput = None
 #        prevEvent =  target.currentEvent
         
@@ -170,7 +170,7 @@ class ExpectSession:
     def processResponse(self, target, checkPoint):
         '''
         '''
-        return self.patternMatch(target, checkPoint, [TIMEOUT], target.maxWait, exactMatch=False)
+        return self.patternMatch(target, checkPoint, [TIMEOUT], target.maxWait)
         
         
  

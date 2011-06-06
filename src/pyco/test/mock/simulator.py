@@ -67,5 +67,8 @@ def side_effect(*args, **kwargs):
 
     m.expect = expect
     
+    # TODO: implements a exact match
+    m.expect_exact = expect
+    
     return m
 

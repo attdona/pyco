@@ -254,6 +254,7 @@ def device(url):
     driver = Driver.get(driverName)
     
     obj = Device(host, driver, user, password, protocol, port)
+    log.debug("[%s] builded" % host)
     return obj
     
 def parseUrl(url):
@@ -469,6 +470,8 @@ def cliIsConnected(target):
         
         target.expect(isTimeoutOrPromptMatch)
         
+        log.debug("prompt discovery executed, cliIsConnected event: [%s]" % target.currentEvent.name)
+        return target.currentEvent.name == 'prompt-match'
 
 class Event:
     def __init__(self, name, propagateToFsm=True):
@@ -548,7 +551,6 @@ class Device:
 
         self.setDriver(self.driver.name)
         
-
     # TODO: return the device url
     def __str__(self):
         return self.name
@@ -560,7 +562,7 @@ class Device:
         if attrname == 'driver':
             raise AttributeError, attrname
         else:
-            #log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.driver))
+            log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.driver))
             try:
                 return getattr(self.driver, attrname)
             except AttributeError:
@@ -729,7 +731,6 @@ class Device:
         """
         from pyco.expectsession import ExpectSession
         log.debug("%s login ..." % self.name)
-
         self.esession = ExpectSession(self.hops,self)
         self.currentEvent = Event('do-nothing-event')
         
@@ -754,7 +755,7 @@ class Device:
             
         
     def expect(self, checkPoint):
-        self.esession.patternMatch(self, checkPoint, [], self.maxWait, exactMatch=True)
+        self.esession.patternMatch(self, checkPoint, [], self.maxWait)
         
     def sendLine(self, stringValue):
         """
@@ -766,7 +767,7 @@ class Device:
     def __call__(self, command):
         return self.send(command)
             
-    def send(self, command, answers = {}):
+    def send(self, command):
         '''
         Send the command string to the device and return the command output
         '''
