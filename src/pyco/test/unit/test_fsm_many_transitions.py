@@ -20,7 +20,7 @@ class Test(unittest2.TestCase):
     def testManyTransitions(self):
         
         log.info("testManyTransitions ...")
-        loadConfiguration(resource_filename('pyco.test.unit', 'pyco_many_transitions.cfg'))
+        loadConfiguration(resource_filename('pyco.test.unit', 'test_fsm_many_transitions.cfg'))
         h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
         h.maxWait = 20
         out = h('id')

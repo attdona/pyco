@@ -418,7 +418,7 @@ def buildAction(actionString):
     else:        
         al = actionString.split()
     
-    log.debug('[%s] splitted into [%s]' % (actionString, al))
+    #log.debug('[%s] splitted into [%s]' % (actionString, al))
     if len(al) > 1:
         baseAction = getCallable(al[0])
         def action(target):
@@ -1078,11 +1078,13 @@ def loadConfiguration(cfgfile=cfgFile):
     Load the pyco configuration file
     '''
     
-    #import os.path
-    #if os.path.isfile(cfgfile):
+    import os.path
+    if os.path.isfile(cfgfile):
     #try:
-    config = ConfigObj(cfgfile, configspec=resource_filename('pyco', 'cfg/pyco_spec.cfg'))
-    return reload(config)
+        config = ConfigObj(cfgfile, configspec=resource_filename('pyco', 'cfg/pyco_spec.cfg'))
+        return reload(config)
+    else:
+        raise Exception('pyco configuration file not found: ' + cfgfile)
     #except:
     #    raise Exception('pyco configuration file not found: ' + cfgfile)
 
@@ -1108,8 +1110,6 @@ def load(config):
                 raise ConfigFileError('The following section was missing:%s ' % ', '.join(section_list))
     
     configObj = config
-    
-    #log.debug("[common] driver data: %s" % config.get("common"))
     
     for section in config.keys():
         for (key,value) in config[section].items():

@@ -99,7 +99,6 @@ class ExpectSession:
             # send the connect string to pexpect
             log.debug("[%s]: spawning a new [%s] session ..." % (target, cmd)) 
             self.pipe = spawn(cmd, logfile=self.logfile)
-            log.debug('spawned!')
         self.processResponse(target, loginSuccessfull)
 
     def sendLine(self, command):
@@ -142,7 +141,7 @@ class ExpectSession:
                         raise
                         
                 log.debug("matched pattern [%s] --> [%s]" % (patterns[index], target.currentEvent.name))
-                log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
+                #log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
             except EOF:
                 log.debug("[%s] connection unexpectedly closed (%s)" % (target.name, self.pipe.before))
                 target.currentEvent = Event('eof')

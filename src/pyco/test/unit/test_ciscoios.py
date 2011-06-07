@@ -19,6 +19,7 @@ class Test(unittest2.TestCase):
         pass
 
 
+    @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
     def testTimeoutOnCommand(self):
         cisco = device('telnet://%s:%s@%s' % (cisco1['username'],cisco1['password'],cisco1['name']))
 

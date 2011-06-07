@@ -16,6 +16,8 @@ localhost = {
              'username':'netbox',
              'password':'netbox'
              }
+
+# To skip the ciscoIOS test requiring a true or emulated router set name to ''
 cisco1  =   {
              'name'    :'163.162.155.61', 
              'username':'cisco',
