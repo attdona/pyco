@@ -81,7 +81,7 @@ waiting for the user to press a some keyboard character to proceed.
 CiscoIOS has a special command to disable output paging: *terminal lenght 0*::
 
  >>> def set_terminal(target):
- 		target.send('terminal length 0')
+ >>> ... target.send('terminal length 0')
 
  >>> cisco.addEventAction('user_prompt', action=set_terminal)
 

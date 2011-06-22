@@ -9,7 +9,7 @@ from pyco.device import device, PermissionDenied
 from pyco import log
 import simulator
 
-from mock import Mock, patch, patch_object, sentinel
+from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re
 import sys

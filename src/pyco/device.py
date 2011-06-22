@@ -29,8 +29,6 @@ if hasattr(pyco, 'pyco_home'):
 configObj = None
 
 
-
-
 class DeviceException(Exception):
 
     """This is the Device base exception class."""
@@ -59,9 +57,15 @@ class UnsupportedProtocol(DeviceException):
 
 class ExpectException(DeviceException):
     
+    # impossibile connettersi correttamente all'apparato di rete
+    code = 310
+    
     def __init__(self, device, msg=''):
         self.interactionLog = device.interactionLog()
         DeviceException.__init__(self, device, msg)
+
+    def descr(self):
+        return '%s: %s' % (self.device.name, self.msg)
 
 
 class ConnectionClosed(ExpectException):
@@ -87,6 +91,11 @@ class ConnectionTimedOut(ExpectException):
     Typically occurs when there is no response or when none of the expected patterns match with the device response
     '''
     pass
+
+class CommandExecutionError(ExpectException):
+    '''
+    Raised when there is a error pattern match that signal a command error, for example an invalid syntax
+    '''
 
 class LoginFailed(ExpectException):
     '''
@@ -473,6 +482,14 @@ def cliIsConnected(target):
         log.debug("prompt discovery executed, cliIsConnected event: [%s]" % target.currentEvent.name)
         return target.currentEvent.name == 'prompt-match'
 
+def cliIsEnabled(target):
+    cliIsConnected(target)
+    target.sendLine('')
+  
+def commandError(target):
+    log.error('[%s]: detected error response [%s]' % (target.name, target.esession.pipe.after))
+    raise CommandExecutionError(target)
+
 class Event:
     def __init__(self, name, propagateToFsm=True):
         self.name = name
@@ -813,7 +830,7 @@ class Device:
         
         if out.startswith(command):
             out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
-        log.debug("[%s:%s]: captured response [%s]" % (self.name, command, out))
+        log.info("[%s:%s]: captured response [%s]" % (self.name, command, out))
         
         return out 
            
