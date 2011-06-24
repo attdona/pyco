@@ -13,7 +13,7 @@ else:
 
 
 setup(name='pyco',
-      version='0.1.1',
+      version='0.2.0',
       description='python library for network devices control and automation',
       author='adona',
       author_email='attilio.dona@gmail.com',
@@ -25,7 +25,7 @@ setup(name='pyco',
       package_data = {
         # If any package contains *.txt or *.rst files, include them:
         '': ['*.txt', '*.rst'],
-        'netcube': ['cfg/*.*']
+        'pyco': ['cfg/*.*']
       },
       
       entry_points="""
