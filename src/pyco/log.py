@@ -12,7 +12,7 @@ from pkg_resources import resource_filename #@UnresolvedImport
 if hasattr(pyco, 'pyco_home'):
     logfile = pyco.pyco_home + "/cfg/log.cfg"
 else:
-    logfile = resource_filename('pyco', 'cfg/log.conf')
+    logfile = resource_filename('pyco', 'cfg/log.cfg')
 try:    
     logging.config.fileConfig(logfile)
 except:
