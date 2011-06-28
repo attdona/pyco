@@ -470,21 +470,28 @@ def cliIsConnected(target):
     if target.currentEvent.name == 'prompt-match':
         return True
 
-    if target.discoverPrompt:
-        log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.state))
-        target.enablePromptDiscovery()
-        
-        def isTimeoutOrPromptMatch(d):
-            return d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match'
-        
-        target.expect(isTimeoutOrPromptMatch)
-        
-        log.debug("prompt discovery executed, cliIsConnected event: [%s]" % target.currentEvent.name)
-        return target.currentEvent.name == 'prompt-match'
+    if hasattr(target, 'promptPattern'):
+        log.debug('[%s] matching prompt with pattern [%s]' % (target.state, target.promptPattern))
+        target.prompt[target.state] = Prompt(target.promptPattern, tentative=False)
+        target.addExpectPattern('prompt-match', target.promptPattern, target.state)
+        return True
+    else:
+
+        if target.discoverPrompt:
+            log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.state))
+            target.enablePromptDiscovery()
+            
+            def isTimeoutOrPromptMatch(d):
+                return d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match'
+            
+            target.expect(isTimeoutOrPromptMatch)
+            
+            log.debug("prompt discovery executed, cliIsConnected event: [%s]" % target.currentEvent.name)
+            return target.currentEvent.name == 'prompt-match'
 
 def cliIsEnabled(target):
     cliIsConnected(target)
-    target.sendLine('')
+    #target.sendLine('')
   
 def commandError(target):
     log.error('[%s]: detected error response [%s]' % (target.name, target.esession.pipe.after))
@@ -802,7 +809,7 @@ class Device:
         
         if self.currentEvent.name == 'timeout' and self.discoverPrompt == True:
             
-            if hasattr(self, 'rediscoverPrompt') and self.rediscoverPrompt:
+            if not hasattr(self, 'promptPattern') and hasattr(self, 'rediscoverPrompt') and self.rediscoverPrompt:
             
                 # rediscover the prompt
                 log.debug("[%s] discovering again the prompt ..." % self.name)
@@ -1252,7 +1259,7 @@ loadConfiguration()
 
 
 if __name__ == "__main__":
-    import doctest
+    import doctest #@UnresolvedImport
     doctest.testmod()
 
     
