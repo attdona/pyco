@@ -443,15 +443,28 @@ def buildAction(actionString):
 
 def getCallable(methodName):
     '''
-    From the methodName string get the callable object from pyco.actions or pyco.common name space
+    From the methodName string get the callable object from pyco.actions or pyco.device module
     '''
     if methodName == '' or methodName is None:
         return None
 
+    log.debug('looking for action [%s]' % methodName)
     import pyco.actions
     if isinstance(methodName,str):
         try:
-            return getattr(pyco.actions, methodName)
+            if hasattr(pyco, 'pyco_home'):
+                
+                sys.path.append(pyco.pyco_home)
+                
+                try:
+                    log.debug('looking for [%s] into actions module' % methodName)
+                    import handlers
+                    return getattr(handlers, methodName)
+                except:
+                    log.debug('looking for [%s] into pyco package' % methodName)
+                    return getattr(pyco.actions, methodName)
+            else:
+                return getattr(pyco.actions, methodName)
         except:
             if methodName in globals():
                 return globals()[methodName]
@@ -489,13 +502,11 @@ def cliIsConnected(target):
             log.debug("prompt discovery executed, cliIsConnected event: [%s]" % target.currentEvent.name)
             return target.currentEvent.name == 'prompt-match'
 
-def cliIsEnabled(target):
-    cliIsConnected(target)
-    #target.sendLine('')
   
 def commandError(target):
     log.error('[%s]: detected error response [%s]' % (target.name, target.esession.pipe.after))
     raise CommandExecutionError(target)
+
 
 class Event:
     def __init__(self, name, propagateToFsm=True):

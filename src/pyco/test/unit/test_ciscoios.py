@@ -20,7 +20,7 @@ class Test(unittest2.TestCase):
 
 
     @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
-    def testTimeoutOnCommand(self):
+    def _testTimeoutOnCommand(self):
         cisco = device('telnet://%s:%s@%s' % (cisco1['username'],cisco1['password'],cisco1['name']))
 
         from pyco.actions import sendUsername
@@ -29,6 +29,16 @@ class Test(unittest2.TestCase):
         cisco.login()
 
         cisco('show version')
+
+
+    @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
+    def testExternalAction(self):
+        cisco = device('telnet://%s:%s@%s/ciscoios' % (cisco1['username'],cisco1['password'],cisco1['name']))
+
+        cisco.login()
+
+        cisco('show version')
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
