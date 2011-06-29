@@ -526,7 +526,7 @@ class Event:
         return self.name == 'timeout'
             
     def isPromptMatch(self):
-        return self.name == 'prompt-match'
+        return self.name == 'prompt-match' or self.name.endswith('_prompt')
     
 class Prompt:
     
@@ -814,7 +814,7 @@ class Device:
         self.sendLine(command)
 
         def runUntilPromptMatchOrTimeout(device):
-            return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match'
+            return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match' or device.currentEvent.name.endswith('_prompt')
 
         out = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
         
