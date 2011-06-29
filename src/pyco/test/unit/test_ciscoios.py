@@ -32,12 +32,25 @@ class Test(unittest2.TestCase):
 
 
     @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
-    def testExternalAction(self):
+    def _testExternalAction(self):
         cisco = device('telnet://%s:%s@%s/ciscoios' % (cisco1['username'],cisco1['password'],cisco1['name']))
 
         cisco.login()
 
         cisco('show version')
+
+    @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
+    def testLongOutput(self):
+        cisco = device('telnet://%s:%s@%s/ciscoios' % (cisco1['username'],cisco1['password'],cisco1['name']))
+
+        try:
+            cisco.login()
+
+            cisco('enable')
+        
+            cisco('show running-config')
+        except Exception as e:
+            print(e.interactionLog)
 
 
 if __name__ == "__main__":

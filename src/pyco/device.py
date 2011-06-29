@@ -458,7 +458,7 @@ def getCallable(methodName):
                 
                 try:
                     log.debug('looking for [%s] into actions module' % methodName)
-                    import handlers
+                    import handlers #@UnresolvedImport
                     return getattr(handlers, methodName)
                 except:
                     log.debug('looking for [%s] into pyco package' % methodName)
