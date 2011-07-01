@@ -17,6 +17,6 @@ def sendUsername(target):
     log.debug("sending username  [%s] ..." % target.username)
     target.sendLine(target.username)
 
-def cliIsEnabled(target):
-    cliIsConnected(target)
-    target.send('')
+
+
+    

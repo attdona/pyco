@@ -6,6 +6,7 @@ Created on Mar 15, 2011
 '''
 import sys
 import re #@UnresolvedImport
+import time
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
 from StringIO import StringIO #@UnresolvedImport
@@ -814,6 +815,7 @@ class Device:
         self.sendLine(command)
 
         def runUntilPromptMatchOrTimeout(device):
+            #return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match' or device.currentEvent.name.endswith('_prompt')
             return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match' or device.currentEvent.name.endswith('_prompt')
 
         out = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
@@ -854,11 +856,15 @@ class Device:
            
     def clearBuffer(self):
         log.debug('clearing buffer ...')
-        # wait for a 1 second timeout period and then consider cleared the buffer
-        try: 
-            self.esession.pipe.expect('.*', timeout=1)    
+        
+        try:
+            # expect some time (2 seconds) the arrivals of terminal characters and then clears the buffer 
+            time.sleep(2)
+            self.esession.pipe.expect('.*', timeout=1)
+            
         except Exception as e:
             log.debug("[%s] clearBuffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
+
 
     def add_transition (self, input_symbol, state, action=None, next_state=None):
 

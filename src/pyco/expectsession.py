@@ -140,7 +140,7 @@ class ExpectSession:
                         log.error("[%s]: event not registered for pattern: [%s]" % (target.name, patterns[index]))
                         raise
                         
-                log.debug("matched pattern [%s] --> [%s]" % (patterns[index], target.currentEvent.name))
+                log.debug("matched [%s] pattern [%s] --> [%s]" % (index, patterns[index], target.currentEvent.name))
                 #log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
             except EOF:
                 log.debug("[%s] connection unexpectedly closed (%s)" % (target.name, self.pipe.before))
