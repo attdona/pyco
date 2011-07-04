@@ -10,14 +10,11 @@ from pyco.device import device
 
 class Test(unittest2.TestCase):
 
-
     def setUp(self):
         pass
 
-
     def tearDown(self):
         pass
-
 
     @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
     def _testTimeoutOnCommand(self):
@@ -39,6 +36,7 @@ class Test(unittest2.TestCase):
 
         cisco('show version')
 
+
     @unittest2.skipIf(cisco1['name'] == '', "ciscoIOS router not available in this test setup")
     def testLongOutput(self):
         cisco = device('telnet://%s:%s@%s/ciscoios' % (cisco1['username'],cisco1['password'],cisco1['name']))
@@ -50,7 +48,8 @@ class Test(unittest2.TestCase):
         
             cisco('show running-config')
         except Exception as e:
-            print(e.interactionLog)
+            #print(e.interactionLog)
+            raise
 
 
 if __name__ == "__main__":
