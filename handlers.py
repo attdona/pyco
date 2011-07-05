@@ -9,14 +9,7 @@ from pyco.device import ConnectionRefused, PermissionDenied, MissingDeviceParame
 
 log = log.getLogger("handlers")
 
-
-def sendUsername(target):
-    if target.username is None:
-        raise MissingDeviceParameter(target, '%s username undefined' % target.name)
-
-    log.debug("sending username  [%s] ..." % target.username)
-    target.sendLine(target.username)
-
-
+def initCiscoTerminal(target):
+    target.sendLine('terminal length 0')
 
     

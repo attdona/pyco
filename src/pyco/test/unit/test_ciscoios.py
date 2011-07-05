@@ -48,7 +48,7 @@ class Test(unittest2.TestCase):
         
             cisco('show running-config')
         except Exception as e:
-            #print(e.interactionLog)
+            print(e.interactionLog)
             raise
 
 

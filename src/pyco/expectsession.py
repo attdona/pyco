@@ -114,8 +114,6 @@ class ExpectSession:
         target.currentEvent = Event('do-nothing-event')
         log.debug("entering patternMatch, checkpoint is [%s]" % (checkPoint))
         log.debug("exactPatternMatch [%s]" % target.exactPatternMatch)
-#        prevOutput = None
-#        prevEvent =  target.currentEvent
         
         response = ''        
         while not (checkPoint (target) or target.currentEvent.isTimeout()):

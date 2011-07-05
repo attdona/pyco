@@ -1295,110 +1295,119 @@ class Driver:
         Driver.registry[driver.name] = driver
         
   
+try:
 
-
-import sqlalchemy as sa #@UnresolvedImport
-from sqlalchemy import create_engine #@UnresolvedImport
-from sqlalchemy import Column #@UnresolvedImport
-from sqlalchemy import String #@UnresolvedImport
-from sqlalchemy.ext.declarative import declarative_base #@UnresolvedImport
-from sqlalchemy.orm import scoped_session #@UnresolvedImport
-from sqlalchemy.orm import sessionmaker #@UnresolvedImport
-from zope.sqlalchemy import ZopeTransactionExtension #@UnresolvedImport
-import transaction #@UnresolvedImport
-
-Base = declarative_base()
-
-class DevicePrompt(Base):
-    __tablename__ = 'device_prompt'
+    import sqlalchemy as sa #@UnresolvedImport
+    from sqlalchemy import create_engine #@UnresolvedImport
+    from sqlalchemy import Column #@UnresolvedImport
+    from sqlalchemy import String #@UnresolvedImport
+    from sqlalchemy.ext.declarative import declarative_base #@UnresolvedImport
+    from sqlalchemy.orm import scoped_session #@UnresolvedImport
+    from sqlalchemy.orm import sessionmaker #@UnresolvedImport
+    from zope.sqlalchemy import ZopeTransactionExtension #@UnresolvedImport
+    import transaction #@UnresolvedImport
     
-    device = Column(String, primary_key=True)
-    state  = Column(String, primary_key=True)
-    prompt = Column(String)
-
-    def __init__(self, device ,state, prompt):
-        self.device = device
-        self.state = state
-        self.prompt = prompt
-
-def initialize_sql():
-    Base.metadata.bind = engine
-    Base.metadata.create_all(engine)
-
-
-def createDB(url):
-    log.debug('db endpoint: [%s]' % url)
-    initialize_sql()
+    Base = declarative_base()
     
-def db_url():
-    import os.path
-    if hasattr(pyco, 'pyco_home'):
-        db_url = 'sqlite:///%s/%s' % (pyco.pyco_home, configObj['common']['cache'])
-    else:
-        db_url = 'sqlite:////tmp/%s' % configObj['common']['cache']
-    return db_url
-
-def cache_enabled():
-    return DBSession != None
-
-def cache_exists():
-    import os.path
-    if hasattr(pyco, 'pyco_home'):
-        db_file = '%s/%s' % (pyco.pyco_home, configObj['common']['cache'])
-    else:
-        db_file = '/tmp/%s' % configObj['common']['cache']
-    try:
-        if configObj['common']['cache']:
-            if not os.path.isfile(db_file):
-                log.debug('creating cache [%s] ...' % db_file)
-                createDB('sqlite://%s' % db_file)
-    except Exception as e:
-        log.info('prompt cache is not enabled: %s' % e)
-
-
-def get_cached_prompt(target):
-    log.debug('[%s] state [%s]: getting cached prompt' % (target.name, target.state))
-    try:
-        session = DBSession()
-        prompt = session.query(DevicePrompt).get((target.name,target.state))
-        session.close()
-        return prompt
-    except Exception as e:
-        log.debug('no prompt cached: %s' % e)
-        return None
-
-def save_cached_prompt(target):
-    log.debug('[%s] state [%s]: caching prompt [%s]' % (target.name, target.state, target.prompt[target.state].value))
-    try:
-        session = DBSession()
+    class DevicePrompt(Base):
+        __tablename__ = 'device_prompt'
         
-        transaction.begin()
-        prompt = session.query(DevicePrompt).get((target.name,target.state))
-        if prompt:
-            prompt.prompt = target.prompt[target.state].value
+        device = Column(String, primary_key=True)
+        state  = Column(String, primary_key=True)
+        prompt = Column(String)
+    
+        def __init__(self, device ,state, prompt):
+            self.device = device
+            self.state = state
+            self.prompt = prompt
+    
+    def initialize_sql():
+        Base.metadata.bind = engine
+        Base.metadata.create_all(engine)
+    
+    
+    def createDB(url):
+        log.debug('db endpoint: [%s]' % url)
+        initialize_sql()
+        
+    def db_url():
+        import os.path
+        if hasattr(pyco, 'pyco_home'):
+            db_url = 'sqlite:///%s/%s' % (pyco.pyco_home, configObj['common']['cache'])
         else:
+            db_url = 'sqlite:////tmp/%s' % configObj['common']['cache']
+        return db_url
+    
+    def cache_enabled():
+        return DBSession != None
+    
+    def cache_exists():
+        import os.path
+        if hasattr(pyco, 'pyco_home'):
+            db_file = '%s/%s' % (pyco.pyco_home, configObj['common']['cache'])
+        else:
+            db_file = '/tmp/%s' % configObj['common']['cache']
+        try:
+            if configObj['common']['cache']:
+                if not os.path.isfile(db_file):
+                    log.debug('creating cache [%s] ...' % db_file)
+                    createDB('sqlite://%s' % db_file)
+        except Exception as e:
+            log.info('prompt cache is not enabled: %s' % e)
+    
+    
+    def get_cached_prompt(target):
+        log.debug('[%s] state [%s]: getting cached prompt' % (target.name, target.state))
+        try:
+            session = DBSession()
+            prompt = session.query(DevicePrompt).get((target.name,target.state))
+            session.close()
+            return prompt
+        except Exception as e:
+            log.debug('no prompt cached: %s' % e)
+            return None
+    
+    def save_cached_prompt(target):
+        log.debug('[%s] state [%s]: caching prompt [%s]' % (target.name, target.state, target.prompt[target.state].value))
+        try:
+            session = DBSession()
             
-            log.debug('adding a new prompt to cache')
-            prompt = DevicePrompt(target.name, target.state, target.prompt[target.state].value)
-            session.add(prompt)
-        transaction.commit()
-
-        #session.close()
-    except Exception as e:
-        log.error('no prompt saved: %s' % e)
-
+            transaction.begin()
+            prompt = session.query(DevicePrompt).get((target.name,target.state))
+            if prompt:
+                prompt.prompt = target.prompt[target.state].value
+            else:
+                
+                log.debug('adding a new prompt to cache')
+                prompt = DevicePrompt(target.name, target.state, target.prompt[target.state].value)
+                session.add(prompt)
+            transaction.commit()
+    
+            #session.close()
+        except Exception as e:
+            log.error('no prompt saved: %s' % e)
+            
+    sql_powered = True
+except:
+    sql_powered = False
+    
+    def cache_enabled():
+        return False
+    
     
 # finally and only finally load the configuration
 loadConfiguration()     
 
-DBSession = None
-if 'cache' in configObj['common']:
-    log.debug('creating engine for [%s]' % db_url())
-    engine = create_engine(db_url(), echo=True)
-    DBSession = scoped_session(sessionmaker(
-                             extension=ZopeTransactionExtension(), bind=engine))
 
-    cache_exists()
+if sql_powered:
+    DBSession = None
+    if 'cache' in configObj['common']:
+        log.debug('creating engine for [%s]' % db_url())
+        engine = create_engine(db_url(), echo=True)
+        DBSession = scoped_session(sessionmaker(
+                                 extension=ZopeTransactionExtension(), bind=engine))
+    
+        cache_exists()
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ else:
 
 
 setup(name='pyco',
-      version='0.2.2',
+      version='0.3.0',
       description='python library for network devices control and automation',
       author='adona',
       author_email='attilio.dona@gmail.com',
