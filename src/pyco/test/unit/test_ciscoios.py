@@ -21,7 +21,7 @@ class Test(unittest2.TestCase):
         cisco = device('telnet://%s:%s@%s' % (cisco1['username'],cisco1['password'],cisco1['name']))
 
         from pyco.actions import sendUsername
-        cisco.addEventAction('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')
+        cisco.add_event_action('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')
 
         cisco.login()
 
@@ -48,7 +48,7 @@ class Test(unittest2.TestCase):
         
             cisco('show running-config')
         except Exception as e:
-            print(e.interactionLog)
+            #print(e.interactionLog)
             raise
 
 

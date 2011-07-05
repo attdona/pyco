@@ -73,7 +73,7 @@ class ExpectSession:
         target = self.hops[position]
        
         log.debug("[%s] prev hop device: [%s]" % (target.name, prevDevice.name))
-        if not prevDevice.isConnected():
+        if not prevDevice.is_connected():
             log.debug("previous hop %s is not connected, activating ..." % prevDevice.name)
             
             # backward propagate the session
@@ -81,7 +81,7 @@ class ExpectSession:
             self.connect(prevPos)
         
             
-        cmd = target.connectCommand(prevDevice)
+        cmd = target.connect_command(prevDevice)
         
         # in memory log
         #self.logfile = StringIO.StringIO()
@@ -93,7 +93,7 @@ class ExpectSession:
         self.currentHop = target
         
         if hasattr(self, 'pipe'):
-            self.sendLine(cmd)
+            self.send_line(cmd)
         else:
             # TODO: close the spawned session
             # send the connect string to pexpect
@@ -101,7 +101,7 @@ class ExpectSession:
             self.pipe = spawn(cmd, logfile=self.logfile)
         self.processResponse(target, loginSuccessfull)
 
-    def sendLine(self, command):
+    def send_line(self, command):
         """
         Send a command string to the device actually connected
         """
@@ -129,7 +129,7 @@ class ExpectSession:
                     index = self.pipe.expect(patterns, maxWaitTime)
                
                 try:    
-                    target.currentEvent = Event(target.getEvent(patterns[index]))
+                    target.currentEvent = Event(target.get_event(patterns[index]))
                 except Exception as e:
                     if patterns[index] == TIMEOUT:
                         log.debug("[%s]: exception timeout triggered" % target.name)
@@ -139,7 +139,7 @@ class ExpectSession:
                         raise
                         
                 log.debug("matched [%s] pattern [%s] --> [%s]" % (index, patterns[index], target.currentEvent.name))
-                #log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
+                log.debug("before: [%s] - after: [%s]" % (self.pipe.before, self.pipe.after))
             except EOF:
                 log.debug("[%s] connection unexpectedly closed (%s)" % (target.name, self.pipe.before))
                 target.currentEvent = Event('eof')
@@ -148,9 +148,9 @@ class ExpectSession:
                 target.currentEvent = Event('timeout')
 
             #log.debug("detected event [%s]" % target.currentEvent)
-            if target.hasEventHandlers(target.currentEvent):
-                log.debug("[%s] got [%s] event; invoking handlers: [%s]" % (target.name, target.currentEvent.name, target.getEventHandlers(target.currentEvent)))
-                for eh in target.getEventHandlers(target.currentEvent):
+            if target.has_event_handlers(target.currentEvent):
+                log.debug("[%s] got [%s] event; invoking handlers: [%s]" % (target.name, target.currentEvent.name, target.get_event_handlers(target.currentEvent)))
+                for eh in target.get_event_handlers(target.currentEvent):
                     eh(target)
            
             stateChanged = target.process(target.currentEvent)
@@ -177,5 +177,5 @@ class ExpectSession:
 SOURCE_HOST = device('__source_host__')
 
 # the source is connected for definition 
-SOURCE_HOST.isConnected = lambda : True
+SOURCE_HOST.is_connected = lambda : True
         

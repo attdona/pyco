@@ -114,7 +114,7 @@ class Test(unittest2.TestCase):
         linux.discoverPrompt = True
         linux.promptRegexp = r"[^\r\n]*@.*\r\n~\$ "
         
-        linux.discoverPromptWithRegexp(linux.promptRegexp, state='USER_PROMPT')
+        linux.discover_prompt_with_regexp(linux.promptRegexp, state='USER_PROMPT')
         
         linux.login()
         output = linux.send('id')
@@ -134,7 +134,7 @@ class Test(unittest2.TestCase):
         linux.discoverPrompt = True
         linux.promptRegexp = r"\$ "
         
-        linux.discoverPromptWithRegexp(linux.promptRegexp, state='USER_PROMPT')
+        linux.discover_prompt_with_regexp(linux.promptRegexp, state='USER_PROMPT')
         
         linux.login()
         output = linux.send('id')
@@ -247,10 +247,10 @@ class TestHops(unittest2.TestCase):
         try:
             host.login()
         except:
-            d = host.whereAmI()
+            d = host.where_am_i()
             log.debug("target host: [%s], connected host: [%s]" % (host.name, d.name))
 
-            self.assertEqual(d.name, hop2['name'], 'whereAmI unexpected result')
+            self.assertEqual(d.name, hop2['name'], 'where_am_i unexpected result')
 
 
     @unittest2.skipIf(skip==True,"skipped test")    
@@ -271,7 +271,7 @@ class TestHops(unittest2.TestCase):
         try:
             host.login()
         except:
-            d = host.whereAmI()
+            d = host.where_am_i()
             log.debug("target host: [%s], connected host: [%s]" % (host.name, d.name))
 
             self.assertRaises((ConnectionClosed), host, 'uname -a')

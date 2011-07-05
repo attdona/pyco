@@ -62,7 +62,7 @@ class ExpectException(DeviceException):
     code = 310
     
     def __init__(self, device, msg=''):
-        self.interactionLog = device.interactionLog()
+        self.interaction_log = device.interaction_log()
         DeviceException.__init__(self, device, msg)
 
     def descr(self):
@@ -128,7 +128,7 @@ class ConfigFileError(Exception):
 
 def getAccount(device):
     
-    # it is always the last function in the plugin group
+    # this is the last function in the plugin group
     return False
 
 def path(hops):
@@ -220,7 +220,7 @@ def device(url):
       2222
       
     The *driver* name has to be one of the [section] name found into the pyco configuration file :ref:`driver-configuration`.
-    At the momento the configured driver are:
+    With this release the configured drivers are:
       
       * common
       * linux
@@ -322,6 +322,7 @@ def discoverPromptCallback(device, tentativePrompt=None):
         output = tentativePrompt
     elif device.currentEvent.name == 'prompt-match':
         output = device.esession.pipe.after
+        log.debug('raw output: [%s]' % device.esession.pipe.after)
     elif device.currentEvent.name == 'timeout':
         output = device.esession.pipe.before
     else:
@@ -336,8 +337,11 @@ def discoverPromptCallback(device, tentativePrompt=None):
     sts = device.state
 
     if sts in device.prompt:
-        log.debug('[%s] == [%s]' % (device.prompt[sts].value, output.replace('\r\n', '', 1)))
-        if device.prompt[sts].value == output.replace('\r\n', '', 1):
+        if output.startswith('\r\n'):
+            output = output.replace('\r\n', '', 1)
+
+        log.debug('[%s] == [%s]' % (device.prompt[sts].value, output))
+        if device.prompt[sts].value == output:
             device.discoveryCounter = 0
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
             device.prompt[sts].setExactValue(device.prompt[sts].value)
@@ -346,11 +350,11 @@ def discoverPromptCallback(device, tentativePrompt=None):
             if cache_enabled():
                 save_cached_prompt(device)
             
-            #device.addEventAction('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
-            device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
+            #device.add_event_action('prompt-match', getExactStringForMatch(device.prompt[sts].value), device.fsm.current_state)
+            device.add_expect_pattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
             for ev in ['timeout', 'prompt-match']:
                 log.debug('removing discoverPromptCallback')
-                device.removeEventHandler(ev, discoverPromptCallback)
+                device.remove_event_handler(ev, discoverPromptCallback)
             
             # declare the discovery with the event
             device.currentEvent = Event('prompt-match')
@@ -358,32 +362,38 @@ def discoverPromptCallback(device, tentativePrompt=None):
             return
             
         else:
-            device.removePattern(getExactStringForMatch(device.prompt[sts].value), sts)
+            device.remove_pattern(getExactStringForMatch(device.prompt[sts].value), sts)
             
             if device.discoveryCounter == 2:
                 log.debug("[%s] [%s] unable to found the prompt, unsetting discovery. last output: [%s]" % (device.name, sts, output))
                 device.discoverPrompt = False
-                device.removeEventHandler('timeout', discoverPromptCallback)
+                device.remove_event_handler('timeout', discoverPromptCallback)
                 return
             else:
                 device.prompt[sts].tentative = True
                 if output.startswith('\r\n'):
-                    log.debug('output starts with \r\n')
                     output = output.replace('\r\n', '', 1)
                 device.prompt[sts].value = output
                 log.debug("[%s] [%s] no prompt match, retrying discovery with pointer %s" % (device.name, sts, [device.prompt[sts].value]))
-                device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
+                device.add_expect_pattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
                 device.discoveryCounter += 1
     else:
         rows = output.split('\r\n')
-        tentativePrompt = rows[-1]
+        if hasattr(device, 'promptRegexp'):
+            if output.startswith('\r\n'):
+                output = output.replace('\r\n', '', 1)
+            tentativePrompt = output
+            log.debug('promptRegexp tentativePrompt: [%s]' % tentativePrompt)
+            device.remove_pattern('\r\n' + device.promptRegexp, sts)
+        else:
+            tentativePrompt = rows[-1]
         device.discoveryCounter = 0
         log.debug("[%s] tentativePrompt: [%s]" % (device.name, tentativePrompt))
         device.prompt[sts] = Prompt(tentativePrompt, tentative=True)
-        device.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
+        device.add_expect_pattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
         
-    device.clearBuffer()
-    device.sendLine('')
+    device.clear_buffer()
+    device.send_line('')
     device.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
 
 
@@ -422,7 +432,7 @@ def buildPatternsList(device, driver=None):
         if 'pattern' in eventData:
             pattern = eventData['pattern']
             
-        device.addEventAction(event=eventKey, pattern=pattern, action=action, beginState=states, endState=endState)
+        device.add_event_action(event=eventKey, pattern=pattern, action=action, beginState=states, endState=endState)
 
 
 
@@ -436,21 +446,24 @@ def buildAction(actionString):
     
     #log.debug('[%s] splitted into [%s]' % (actionString, al))
     if len(al) > 1:
-        baseAction = getCallable(al[0])
+        baseAction = get_callable(al[0])
         def action(target):
             log.debug("invoking action [%s] with %s" % (baseAction.__name__, al[1:]))
             baseAction(target,*al[1:])
             
     else:
-        action = getCallable(actionString)
+        action = get_callable(actionString)
     
     return action
 
 
 
-def getCallable(methodName):
+def get_callable(methodName):
     '''
-    From the methodName string get the callable object from pyco.actions or pyco.device module
+    From the methodName string get the first callable object looking into:
+    * `$PYCO_HOME/handlers.py` python source file
+    * pyco.actions internal package module
+    * pyco.device internal package module
     '''
     if methodName == '' or methodName is None:
         return None
@@ -480,7 +493,7 @@ def getCallable(methodName):
     else:
         def composite(d):
             for m in methodName:
-                getCallable(m)(d)
+                get_callable(m)(d)
         return composite
 
 
@@ -493,13 +506,13 @@ def cliIsConnected(target):
     if hasattr(target, 'promptPattern'):
         log.debug('[%s] matching prompt with pattern [%s]' % (target.state, target.promptPattern))
         target.prompt[target.state] = Prompt(target.promptPattern, tentative=False)
-        target.addExpectPattern('prompt-match', target.promptPattern, target.state)
+        target.add_expect_pattern('prompt-match', target.promptPattern, target.state)
         return True
     else:
 
         if target.discoverPrompt:
             log.debug("[%s] starting [%s] prompt discovery" % (target.name, target.state))
-            target.enablePromptDiscovery()
+            target.enable_prompt_discovery()
             
             def isTimeoutOrPromptMatch(d):
                 return d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match'
@@ -565,10 +578,35 @@ class FSMException(Exception):
 
 class Device:
     '''
-    Base class for device configuration 
+    `Device` class models a host machine and implements the FSM behavoir.
+
+    device object properties are:
+
+    * `name`
+        the fqdn or the host ip address
+
+    * `username`
+        the authenticated username   
+
+    * `password`
+        the authenticated password
+
+    In a normal usage scenario you dont use any of the Device methods apart the :meth:`pyco.device.Device.send_line` to send
+    a string to the CLI in response to an event::
+    
+     def sendUsername(target):
+        if target.username is None:
+            raise MissingDeviceParameter(target, '%s username undefined' % target.name)
+
+        log.debug("sending username  [%s] ..." % target.username)
+        target.send_line(target.username)
+
+    
+     
+
     '''    
     
-    processResponseg = None
+    #processResponseg = None
     
     def __init__(self, name, driver=None, username = None, password = None, protocol='ssh', port=22, hops = []):
         log.debug("[%s] ctor" % name)
@@ -591,7 +629,7 @@ class Device:
         else:
             self.driver = driver
 
-        self.setDriver(self.driver.name)
+        self.set_driver(self.driver.name)
         
     # TODO: return the device url
     def __str__(self):
@@ -611,11 +649,13 @@ class Device:
                 raise AttributeError, attrname
 
 
-    def getDriver(self):
+    def get_driver(self):
         return self.driver.name
 
-    def setDriver(self, driverName):
-        
+    def set_driver(self, driverName):
+        '''
+        Initialize the device object with the FSM associated with `driverName` 
+        '''
         self.driver = Driver.get(driverName)
         
         # Map (input_symbol, current_state) --> (action, next_state).
@@ -631,14 +671,15 @@ class Device:
         self.set_default_transition(defaultEventHandler, None)
         
         # simply ignore 'prompt-match' on any state
-        self.add_input_any('prompt-match')
+        #self.add_input_any('prompt-match')
 
-    def enablePromptDiscovery(self):
+
+    def enable_prompt_discovery(self):
         """
         Match the output device against the promptRegexp pattern and set the device prompt
         """
-        self.onEvent('timeout', discoverPromptCallback)
-        self.onEvent('prompt-match', discoverPromptCallback)
+        self.on_event('timeout', discoverPromptCallback)
+        self.on_event('prompt-match', discoverPromptCallback)
         
         # add the cached prompt ...
         if cache_enabled():
@@ -646,7 +687,7 @@ class Device:
             if prompt:
                 log.debug('[%s] found cached [%s] prompt [%s]' % (self.name, self.state, prompt.prompt))
                 self.prompt[self.state] = Prompt(prompt.prompt, tentative=True)
-                self.addExpectPattern('prompt-match', getExactStringForMatch(prompt.prompt), self.state)
+                self.add_expect_pattern('prompt-match', getExactStringForMatch(prompt.prompt), self.state)
                 self.discoveryCounter = 0
 
             else:
@@ -654,27 +695,27 @@ class Device:
             
         #self.expect(lambda d: d.currentEvent.name == 'timeout' or d.currentEvent.name == 'prompt-match')
 
-    def interactionLog(self):
+    def interaction_log(self):
         return self.esession.logfile.getvalue()
 
-    def isConnected(self):
+    def is_connected(self):
         '''
         If the device is connected return True 
         '''
         return self.loggedin
         
-    def whereAmI(self):
+    def where_am_i(self):
         '''
         return the hop device actually connected. 
         '''
         from pyco.expectsession import SOURCE_HOST
         
-        if self.isConnected():
+        if self.is_connected():
             return self
         
         for d in reversed(self.hops):
             log.debug("checking if [%s] is connected" % d.name)
-            if d.isConnected():
+            if d.is_connected():
                 return d
     
         return SOURCE_HOST
@@ -688,29 +729,30 @@ class Device:
         self.state = 'GROUND'
         
 
-    def discoverPromptWithRegexp(self, regexp, state='*'):
+    def discover_prompt_with_regexp(self, regexp, state='*'):
         '''
         Use regexp as a hint for prompt discovery 
         Add the guard \'\\\\r\\\\n\' to the begin of prompt regexp
         '''
         
-        self.addEventAction("prompt-match", '\r\n' + regexp, state)
-        self.onEvent('prompt-match', discoverPromptCallback)
+        self.add_event_action("prompt-match", '\r\n' + regexp, state)
+        self.on_event('prompt-match', discoverPromptCallback)
 
         
-    def getPrompt(self):
+    def get_prompt(self):
         '''
         Get the current device prompt
         '''
         return self.prompt[self.state].value
 
-    def promptDiscovered(self):
+
+    def prompt_discovered(self):
         if self.state in self.prompt:
             return self.prompt[self.state].isFinal()
         return False
         
        
-    def getEvent(self,pattern):
+    def get_event(self,pattern):
         '''
         The event associated with the pattern argument
         '''
@@ -720,7 +762,8 @@ class Device:
             # TODO: raise an exception if event not found
             return self.patternMap['*'][pattern]
 
-    def connectCommand(self, clientDevice):
+
+    def connect_command(self, clientDevice):
         
         for ep in iter_entry_points(group='pyco.plugin', name=None):
             log.debug("found [%s] plugin into module [%s]" % (ep.name, ep.module_name))
@@ -757,13 +800,13 @@ class Device:
         return clicommand.getvalue()
  
         
-    def hasEventHandlers(self, event):
+    def has_event_handlers(self, event):
         return event.name in self.eventCb
 
-    def getEventHandlers(self, event):
+    def get_event_handlers(self, event):
         return self.eventCb[event.name]
     
-    def onEvent(self, eventName, callback):
+    def on_event(self, eventName, callback):
         log.debug("[%s] adding [%s] for [%s] event" % (self.name, callback, eventName))
         try:
             if not callback in self.eventCb[eventName]:
@@ -771,7 +814,7 @@ class Device:
         except:
             self.eventCb[eventName] = [callback]
 
-    def removeEventHandler(self, eventName, callback):
+    def remove_event_handler(self, eventName, callback):
         log.debug("[%s] removing [%s] event handler [%s]" % (self.name, eventName, callback))
         try:
             self.eventCb[eventName].remove(callback)
@@ -795,10 +838,10 @@ class Device:
         except ExpectException as e:
             # something go wrong, try to find the last connected hop in the path
             log.info("[%s]: in login phase got [%s] error" % (e.device.name ,e.__class__))
-            log.debug("full interaction: [%s]" % e.interactionLog)
+            log.debug("full interaction: [%s]" % e.interaction_log)
             raise e
             
-        self.clearBuffer()
+        self.clear_buffer()
         
         if self.state == 'GROUND' or self.currentEvent.isTimeout():
             raise LoginFailed(self, 'unable to connect: %s' % self.currentEvent.name)
@@ -811,9 +854,12 @@ class Device:
     def expect(self, checkPoint):
         self.esession.patternMatch(self, checkPoint, [], self.maxWait)
         
-    def sendLine(self, stringValue):
+
+    def send_line(self, stringValue):
         """
-        send ``stringValue`` to the device cli 
+        simply send ``stringValue`` to the device CLI assuming that the device object is connected::
+            
+            self.is_connected() == True
         """
         
         log.debug('generating event [%s]' % stringValue)
@@ -822,21 +868,27 @@ class Device:
         self.process(event)
         
         log.debug("[%s] sending [%s]" % (self, stringValue))
-        self.esession.sendLine(stringValue)
+        self.esession.send_line(stringValue)
         
     def __call__(self, command):
         return self.send(command)
             
     def send(self, command):
         '''
-        Send the command string to the device and return the command output
+        Send the command string to the device and return the command output.
+        
+        If the device is not connected first a :py:meth:`pyco.device.Device.login` is executed
+        
+        After sending the command with :py:meth:`pyco.device.Device.send_line` activate a `processResponse` loop and awaits one of
+        the expected results or a timeout.
+        
         '''
         
         if self.state == 'GROUND':
             self.login()
         
-        #self.clearBuffer()
-        self.sendLine(command)
+        #self.clear_buffer()
+        self.send_line(command)
 
         def runUntilPromptMatchOrTimeout(device):
             #return device.currentEvent.name == 'timeout' or device.currentEvent.name == 'prompt-match' or device.currentEvent.name.endswith('_prompt')
@@ -852,7 +904,7 @@ class Device:
                 log.debug("[%s] discovering again the prompt ..." % self.name)
                 tentativePrompt = out.split('\r\n')[-1]
                 log.debug('[%s] taking last line as tentativePrompt: [%s]' % (self.name, tentativePrompt))
-                self.enablePromptDiscovery()
+                self.enable_prompt_discovery()
                 discoverPromptCallback(self, tentativePrompt)
             else:
                 raise ConnectionTimedOut(self, 'prompt not hooked')
@@ -862,7 +914,7 @@ class Device:
             log.debug("Checking if [%s] response [%s] is complete" % (command,out))
             prevOut = None
             while out != prevOut:
-                self.clearBuffer()
+                self.clear_buffer()
                 log.debug("[%s] == [%s]" % (prevOut,out))
                 prevOut = out
                 currOut = self.esession.processResponse(self, runUntilPromptMatchOrTimeout)
@@ -877,8 +929,9 @@ class Device:
         log.info("[%s:%s]: captured response [%s]" % (self.name, command, out))
         
         return out 
+
            
-    def clearBuffer(self):
+    def clear_buffer(self):
         log.debug('clearing buffer ...')
         
         try:
@@ -887,7 +940,7 @@ class Device:
             self.esession.pipe.expect('.*', timeout=1)
             
         except Exception as e:
-            log.debug("[%s] clearBuffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
+            log.debug("[%s] clear_buffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
 
 
     def add_transition (self, input_symbol, state, action=None, next_state=None):
@@ -1065,7 +1118,7 @@ class Device:
         except:
             return self.patternMap['*'].keys()
 
-    def addEventAction(self, event, pattern=None, beginState=['*'], endState=None, action=None):
+    def add_event_action(self, event, pattern=None, beginState=['*'], endState=None, action=None):
         '''
         Add a pattern to be matched in the FSM state. If the pattern is matched then the corresponding event is generated.
         
@@ -1105,12 +1158,25 @@ class Device:
                 self.add_transition(event, state, action, endState)
 
 
-    def addTransition(self, t):
+    def add_transition_object(self, t):
+        '''
+        Add the transition argument coded as a dictionary::
+        
+            suRule = {
+                 'beginState' : 'USER_PROMPT',
+                 'event': 'su_event',
+                 'action' :  sendSuPassword,
+                 'endState' : 'USER2_PROMPT'
+               }
+               
+            device.add_transition_object(suRule)
+
+        '''
         self.add_transition(t['event'], t['beginState'], t['action'], t['endState'])    
         
  
 
-    def addExpectPattern(self, event, pattern, state):
+    def add_expect_pattern(self, event, pattern, state):
         log.debug("[%s]: adding expect pattern %s, event [%s], state [%s]" % (self.name, [pattern], event, state))
         if not pattern or pattern == '':
             log.warning("[%s]: skipped [%s] event with empty pattern and * state" % (self.name, event))
@@ -1122,13 +1188,13 @@ class Device:
             self.patternMap[state] = {pattern:event}
             
 
-    def removeEvent(self, event, state = '*'):
+    def remove_event(self, event, state = '*'):
         reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
         if event in reverseMap:
             pattern = reverseMap[event]
-            self.removePattern(pattern, state)
+            self.remove_pattern(pattern, state)
         
-    def removePattern(self, pattern, state = '*'):
+    def remove_pattern(self, pattern, state = '*'):
         try:
             del self.patternMap[state][pattern]
         except KeyError:

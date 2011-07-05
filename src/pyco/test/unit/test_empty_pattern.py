@@ -33,7 +33,7 @@ class Test(unittest2.TestCase):
         
         pattern = {'event': 'su_event', 'pattern': '', 'beginState': 'USER_PROMPT'}
 
-        h.addEventAction(**pattern)
+        h.add_event_action(**pattern)
    
 
 if __name__ == "__main__":

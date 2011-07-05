@@ -1,10 +1,8 @@
-Base Device configuration
+Device Class
 =========================
 
-asd asdd as das das d
- * a
- * b
-
+	
+	
 .. highlight:: python
 
 .. 

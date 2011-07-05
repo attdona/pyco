@@ -9,7 +9,8 @@ from pyco.device import ConnectionRefused, PermissionDenied, MissingDeviceParame
 
 log = log.getLogger("handlers")
 
+
 def initCiscoTerminal(target):
-    target.sendLine('terminal length 0')
+    target.send_line('terminal length 0')
 
     

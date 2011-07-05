@@ -38,7 +38,7 @@ class Test(unittest2.TestCase):
         cisco = device('telnet://u:p@h')
         
         from pyco.actions import sendUsername
-        cisco.addEventAction('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')
+        cisco.add_event_action('username-event', pattern='Username: ', action=sendUsername, beginState='GROUND')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses

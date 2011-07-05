@@ -28,7 +28,7 @@ class Test(unittest2.TestCase):
 
     def testScript(self):
         h = Device(**localhost)
-        h.setDriver('marconi')
+        h.set_driver('marconi')
         h('id')
 
 

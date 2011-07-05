@@ -38,8 +38,8 @@ class Test(unittest2.TestCase):
         #h = device('telnet://%s:%s@%s' % (hop1['username'], hop1['password'], hop1['name']))
         h = device('telnet://u:u@h')
         
-        h.removeEvent('username_event', 'GROUND')
-        h.addEventAction('timeout', action=cliIsConnected, endState='USER_PROMPT')
+        h.remove_event('username_event', 'GROUND')
+        h.add_event_action('timeout', action=cliIsConnected, endState='USER_PROMPT')
         
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = self.responses

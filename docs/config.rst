@@ -7,7 +7,7 @@ The pyco configuration file is a .ini file containing the settings used in the d
 
 Every section define a specific driver setup, where the section title is the name of the driver.
 
-for example the [common] section contains the setup of the common driver::
+for example the [common] section contains the setup of the default common driver::
 
  [common]
 
@@ -57,6 +57,10 @@ for example the [common] section contains the setup of the common driver::
 		pattern = '(?i)connection refused'
 		action  = connectionRefused
 
+The *common* driver is used when no driver is defined in the device url:
+
+ ssh://user@myremotemachine
+
 The [linux] section contains the setup specific for the linux family of operating systems.
 Note the `parent` keyword: the [common] setup is inherited by [linux] driver if not overwritten by the most specific driver.
 For example the following inherits all the [common] configurations and overwrite the *discoverPrompt* flag:: 		
@@ -90,8 +94,9 @@ Below are reported all the pyco configuration parameters.
   *maxWait* 
 	wait *maxWait* seconds for a device response before raising timeout event.
 	what happens when a *timeout* event is triggered depends on the FSM state:
-		* it may be a operational wait time needed for waiting the device output in the discovery prompt phase
-		* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received. 
+	
+	* it may be a operational wait time needed for waiting the device output in the discovery prompt phase
+	* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received. 
 
   *sshCommand*
   	the ssh client template command used for connecting.  

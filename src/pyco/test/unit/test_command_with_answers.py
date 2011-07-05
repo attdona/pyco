@@ -35,7 +35,7 @@ class Test(unittest2.TestCase):
             raise AuthenticationFailed
         
         def sendSuPassword(target):
-            target.sendLine('pyco')
+            target.send_line('pyco')
         
         suPattern = {'event': 'su_event', 'pattern': 'Password: ', 'beginState': 'USER_PROMPT'}
         
@@ -48,9 +48,9 @@ class Test(unittest2.TestCase):
                  'endState' : 'USER2_PROMPT'
                }
         
-        linux.addEventAction(**suPattern)
-        linux.addEventAction(**authFailed)
-        linux.addTransition(suRule)
+        linux.add_event_action(**suPattern)
+        linux.add_event_action(**authFailed)
+        linux.add_transition_object(suRule)
         
         linux.discoverPrompt = True
         
