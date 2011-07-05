@@ -336,6 +336,7 @@ def discoverPromptCallback(device, tentativePrompt=None):
     sts = device.state
 
     if sts in device.prompt:
+        log.debug('[%s] == [%s]' % (device.prompt[sts].value, output.replace('\r\n', '', 1)))
         if device.prompt[sts].value == output.replace('\r\n', '', 1):
             device.discoveryCounter = 0
             log.debug("[%s] [%s] prompt discovered: [%s]" % (device.name, sts, device.prompt[sts].value))
@@ -367,6 +368,7 @@ def discoverPromptCallback(device, tentativePrompt=None):
             else:
                 device.prompt[sts].tentative = True
                 if output.startswith('\r\n'):
+                    log.debug('output starts with \r\n')
                     output = output.replace('\r\n', '', 1)
                 device.prompt[sts].value = output
                 log.debug("[%s] [%s] no prompt match, retrying discovery with pointer %s" % (device.name, sts, [device.prompt[sts].value]))
@@ -642,9 +644,10 @@ class Device:
         if cache_enabled():
             prompt = get_cached_prompt(self)
             if prompt:
-                log.debug('[%s] found cached [%s] prompt [%s]' % (self.name, self.state, prompt))
-                self.prompt[self.state] = Prompt(prompt, tentative=True)
-                self.addExpectPattern('prompt-match', getExactStringForMatch(device.prompt[self.state].value), self.state)
+                log.debug('[%s] found cached [%s] prompt [%s]' % (self.name, self.state, prompt.prompt))
+                self.prompt[self.state] = Prompt(prompt.prompt, tentative=True)
+                self.addExpectPattern('prompt-match', getExactStringForMatch(prompt.prompt), self.state)
+                self.discoveryCounter = 0
 
             else:
                 log.debug('[%s] - [%s]: no prompt cached' % (self.name, self.state))
@@ -879,8 +882,8 @@ class Device:
         log.debug('clearing buffer ...')
         
         try:
-            # expect some time (2 seconds) the arrivals of terminal characters and then clears the buffer 
-            time.sleep(2)
+            # expect some time (default: 2 seconds) the arrivals of terminal characters and then clears the buffer 
+            time.sleep(self.waitBeforeClearingBuffer)
             self.esession.pipe.expect('.*', timeout=1)
             
         except Exception as e:
@@ -1332,7 +1335,7 @@ def db_url():
     if hasattr(pyco, 'pyco_home'):
         db_url = 'sqlite:///%s/%s' % (pyco.pyco_home, configObj['common']['cache'])
     else:
-        db_file = 'sqlite:///tmp/%s' % configObj['common']['cache']
+        db_url = 'sqlite:////tmp/%s' % configObj['common']['cache']
     return db_url
 
 def cache_enabled():
@@ -1348,7 +1351,7 @@ def cache_exists():
         if configObj['common']['cache']:
             if not os.path.isfile(db_file):
                 log.debug('creating cache [%s] ...' % db_file)
-                createDB('sqlite:///%s' % db_file)
+                createDB('sqlite://%s' % db_file)
     except Exception as e:
         log.info('prompt cache is not enabled: %s' % e)
 
@@ -1369,15 +1372,17 @@ def save_cached_prompt(target):
     try:
         session = DBSession()
         
+        transaction.begin()
         prompt = session.query(DevicePrompt).get((target.name,target.state))
         if prompt:
             prompt.prompt = target.prompt[target.state].value
         else:
-            transaction.begin()
+            
             log.debug('adding a new prompt to cache')
             prompt = DevicePrompt(target.name, target.state, target.prompt[target.state].value)
             session.add(prompt)
-            transaction.commit()
+        transaction.commit()
+
         #session.close()
     except Exception as e:
         log.error('no prompt saved: %s' % e)
@@ -1387,7 +1392,8 @@ def save_cached_prompt(target):
 loadConfiguration()     
 
 DBSession = None
-if configObj['common']['cache']:
+if 'cache' in configObj['common']:
+    log.debug('creating engine for [%s]' % db_url())
     engine = create_engine(db_url(), echo=True)
     DBSession = scoped_session(sessionmaker(
                              extension=ZopeTransactionExtension(), bind=engine))
