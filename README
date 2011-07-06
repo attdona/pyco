@@ -1,5 +1,9 @@
 PyCO
 ====
 
- Installation
- =============
+Build a distribution
+-------------------- 
+
+After updating the setup.py configuration run the command::
+
+ $PYCO_HOME> python setup.py bdist_egg 
