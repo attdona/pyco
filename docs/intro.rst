@@ -4,7 +4,8 @@ Introduction
 The goal of Pyco project is to automates the interaction with systems and network devices 
 with a convention over configuration approach.
 
-Pyco is a python library based on pexpect tools written by Noah Spurrier and others contributors. 
+Pyco is a python library based on `pexpect <http://www.noah.org/wiki/Pexpect>`_ tools written by Noah Spurrier and others contributors,
+and pexpect is inspired by the famous Don Libes `Expect` system.
 
 What you can do with pyco is for example:
 
@@ -44,15 +45,15 @@ The design and implementation philosophy of pyco is based upon the following poi
  	for assuring a robust and reliable automatic machine interaction.  
  	
 
-Pyco is shipped with a interaction case study :term:`DIC` catalog documenting the most common interactions patterns that can arises in device automation.
-
 For the impatients: the pyco short story
 ----------------------------------------
 
-Install pyco::
- #. unzip the distribution pyco-<x>.<y>.<z>.tar.gz
- #. change to pyco package extraction root directory
- #. python setup.py install
+Keep in mind that actually pyco is tested on 2.6 and 2.7 python version, so you must use one of such version.
+
+Install pyco as an egg, in the python os inntallation or in a virtualenv:
+
+ #. download a pyco egg distribution from `google code <http://code.google.com/p/pyco/>`_
+ #. easy_install pyco-<x.y.z>-py2.7.egg
 
 and then try a simple remote command::
 
@@ -62,7 +63,12 @@ and then try a simple remote command::
 
 The response string will contain the command output, something like:
 
-	``Linux cencenighe 2.6.32-29-generic #58-Ubuntu SMP Fri Feb 11 20:52:10 UTC 2011 x86_64 GNU/Linux``
+	`Linux cencenighe 2.6.32-29-generic #58-Ubuntu SMP Fri Feb 11 20:52:10 UTC 2011 x86_64 GNU/Linux`
+
+This is the simpler use case for interacting with a remote device. pyco use the default configuration stored into the package.
+
+If a FSM have to be customized for a specific device interaction you have to write a new :ref:`driver-configuration`, but this 
+is the long story side.
 	
 
 For the courious: Pyco Theory

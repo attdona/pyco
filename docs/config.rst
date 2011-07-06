@@ -3,11 +3,19 @@
 Driver Configuration
 ====================
 
+If you need to define a new driver or change an existing one follow the following recipe:
+
+#. set the environment variable PYCO_HOME pointing to the application root directory
+#. place a pyco.cfg configuration file in $PYCO_HOME/cfg
+
 The pyco configuration file is a .ini file containing the settings used in the device connection setup and command line communication.
 
 Every section define a specific driver setup, where the section title is the name of the driver.
 
-for example the [common] section contains the setup of the default common driver::
+The special [common] section contains the setup of the default common driver.
+This is the only mandatory section that has to be defined.
+
+The following is a configuration example that define also the `linux` and a `ciscoios` driver::
 
  [common]
 
@@ -71,36 +79,57 @@ For example the following inherits all the [common] configurations and overwrite
 
    # enable/disable prompt discovery
    discoverPrompt = False
-
-   # if True disable another expect to check if more output arrived after 
-   # prompt match or the first expect loop timeout.
-   # In case discoverPrompt is True use prompt match to check if command output is complete
-   timeoutCheckOnOutputComplete = False
-
-
 		
 
 Configuration parameters
 ------------------------
 
-Below are reported all the pyco configuration parameters.
+Below are reported all the pyco configuration parameters. In parenthesis the default values.
 
+  *cache*
+    a sqlite database cache holding the prompts discovered by pyco. the `cache` value `<prompt_cache>` is the sqlite filename:
+    
+    * `$PYCO_HOME/<prompt_cache>` if the environment variable `PYCO_HOME` is set
+    * `/tmp/<prompt_cache>` otherwise
+    
+    The caching is enabled automatically if the cache parameter is defined: this requires that the `sqlalchemy` and `transaction` 
+    python are installed in the python environment. 
+
+  *checkIfOutputComplete* (False)
+    if True enable another expect loop to check if more output arrived after 
+    prompt match or the first expect loop timeout. This extra control slows down the the interaction.
+  
   *discoverPrompt* (True|False)
   	enable the discovery prompt algorithm. If *discoverPrompt* is ``False`` the output returned by :py:meth:`pyco.device.Device.send()` is mixed with banners, input command and prompt strings.
 
-  *exactPatternMatch* (True|False)
+  *exactPatternMatch* (False)
   	if *True* performs exact pattern matching, so must be used defining the *event.pattern* field with an exact string and not with a regular expression.
 
-  *maxWait* 
+  *maxWait* (5)
 	wait *maxWait* seconds for a device response before raising timeout event.
 	what happens when a *timeout* event is triggered depends on the FSM state:
 	
 	* it may be a operational wait time needed for waiting the device output in the discovery prompt phase
-	* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received. 
+	* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received.
+	
+  *promptPattern*
+    use this regular expression value as a hint for matching the cli prompt. If `promptPattern` is defined the discovery prompt
+    algorithm is disabled also if the `discoverPrompt` is True.
+    Keep in mind that this is a weaker match than the exactp prompt match implied by the prompt discovery algorithm, so be sure that the
+    command response does not contains a string that match this regular expression.
 
-  *sshCommand*
+  *sshCommand* (ssh ${device.username}@${device.name})
   	the ssh client template command used for connecting.  
 
-  *telnetCommand*
-  	the telnet client template command used for connecting.  
+  *telnetCommand* (telnet ${device.name} ${device.port})
+  	the telnet client template command used for connecting.
+  	
+  *waitBeforeClearingBuffer* (1)
+  	wait waitBeforeClearingBuffer seconds for some more output before clearing the output buffer in the following cases:
+
+  	* after the login phase and before sending the shell commands
+  	* after a promp discovery
+  	
+  	This time waste in necessary for avoiding spurious pattern matching in the FSM algorithm.  
+  	
   	

@@ -12,11 +12,12 @@ Contents:
    :maxdepth: 2
    
    intro
+   config
    device_endpoint
    common
-   config
    fsm_model
    exceptions
+   multi_hops
    example
 
 Indices and tables

@@ -182,7 +182,7 @@ htmlhelp_basename = 'pycodoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyco.tex', u'pyco Documentation',
+  ('index', 'pyco.tex', u'pyco User Guide',
    u'Attilio Donà', 'manual'),
 ]
 

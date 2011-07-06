@@ -29,7 +29,6 @@ if hasattr(pyco, 'pyco_home'):
 # the shared configObj
 configObj = None
 
-
 class DeviceException(Exception):
 
     """This is the Device base exception class."""
@@ -590,6 +589,12 @@ class Device:
 
     * `password`
         the authenticated password
+        
+    * `protocol`
+        the transport protocol: actually ssh o telnet
+        
+    * `driver`
+        the FSM driver associated with this device
 
     In a normal usage scenario you dont use any of the Device methods apart the :meth:`pyco.device.Device.send_line` to send
     a string to the CLI in response to an event::
