@@ -130,7 +130,7 @@ class ExpectSession:
                
                 try:    
                     target.currentEvent = Event(target.get_event(patterns[index]))
-                except Exception as e:
+                except Exception, e:
                     if patterns[index] == TIMEOUT:
                         log.debug("[%s]: exception timeout triggered" % target.name)
                         target.currentEvent = Event('timeout', propagateToFsm = True)

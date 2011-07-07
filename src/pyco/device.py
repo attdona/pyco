@@ -1,4 +1,4 @@
-# coding=utf-8-sig
+# coding=utf-8
 '''
 Created on Mar 15, 2011
 
@@ -271,11 +271,25 @@ def parseUrl(url):
     '''
     from urlparse import urlparse #@UnresolvedImport
 
-    items = urlparse(url)
-    if items.scheme == '':
-        items = urlparse('ssh://' + url)
+    # Workaround 
+    # jython (and python?) 2.5.2 urlparse does not support the ssh schema
     
-    return (items.path, items.hostname, items.username, items.password, items.scheme, items.port)
+    if url.startswith('ssh://'):
+        purl = url.replace('ssh://', 'telnet://', 1)
+        sshScheme = True
+    else:
+        purl = url
+        sshScheme = False
+        
+    items = urlparse(purl)
+    
+    if items.scheme == '':
+        items = urlparse('telnet://' + url)
+    
+    if sshScheme:
+        return (items.path, items.hostname, items.username, items.password, 'ssh', items.port)
+    else:
+        return (items.path, items.hostname, items.username, items.password, items.scheme, items.port)
 
 
 def defaultEventHandler(device):
@@ -320,8 +334,12 @@ def discoverPromptCallback(device, tentativePrompt=None):
     if tentativePrompt is not None:
         output = tentativePrompt
     elif device.currentEvent.name == 'prompt-match':
+        
+        # TODO: manage a tuple of hints, for example
+        # output = (device.esession.pipe.before + device.esession.pipe.after, device.esession.pipe.after)
+        # because a multiline prompt actually is not correctly managed
         output = device.esession.pipe.after
-        log.debug('raw output: [%s]' % device.esession.pipe.after)
+        log.debug('raw output: [%s]' % output)
     elif device.currentEvent.name == 'timeout':
         output = device.esession.pipe.before
     else:
@@ -840,7 +858,7 @@ class Device:
         
         try:
             self.esession.login()
-        except ExpectException as e:
+        except ExpectException, e:
             # something go wrong, try to find the last connected hop in the path
             log.info("[%s]: in login phase got [%s] error" % (e.device.name ,e.__class__))
             log.debug("full interaction: [%s]" % e.interaction_log)
@@ -944,7 +962,7 @@ class Device:
             time.sleep(self.waitBeforeClearingBuffer)
             self.esession.pipe.expect('.*', timeout=1)
             
-        except Exception as e:
+        except Exception , e:
             log.debug("[%s] clear_buffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
 
 
@@ -1423,7 +1441,7 @@ try:
                 if not os.path.isfile(db_file):
                     log.debug('creating cache [%s] ...' % db_file)
                     createDB('sqlite://%s' % db_file)
-        except Exception as e:
+        except Exception , e:
             log.info('prompt cache is not enabled: %s' % e)
     
     
@@ -1434,7 +1452,7 @@ try:
             prompt = session.query(DevicePrompt).get((target.name,target.state))
             session.close()
             return prompt
-        except Exception as e:
+        except Exception, e:
             log.debug('no prompt cached: %s' % e)
             return None
     
@@ -1455,7 +1473,7 @@ try:
             transaction.commit()
     
             #session.close()
-        except Exception as e:
+        except Exception, e:
             log.error('no prompt saved: %s' % e)
             
     sql_powered = True
