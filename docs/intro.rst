@@ -36,19 +36,20 @@ The design and implementation philosophy of pyco is based upon the following poi
 	It must be easy define the behavoir of the communication pattern with a device through an
 	API that build the needed FSM.
 
-.. [#f] A driver is a configuration file and some python code that defines a device communication
- 	pattern.
- 	
  * A complete Exception System
  
  	The interaction errors arising in a network communications has to be correctly classified and managed
  	for assuring a robust and reliable automatic machine interaction.  
+
+.. [#f] A driver is a configuration file and some python code that defines a device communication
+ 	pattern.
  	
 
 For the impatients: the pyco short story
 ----------------------------------------
 
-Keep in mind that actually pyco is tested on 2.6 and 2.7 python version, so you must use one of such version.
+Keep in mind that actually pyco is tested with 2.6 and 2.7 python version, so you must use one of such version, even if it should
+works also with python 2.5.
 
 Install pyco as an egg, in the python os inntallation or in a virtualenv:
 

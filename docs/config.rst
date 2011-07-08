@@ -65,7 +65,7 @@ The following is a configuration example that define also the `linux` and a `cis
 		pattern = '(?i)connection refused'
 		action  = connectionRefused
 
-The *common* driver is used when no driver is defined in the device url:
+The *common* driver is used when no driver is defined in the device url, for example:
 
  ssh://user@myremotemachine
 
@@ -79,13 +79,22 @@ For example the following inherits all the [common] configurations and overwrite
 
    # enable/disable prompt discovery
    discoverPrompt = False
-		
+
+The `events` section defines the :term:`FSM` logic that models the interaction with the device. 
+
+The :ref:`fsm_model` section describes the meaning and syntax of a FSM machine described in terms of events, states and actions. 	
+
+A special action is `cliIsDefined`: only such action implements the prompt discovery logic controlled by the
+:ref:`discoverPrompt <config_discoverPrompt>`, :ref:`promptPattern <config_promptPattern>` and :ref:`cache <config_cache>` configuration parameter.  
+
 
 Configuration parameters
 ------------------------
 
 Below are reported all the pyco configuration parameters. In parenthesis the default values.
 
+  .. _config_cache:
+  
   *cache*
     a sqlite database cache holding the prompts discovered by pyco. the `cache` value `<prompt_cache>` is the sqlite filename:
     
@@ -98,6 +107,8 @@ Below are reported all the pyco configuration parameters. In parenthesis the def
   *checkIfOutputComplete* (False)
     if True enable another expect loop to check if more output arrived after 
     prompt match or the first expect loop timeout. This extra control slows down the the interaction.
+
+  .. _config_discoverPrompt:
   
   *discoverPrompt* (True|False)
   	enable the discovery prompt algorithm. If *discoverPrompt* is ``False`` the output returned by :py:meth:`pyco.device.Device.send()` is mixed with banners, input command and prompt strings.
@@ -112,6 +123,8 @@ Below are reported all the pyco configuration parameters. In parenthesis the def
 	* it may be a operational wait time needed for waiting the device output in the discovery prompt phase
 	* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received.
 	
+  .. _config_promptPattern:
+  
   *promptPattern*
     use this regular expression value as a hint for matching the cli prompt. If `promptPattern` is defined the discovery prompt
     algorithm is disabled also if the `discoverPrompt` is True.
