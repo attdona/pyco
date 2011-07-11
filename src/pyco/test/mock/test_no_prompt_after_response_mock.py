@@ -9,6 +9,7 @@ from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 from pyco import log
 import simulator
 
+import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
@@ -28,7 +29,7 @@ log = log.getLogger("test")
 class Test(unittest2.TestCase):
 
     def setUp(self):
-        self.responses = ['Username: ', 'password: ', 'router> ', 'router> ', 
+        self.responses = ['Username: ', 'password: ', 'router> ', 'router> ', 'router> ',
                           'some output\r\n -- More -- \r\n', 'more output \r\n -- More --\r\n', 'more and more\r\n -- More -- \r\n' ]
 
     @patch(spawnFunction)    

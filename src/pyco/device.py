@@ -896,20 +896,51 @@ class Device:
     def __call__(self, command):
         return self.send(command)
             
-    def send(self, command):
+    def send(self, script_or_template, param_map=None):
         '''
-        Send the command string to the device and return the command output.
+        Send the template script or a plain script to the device and return the command output.
         
         If the device is not connected first a :py:meth:`pyco.device.Device.login` is executed
         
-        After sending the command with :py:meth:`pyco.device.Device.send_line` activate a `processResponse` loop and awaits one of
-        the expected results or a timeout.
+        `param_map` is a dictionary containing the `key-value` entries used for creating the plain script from the template:
+        the key dictionary is the template keyword ${`key`} and `value` is the corresponding substituted value.
+        
+        if `param_map` is not defined it is assumed that `script_or_template` is a plain script and no substitution is performed.
         
         '''
         
         if self.state == 'GROUND':
             self.login()
+
+        if param_map:
+            template = Template(script_or_template)
+    
+            clicommand = StringIO()
+            context = Context(clicommand, **param_map)
+    
+            template.render_context(context)
+            
+            command = clicommand.getvalue()
+        else:
+            command = script_or_template
+            
+        out = ''
+        for line in command.split('\n'):
+            log.debug('[%s]: sending line [%s]' % (self.name, line))
+            if out != '':
+                out += '\n'
+            out += self.process_single_line(line)
+            
+        return out 
+
+    def process_single_line(self, command):
+        '''
+        Send the command string to the device and return the command output.
         
+        After sending the command with :py:meth:`pyco.device.Device.send_line` activate a `processResponse` loop and awaits one of
+        the expected results or a timeout.
+        
+        '''
         #self.clear_buffer()
         self.send_line(command)
 
@@ -951,9 +982,8 @@ class Device:
             out = out.replace(command.replace('\n','\r\n'), '', 1).strip('\r\n')  
         log.info("[%s:%s]: captured response [%s]" % (self.name, command, out))
         
-        return out 
+        return out
 
-           
     def clear_buffer(self):
         log.debug('clearing buffer ...')
         
@@ -964,6 +994,7 @@ class Device:
             
         except Exception , e:
             log.debug("[%s] clear_buffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
+            log.debug(e)
 
 
     def add_transition (self, input_symbol, state, action=None, next_state=None):
@@ -1294,6 +1325,8 @@ def reset():
     '''
     Delete the current configuration parameters
     '''
+    global DBSession
+    DBSession = None
     
     if configObj is None:
         return;

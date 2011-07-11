@@ -20,7 +20,7 @@ class Test(unittest2.TestCase):
         loadConfiguration(resource_filename('pyco.test.unit', 'test_nopromptdiscovery.cfg'))
         
     def tearDown(self):
-        #loadConfiguration()
+        loadConfiguration()
         pass
     
     def _testWithPromptDiscovery(self):

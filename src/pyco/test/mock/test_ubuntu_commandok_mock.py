@@ -9,6 +9,7 @@ from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 from pyco import log
 import simulator
 
+import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
@@ -32,7 +33,7 @@ Welcome to Ubuntu!\r
  * Documentation:  https://help.ubuntu.com/\r
 \r
 Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ''',
-'$ ', 'mocked id response\r\n$ ']
+'to be cleared by clear_buffer', '$ ', 'to be cleared by clear_buffer', 'mocked id response\r\n$ ']
   
         
 class Test(unittest2.TestCase):

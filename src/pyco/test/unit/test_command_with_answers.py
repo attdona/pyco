@@ -32,7 +32,7 @@ class Test(unittest2.TestCase):
         linux = Device(name = loginSuccessfullHost, username='netbox', password='netbox', protocol='ssh')
         
         def error(target):
-            raise AuthenticationFailed
+            raise PermissionDenied
         
         def sendSuPassword(target):
             target.send_line('pyco')

@@ -54,7 +54,7 @@ class Test(unittest2.TestCase):
     @patch(spawnFunction)    
     def testPromptDiscoveryDisabled(self, MockExpect):
         '''
-        If after invoking a cli command the expected prompt is not found in the response a timeout event is triggered. 
+        Disable the prompt discovery. 
         '''
         
         responses = ['pyco@localhost password: ', 
@@ -64,7 +64,9 @@ class Test(unittest2.TestCase):
         Welcome to Ubuntu!\r
          * Documentation:  https://help.ubuntu.com/\r
         \r
-        Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ some output''']
+        Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ some output''',
+        'i am pyco']
+        
         log.info("testLoginTimeout ...")
         h = device('telnet://u:p@h')
         h.discoverPrompt = False

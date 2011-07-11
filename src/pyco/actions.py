@@ -51,8 +51,8 @@ def setCliPrompt(target):
     target.add_expect_pattern('prompt-match', uprompt, target.state)
 
 
-def initCiscoCli(target):
-    log.debug('[%s] [%s]: initializing cisco ios cli shell' % (target.name, target.state))    
+#def initCiscoCli(target):
+#    log.debug('[%s] [%s]: initializing cisco ios cli shell' % (target.name, target.state))    
 
 
 def connectionRefused(target):

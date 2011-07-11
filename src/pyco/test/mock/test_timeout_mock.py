@@ -9,6 +9,7 @@ from pyco.device import device, LoginFailed, ConnectionTimedOut
 from pyco import log
 import simulator
 
+import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
@@ -27,8 +28,8 @@ log = log.getLogger("test")
 class Test(unittest2.TestCase):
 
     @patch(spawnFunction)    
-    def testLoginTimeout(self, MockExpect):
-        responses = ['unexpected response (expected password prompt)'] 
+    def _testLoginTimeout(self, MockExpect):
+        responses = ['unexpected response (expected password prompt)', 'to be cleared by clear_buffer'] 
 
         log.info("testLoginTimeout ...")
         h = device('telnet://u:p@h')
@@ -52,7 +53,7 @@ class Test(unittest2.TestCase):
          * Documentation:  https://help.ubuntu.com/\r
         \r
         Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ''',
-        '$ ', 'no prompt']
+        'to be cleared by clear_buffer', '$ ','to be cleared by clear_buffer', 'no prompt']
         log.info("testLoginTimeout ...")
         h = device('telnet://u:p@h')
 

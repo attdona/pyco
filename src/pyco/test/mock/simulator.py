@@ -62,8 +62,8 @@ def side_effect(*args, **kwargs):
     
     m = Mock()
     
-    def expect(patterns, maxTime):
-        return responder(m, side_effect.responses, patterns, maxTime)
+    def expect(patterns, timeout):
+        return responder(m, side_effect.responses, patterns, timeout)
 
     m.expect = expect
     

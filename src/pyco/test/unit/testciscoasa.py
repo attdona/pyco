@@ -13,17 +13,20 @@ from fixture import *
 # create logger
 log = log.getLogger("testciscoasa")
 
-@unittest2.skip("skip because device not more available")
+#@unittest2.skip("skip because device not more available")
 class Test(unittest2.TestCase):
 
-    def testTelnet(self):
-        url = "telnet://%s:%s@%s/ciscoios" % (asa1['username'], asa1['password'],asa1['name'])
+    def test(self):
+        '''
+        test with a ciscoios driver because similar to asa, at least for test purposes
+        '''
+        url = "ssh://%s:%s@%s/ciscoios" % (asa1['username'], asa1['password'],asa1['name'])
         
         h = device(url)
         h.login()
         out = h.send('show version')
         
-        log.debug('[[%s]]' % out)
+        self.assertRegexpMatches(out, 'Cisco Adaptive Security Appliance .*')
 
 
 if __name__ == "__main__":

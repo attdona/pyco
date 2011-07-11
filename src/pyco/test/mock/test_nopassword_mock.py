@@ -9,6 +9,7 @@ from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 from pyco import log
 import simulator
 
+import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 
 import re #@UnresolvedImport
@@ -29,7 +30,7 @@ class Test(unittest2.TestCase):
 
     def setUp(self):
         self.responses = ['Last login: Thu Feb 24 09:05:39 2011 from localhost\r\n$ ', 
-            '\r\n$ ', '\r\n$ ']
+            '\r\n$ ', '\r\n$ ', '\r\n$ ']
 
     @patch(spawnFunction)    
     def testNoPassword(self, MockExpect):

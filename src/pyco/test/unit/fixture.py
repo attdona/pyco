@@ -25,9 +25,9 @@ cisco1  =   {
              }            
              
 asa1 = {
-			 'name'    : '163.162.61.21',
-			 'username': 'cisco',
-			 'password': 'cisco'
+			 'name'    : '163.162.186.23',
+			 'username': 'ospita',
+			 'password': 'ospita'
 }
 
 hop1 = {
