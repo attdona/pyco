@@ -1,24 +1,24 @@
 Introduction
 ============
 
-The goal of Pyco project is to automates the interaction with systems and network devices 
+The goal of the Pyco project is to automate the interaction with systems and network devices 
 with a convention over configuration approach.
 
 Pyco is a python library based on `pexpect <http://www.noah.org/wiki/Pexpect>`_ tools written by Noah Spurrier and others contributors,
 and pexpect is inspired by the famous Don Libes `Expect` system.
 
-What you can do with pyco is for example:
+Some examples of what Pyco is useful for:
 
- * build a command line interface poller to acquire device data with ssh and telnet protocol
- * realize a powerful scripting template engine to automatically configure your network devices
- * build a system of distributed agents that manage the network and system configuration and keep
-   in sync your network inventory 
- * Reach a device that is not directedly reacheable through a path of intermediate hops,
+ * build a command line interface poller to acquire device data via Ssh and Telnet;
+ * create a powerful scripting template engine to automatically configure your network devices;
+ * build a system of distributed agents managing the network and system configuration, and keep
+   your network inventory in sync;
+ * interact with devices that are not otherwise directly accessible through a path of intermediate hops,
    every hop being a telnet or ssh connection.
- * Build a powerful pythonic Network Management System based an all the above 
+ * build a powerful pythonic Network Management System based an all the above.
 
 
-The design and implementation philosophy of pyco is based upon the following points:
+The design and implementation philosophy of Pyco is based upon the following points:
 
  * High Quality software through Test Driven Development
  	
@@ -29,31 +29,31 @@ The design and implementation philosophy of pyco is based upon the following poi
  * Convention Over Configuration
  
  	Pyco goal is to come out of the box with a number of driver [#f]_ configurations
- 	for interacting with many device platforms: linux, ciscoIOS, juniper, ...
+ 	for interacting with many device platforms: Linux, CiscoIOS, Juniper, ...
  	
  * API for finite state machine configuration
  
-	It must be easy define the behavoir of the communication pattern with a device through an
-	API that build the needed FSM.
+	It must be easy to define the behaviour of the interaction pattern with a device through an
+	API building the needed FSM.
 
  * A complete Exception System
  
- 	The interaction errors arising in a network communications has to be correctly classified and managed
- 	for assuring a robust and reliable automatic machine interaction.  
+ 	The interaction errors arising in network communications have to be correctly classified and managed
+ 	to ensure a robust and reliable automatic machine interaction.  
 
-.. [#f] A driver is a configuration file and some python code that defines a device communication
+.. [#f] A driver is a configuration file plus some Python code defining a device communication
  	pattern.
  	
 
-For the impatients: the pyco short story
+For the impatient: the Pyco short story
 ----------------------------------------
 
-Keep in mind that actually pyco is tested with 2.6 and 2.7 python version, so you must use one of such version, even if it should
-works also with python 2.5.
+Before trying anything, please keep in mind that Pyco is currently tested using Python 2.6 and 2.7, so it would be best for you to use said versions, even if it should
+work also with Python 2.5.
 
-Install pyco as an egg, in the python os inntallation or in a virtualenv:
+First, install the Pyco egg, either in the system Python path or in a virtualenv:
 
- #. download a pyco egg distribution from `google code <http://code.google.com/p/pyco/>`_
+ #. download a Pyco egg distribution from `google code <http://code.google.com/p/pyco/>`_
  #. easy_install pyco-<x.y.z>-py2.7.egg
 
 and then try a simple remote command::
@@ -62,23 +62,23 @@ and then try a simple remote command::
 	my_host = device('ssh://myUser:myPassword@myhost.acme.org')
 	response = my_host('uname -a')
 
-The response string will contain the command output, something like:
+The response string will contain the output of command ``uname -a``. It could look like the following:
 
 	`Linux cencenighe 2.6.32-29-generic #58-Ubuntu SMP Fri Feb 11 20:52:10 UTC 2011 x86_64 GNU/Linux`
 
-This is the simpler use case for interacting with a remote device. pyco use the default configuration stored into the package.
+The above is the simpliest use case of interaction with a remote device. In this case, Pyco is using the builtin configuration.
 
-If a FSM have to be customized for a specific device interaction you have to write a new :ref:`driver-configuration`, but this 
-is the long story side.
+If a FSM has to be customized for a specific device interaction, then you have to write a new :ref:`driver-configuration`, but this 
+is the longer side of the story.
 	
 
-For the courious: Pyco Theory
------------------------------
+For the curious: Pyco Theory
+----------------------------
 
-Pyco is based on FSM concepts, see for example http://en.wikipedia.org/wiki/Finite-state_machine for the concepts introduction.
+Pyco is based on FSM concepts (see for example http://en.wikipedia.org/wiki/Finite-state_machine for the concepts introduction).
 
-Automatic device communication using standard protocolos (ssh and telnet) is Pyco goal.
+The goal of Pyco is to automate device interaction using standard protocolos (Ssh and Telnet).
 
-Pyco may be seen therefore as a user that interact with a reactive system: a type of FSM classified as Transducer. 
+Therefore, Pyco may be seen as an user interacting with a reactive system: a type of FSM classified as Transducer. 
 
-See :ref:`fsm_model` for a detailed description.
+See also :ref:`fsm_model` for a detailed description.
