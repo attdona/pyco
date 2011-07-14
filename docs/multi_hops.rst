@@ -1,11 +1,11 @@
 Connecting through a path
 =========================
 
-pyco is able to connect to a remote device using a numbers of intermediate network device hops when the target device
-is non directly reacheable.
+Pyco is able to interact with a remote device also using one or more intermediate hops when the target device
+is not directly accessible.
 
-for example suppose that the router `r1` is reacheable via telnet from the `proxy` host and the `proxy` host is reacheable via
-ssh from the pyco machine::
+For example, let's suppose that router `r1` can be accessed only via Telnet from host `proxy`, which can in turn be
+accessed via SSH from the Pyco machine. This situation could be handled like this::
 
  from pyco.device import device
  
@@ -17,10 +17,10 @@ ssh from the pyco machine::
  
  r1('show version')
 
-First a ssh connection is established between the pyco machine and `proxy` host and then a telnet connection is established between the `proxy` and 
-the `r1`device.
-After the end to end connection is setup the command `show version` is executed.
+First an SSH connection is established between the Pyco machine and host `proxy`, and then a Telnet connection is established between host ``proxy`` and 
+the ``r1`` device.
+After the whole end-to-end connection is set up, we can proceed in executing the command ``show version`` on router ``r1``.
  
-In this scenario there is only one hop in the path from pyco machine and the target device, but the numbers of hops may be as much as needed. 
+In this example there is just one intermediate hop between the host running Pyco and the route, but as said before there can be any number of hops as needed. 
  
     

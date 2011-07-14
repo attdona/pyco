@@ -1,22 +1,22 @@
-Pyco for java
-==============
+Pyco with Jython
+================
 
-jython interpreter doesnt support pty extension required by pexpect so it is not possible to run pyco in a jython environment.
+It's not possible to use Pyco in a pure Jython environment, because the Jython interpreter provides no native support for the pty extension required by pexpect. 
 
-If you want to use pyco in a java environment a solution is to use `execnet <http://codespeak.net/execnet>`_ from jython to a cpython
+On the other hand, if you still want to use Pyco, a solution could be using an external Python interpreter controlled from the Jython environment using  the `execnet <http://codespeak.net/execnet>`_ extension.
 implementation that import the pyco package.
 
 
-java environment setup
+Java environment setup
 ----------------------
 
-Setup th ejython environment, java 1.5 or higher is required.
+First, set up the Jython environment (Java 1.5 or higher is required).
 
 #. download jython-installer-2.5.2.jar
-#. run `java -jar jython-installer-2.5.2.jar`
-#. assure that the PATH environment variable resolve a python executable that knows pyco 
+#. execute `java -jar jython-installer-2.5.2.jar`
+#. finally, set up your PATH enviroment variabile so it's possible to execute a Python interpreter where Pyco is available.
 
-Now you can use the execnet API to run the pyco library from a java enabled jython interpreter, for example::
+After doing that, you can use the execnet API to run the Pyco library (in the external C Python interpreter) from the Jython interpreter. For example::
 
  import execnet
  gw = execnet.makegateway("popen//python=python")
@@ -29,5 +29,5 @@ Now you can use the execnet API to run the pyco library from a java enabled jyth
 
  print (channel.receive())
 
-and keep going with using existing Java libraries from Python.
+and keep going with using existing Java libraries from Jython.
 

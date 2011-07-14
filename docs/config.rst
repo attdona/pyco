@@ -3,19 +3,19 @@
 Driver Configuration
 ====================
 
-If you need to define a new driver or change an existing one follow the following recipe:
+If you need to define a new driver or change an existing one follow the recipe below:
 
-#. set the environment variable PYCO_HOME pointing to the application root directory
-#. place a pyco.cfg configuration file in $PYCO_HOME/cfg
+#. set the PYCO_HOME environment variable to the name of your application's root directory
+#. place a ``pyco.cfg`` configuration file in ``$PYCO_HOME/cfg``
 
-The pyco configuration file is a .ini file containing the settings used in the device connection setup and command line communication.
+``pyco.cfg`` is a .ini configuration file specifying the settings used in setting up the device connection and command line interaction.
 
-Every section define a specific driver setup, where the section title is the name of the driver.
+Every section defines a specific driver setup, where the section title is the name of the driver.
 
-The special [common] section contains the setup of the default common driver.
+The special ``[common]`` section contains the setup of the default common driver.
 This is the only mandatory section that has to be defined.
 
-The following is a configuration example that define also the `linux` and a `ciscoios` driver::
+The following is a configuration example that define also the `linux` and a `ciscoios` drivers::
 
  [common]
 
@@ -65,13 +65,13 @@ The following is a configuration example that define also the `linux` and a `cis
 		pattern = '(?i)connection refused'
 		action  = connectionRefused
 
-The *common* driver is used when no driver is defined in the device url, for example:
+The *common* driver is used when no driver is specified in the device url, for example:
 
  ssh://user@myremotemachine
 
-The [linux] section contains the setup specific for the linux family of operating systems.
-Note the `parent` keyword: the [common] setup is inherited by [linux] driver if not overwritten by the most specific driver.
-For example the following inherits all the [common] configurations and overwrite the *discoverPrompt* flag:: 		
+The ``[linux]`` section contains definitions specific to the family of Linux-based operating systems.
+Please notice the `parent` keyword: it's used to make the ``[linux]`` setup inherits its values from the ``[common]`` driver, unless otherwise specified.
+For example the following definition inherits all the [common] configurations but overrides the *discoverPrompt* flag:: 		
 
   [linux]
 
@@ -80,9 +80,9 @@ For example the following inherits all the [common] configurations and overwrite
    # enable/disable prompt discovery
    discoverPrompt = False
 
-The `events` section defines the :term:`FSM` logic that models the interaction with the device. 
+The `events` section defines the :term:`FSM` logic modelling the interaction with the device. 
 
-The :ref:`fsm_model` section describes the meaning and syntax of a FSM machine described in terms of events, states and actions. 	
+The :ref:`fsm_model` section describes the meaning and syntax of a FSM machine, defined in terms of events, states and actions. 	
 
 A special action is `cliIsDefined`: only such action implements the prompt discovery logic controlled by the
 :ref:`discoverPrompt <config_discoverPrompt>`, :ref:`promptPattern <config_promptPattern>` and :ref:`cache <config_cache>` configuration parameter.  
@@ -96,17 +96,17 @@ Below are reported all the pyco configuration parameters. In parenthesis the def
   .. _config_cache:
   
   *cache*
-    a sqlite database cache holding the prompts discovered by pyco. the `cache` value `<prompt_cache>` is the sqlite filename:
+    the name of an SQLite database used by Pyco to cache user prompts as they are discovered. The `cache` value `<prompt_cache>` is the sqlite filename:
     
     * `$PYCO_HOME/<prompt_cache>` if the environment variable `PYCO_HOME` is set
     * `/tmp/<prompt_cache>` otherwise
     
-    The caching is enabled automatically if the cache parameter is defined: this requires that the `sqlalchemy` and `transaction` 
-    python are installed in the python environment. 
+    Caching is automatically enabled when the cache parameter is set. For it to work you also need  the  `sqlalchemy` and `transaction` 
+    Python packages (which must have been previously installed in the execution environment). 
 
   *checkIfOutputComplete* (False)
-    if True enable another expect loop to check if more output arrived after 
-    prompt match or the first expect loop timeout. This extra control slows down the the interaction.
+    when True, perform another expect loop to check if more output arrived after 
+    prompt match or the first expect loop timeout. This extra check slows down the interaction.
 
   .. _config_discoverPrompt:
   
@@ -114,35 +114,35 @@ Below are reported all the pyco configuration parameters. In parenthesis the def
   	enable the discovery prompt algorithm. If *discoverPrompt* is ``False`` the output returned by :py:meth:`pyco.device.Device.send()` is mixed with banners, input command and prompt strings.
 
   *exactPatternMatch* (False)
-  	if *True* performs exact pattern matching, so must be used defining the *event.pattern* field with an exact string and not with a regular expression.
+  	when *True*, perform exact string matching instead of the usual regexp matching. In this case, the *event.pattern* field must specify an exact string and not a regular expression.
 
   *maxWait* (5)
-	wait *maxWait* seconds for a device response before raising timeout event.
-	what happens when a *timeout* event is triggered depends on the FSM state:
+	wait *maxWait* seconds for a device response before triggering the timeout event.
+	What happens when a *timeout* event is triggered depends on the FSM state:
 	
-	* it may be a operational wait time needed for waiting the device output in the discovery prompt phase
-	* it may trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received.
+	* it could be an operational wait time needed for waiting the device output in the discovery prompt phase
+	* it could trigger a :py:exc:`pyco.device.ConnectionTimedOut` exception when a command response is not received.
 	
   .. _config_promptPattern:
   
   *promptPattern*
-    use this regular expression value as a hint for matching the cli prompt. If `promptPattern` is defined the discovery prompt
-    algorithm is disabled also if the `discoverPrompt` is True.
-    Keep in mind that this is a weaker match than the exactp prompt match implied by the prompt discovery algorithm, so be sure that the
-    command response does not contains a string that match this regular expression.
+    a regular expression used as an hint for matching the CLI prompt. Setting this value automatically disables the discovery prompt
+    algorithm (even if `discoverPrompt` is set to True).
+    Keep in mind that this is a weaker match than the exact prompt match implied by the prompt discovery algorithm, so ensure that the
+    command response does not contain a string matching this regular expression.
 
   *sshCommand* (ssh ${device.username}@${device.name})
-  	the ssh client template command used for connecting.  
+  	specifies the command line to execute the ssh client used for connecting.  
 
   *telnetCommand* (telnet ${device.name} ${device.port})
-  	the telnet client template command used for connecting.
+  	specifies the command line to execute the telnet client used for connecting.
   	
   *waitBeforeClearingBuffer* (1)
-  	wait waitBeforeClearingBuffer seconds for some more output before clearing the output buffer in the following cases:
+  	specifies the amount of seconds to wait for some more output before clearing the output buffer. It's used in the following circumstances:
 
   	* after the login phase and before sending the shell commands
-  	* after a promp discovery
+  	* after a prompt discovery
   	
-  	This time waste in necessary for avoiding spurious pattern matching in the FSM algorithm.  
+  	This wait is necessary to avoid spurious pattern matching in the FSM algorithm.  
   	
   	
