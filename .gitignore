@@ -1,0 +1,8 @@
+.project
+.pydevproject
+.settings
+build
+dist
+docs/_build
+src/pyco.egg-info/
+*.pyc
