@@ -9,7 +9,7 @@ import re #@UnresolvedImport
 import time
 from mako.template import Template #@UnresolvedImport
 from mako.runtime import Context #@UnresolvedImport
-from StringIO import StringIO #@UnresolvedImport
+from io import StringIO #@UnresolvedImport
 from validate import Validator #@UnresolvedImport
 from pkg_resources import resource_filename, resource_string, iter_entry_points #@UnresolvedImport
 
@@ -269,7 +269,7 @@ def device(url):
 def parseUrl(url):
     '''
     '''
-    from urlparse import urlparse #@UnresolvedImport
+    from urllib.parse import urlparse #@UnresolvedImport
 
     # Workaround 
     # jython (and python?) 2.5.2 urlparse does not support the ssh schema
@@ -395,6 +395,7 @@ def discoverPromptCallback(device, tentativePrompt=None):
                 device.add_expect_pattern('prompt-match', getExactStringForMatch(device.prompt[sts].value), sts)
                 device.discoveryCounter += 1
     else:
+        print("OUT: " + str(output))
         rows = output.split('\r\n')
         if hasattr(device, 'promptRegexp'):
             if output.startswith('\r\n'):
@@ -431,7 +432,7 @@ def buildPatternsList(device, driver=None):
         log.debug("skipping undefined [%s] section" % (driver.name))
         return
     
-    for (eventKey, eventData) in configObj[driver.name]['events'].items():
+    for (eventKey, eventData) in list(configObj[driver.name]['events'].items()):
 
         action=None
         if 'action' in eventData:
@@ -590,7 +591,7 @@ class FSMException(Exception):
         self.value = value
 
     def __str__(self):
-        return `self.value`
+        return repr(self.value)
 
 
 class Device:
@@ -663,13 +664,13 @@ class Device:
 
     def __getattr__(self, attrname):
         if attrname == 'driver':
-            raise AttributeError, attrname
+            raise AttributeError(attrname)
         else:
             #log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.driver))
             try:
                 return getattr(self.driver, attrname)
             except AttributeError:
-                raise AttributeError, attrname
+                raise AttributeError(attrname)
 
 
     def get_driver(self):
@@ -858,7 +859,7 @@ class Device:
         
         try:
             self.esession.login()
-        except ExpectException, e:
+        except ExpectException as e:
             # something go wrong, try to find the last connected hop in the path
             log.info("[%s]: in login phase got [%s] error" % (e.device.name ,e.__class__))
             log.debug("full interaction: [%s]" % e.interaction_log)
@@ -992,7 +993,7 @@ class Device:
             time.sleep(self.waitBeforeClearingBuffer)
             self.esession.pipe.expect('.*', timeout=1)
             
-        except Exception , e:
+        except Exception as e:
             log.debug("[%s] clear_buffer timeout: cleared expect buffer (%s)" % (self.name, e.__class__))
             log.debug(e)
 
@@ -1104,11 +1105,11 @@ class Device:
         5. No transition was defined. If we get here then raise an exception.
         """
 
-        if self.state_transitions.has_key((input_symbol, state)):
+        if (input_symbol, state) in self.state_transitions:
             return self.state_transitions[(input_symbol, state)]
-        elif self.state_transitions_any.has_key (state):
+        elif state in self.state_transitions_any:
             return self.state_transitions_any[state]
-        elif self.input_transitions_any.has_key(input_symbol):
+        elif input_symbol in self.input_transitions_any:
             return self.input_transitions_any[input_symbol]
         elif self.default_transition is not None:
             return self.default_transition
@@ -1168,9 +1169,9 @@ class Device:
         Return the pattern list to match the device output 
         '''
         try:
-            return self.patternMap[state].keys() + self.patternMap['*'].keys()
+            return list(self.patternMap[state].keys()) + list(self.patternMap['*'].keys())
         except:
-            return self.patternMap['*'].keys()
+            return list(self.patternMap['*'].keys())
 
     def add_event_action(self, event, pattern=None, beginState=['*'], endState=None, action=None):
         '''
@@ -1178,7 +1179,7 @@ class Device:
         
         If pattern is None only a transition is configured
         '''
-        if isinstance(beginState, basestring):
+        if isinstance(beginState, str):
             beginState = [beginState]
         
         for state in beginState:
@@ -1194,7 +1195,7 @@ class Device:
                 continue
             
             try:
-                reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
+                reverseMap = dict([(item[1],item[0]) for item in list(self.patternMap[state].items())])
                 self.patternMap[state][pattern] = event
                 log.debug('[%s-%s]: configuring [%s] event [%s]' % (self.name, state, pattern, event))
                 if event in reverseMap and pattern != reverseMap[event]:
@@ -1243,7 +1244,7 @@ class Device:
             
 
     def remove_event(self, event, state = '*'):
-        reverseMap = dict(map(lambda item: (item[1],item[0]), self.patternMap[state].items()))
+        reverseMap = dict([(item[1],item[0]) for item in list(self.patternMap[state].items())])
         if event in reverseMap:
             pattern = reverseMap[event]
             self.remove_pattern(pattern, state)
@@ -1296,8 +1297,8 @@ def load(config):
     
     configObj = config
     
-    for section in config.keys():
-        for (key,value) in config[section].items():
+    for section in list(config.keys()):
+        for (key,value) in list(config[section].items()):
             if value is None:
                 log.debug("skipping [%s.%s] undefined value" % (section, key))
                 continue
@@ -1331,8 +1332,8 @@ def reset():
     if configObj is None:
         return;
     
-    for section in configObj.keys():
-        for (key,value) in configObj[section].items():
+    for section in list(configObj.keys()):
+        for (key,value) in list(configObj[section].items()):
             log.debug("deleting %s.%s (was %s)" % (section, key, value))
            
             try:
@@ -1363,7 +1364,7 @@ class DriverException(Exception):
         self.value = value
 
     def __str__(self):
-        return `self.value`
+        return repr(self.value)
 
 class DriverNotFound(DriverException):
     pass
@@ -1395,14 +1396,14 @@ class Driver:
 
     def __getattr__(self, attrname):
         if attrname == 'parent':
-            raise AttributeError, attrname
+            raise AttributeError(attrname)
         else:
             #log.debug("[%s] delegating search for [%s] to [%s]" % (self, attrname, self.parent))
             try:
                 pDriver = Driver.get(self.parent)
                 return getattr(pDriver, attrname)
             except AttributeError:
-                raise AttributeError, attrname
+                raise AttributeError(attrname)
             
 
     @staticmethod
@@ -1474,7 +1475,7 @@ try:
                 if not os.path.isfile(db_file):
                     log.debug('creating cache [%s] ...' % db_file)
                     createDB('sqlite://%s' % db_file)
-        except Exception , e:
+        except Exception as e:
             log.info('prompt cache is not enabled: %s' % e)
     
     
@@ -1485,7 +1486,7 @@ try:
             prompt = session.query(DevicePrompt).get((target.name,target.state))
             session.close()
             return prompt
-        except Exception, e:
+        except Exception as e:
             log.debug('no prompt cached: %s' % e)
             return None
     
@@ -1506,7 +1507,7 @@ try:
             transaction.commit()
     
             #session.close()
-        except Exception, e:
+        except Exception as e:
             log.error('no prompt saved: %s' % e)
             
     sql_powered = True

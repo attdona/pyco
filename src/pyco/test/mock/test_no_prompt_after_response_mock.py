@@ -7,7 +7,7 @@ import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
-import simulator
+from . import simulator
 
 import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport

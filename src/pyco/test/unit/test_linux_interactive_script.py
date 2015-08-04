@@ -8,7 +8,7 @@ from pkg_resources import resource_filename #@UnresolvedImport
 
 from pyco.device import *
 from pyco import log
-from fixture import *
+from .fixture import *
 
 # create logger
 log = log.getLogger("testlinux")

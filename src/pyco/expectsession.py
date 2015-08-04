@@ -4,11 +4,11 @@ Created on Feb 21, 2011
 @author: adona
 '''
 import sys
-import StringIO #@UnresolvedImport
+import io #@UnresolvedImport
 if sys.platform != 'win32':
-    from pexpect import spawn, TIMEOUT, EOF #@UnresolvedImport
+    from pexpect import spawnu, TIMEOUT, EOF #@UnresolvedImport
 else:
-    from winpexpect import winspawn as spawn, TIMEOUT, EOF #@UnresolvedImport
+    from winpexpect import winspawnu as spawnu, TIMEOUT, EOF #@UnresolvedImport
 
     
 from pyco.device import Event, device, ConnectionTimedOut #@UnresolvedImport
@@ -41,7 +41,7 @@ class ExpectSession:
         self.hops = hops + [target]
 
         # in memory log
-        self.logfile = StringIO.StringIO()
+        self.logfile = io.StringIO()
 
         # key is a hop object, value is the hop fsm current state
         #self.currentState = {}
@@ -95,10 +95,10 @@ class ExpectSession:
         if hasattr(self, 'pipe'):
             self.send_line(cmd)
         else:
-            # TODO: close the spawned session
+            # TODO: close the spawnued session
             # send the connect string to pexpect
             log.debug("[%s]: spawning a new [%s] session ..." % (target, cmd)) 
-            self.pipe = spawn(cmd, logfile=self.logfile)
+            self.pipe = spawnu(cmd, logfile=self.logfile)
         self.processResponse(target, loginSuccessfull)
 
     def send_line(self, command):
@@ -130,7 +130,7 @@ class ExpectSession:
                
                 try:    
                     target.currentEvent = Event(target.get_event(patterns[index]))
-                except Exception, e:
+                except Exception as e:
                     if patterns[index] == TIMEOUT:
                         log.debug("[%s]: exception timeout triggered" % target.name)
                         target.currentEvent = Event('timeout', propagateToFsm = True)
@@ -155,7 +155,7 @@ class ExpectSession:
            
             stateChanged = target.process(target.currentEvent)
             response += self.pipe.before
-            if isinstance(self.pipe.after, basestring) and not target.currentEvent.isPromptMatch():
+            if isinstance(self.pipe.after, str) and not target.currentEvent.isPromptMatch():
                 response += self.pipe.after
 
         return response

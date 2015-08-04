@@ -7,7 +7,7 @@ import unittest2
 from pyco.device import device, PermissionDenied
 
 from pyco import log
-import simulator
+from . import simulator
 
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
 

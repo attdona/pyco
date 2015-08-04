@@ -41,8 +41,8 @@ source_encoding = 'utf-8-sig'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pyco'
-copyright = u'2011, Attilio Donà'
+project = 'pyco'
+copyright = '2011, Attilio Donà'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -182,8 +182,8 @@ htmlhelp_basename = 'pycodoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyco.tex', u'pyco User Guide',
-   u'Attilio Donà', 'manual'),
+  ('index', 'pyco.tex', 'pyco User Guide',
+   'Attilio Donà', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -215,6 +215,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyco', u'pyco Documentation',
-     [u'Attilio Donà'], 1)
+    ('index', 'pyco', 'pyco Documentation',
+     ['Attilio Donà'], 1)
 ]

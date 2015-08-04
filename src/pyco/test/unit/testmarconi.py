@@ -11,7 +11,7 @@ from pyco.device import *
 
 from pyco import log
 
-from fixture import *
+from .fixture import *
 
 #pyco.config.loadConfiguration()
 

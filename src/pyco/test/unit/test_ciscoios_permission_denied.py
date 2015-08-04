@@ -5,7 +5,7 @@ Created on Apr 4, 2011
 '''
 import unittest2 #@UnresolvedImport
 
-from fixture import cisco1
+from .fixture import cisco1
 from pyco.device import device, PermissionDenied
 
 class Test(unittest2.TestCase):

@@ -6,3 +6,5 @@ dist
 docs/_build
 src/pyco.egg-info/
 *.pyc
+*.bak
+*.old

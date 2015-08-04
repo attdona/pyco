@@ -23,7 +23,7 @@ log = log.getLogger("sim")
 def responder(mock, responses, patterns, maxTime):
     
     log.debug('entering MOCK responder')
-    print patterns
+    print(patterns)
 
     #return the index relative to event_name
     response = responses.pop(0)
@@ -56,7 +56,7 @@ def responder(mock, responses, patterns, maxTime):
     else:
         mock.before = response
         mock.after = TIMEOUT
-        raise TIMEOUT, 'wait time exceeded'
+        raise TIMEOUT('wait time exceeded')
 
 def side_effect(*args, **kwargs):
     
