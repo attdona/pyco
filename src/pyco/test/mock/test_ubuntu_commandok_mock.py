@@ -7,7 +7,7 @@ import unittest2 #@UnresolvedImport
 from pyco.device import device, ConnectionRefused, ConnectionTimedOut
 
 from pyco import log
-import simulator
+from . import simulator
 
 import pyco.test.mock
 from mock import Mock, patch, patch_object, sentinel #@UnresolvedImport
@@ -44,7 +44,7 @@ class Test(unittest2.TestCase):
         h = device('telnet://u:p@h')
         h.maxWait = 20
 
-        print h.patternMap['GROUND']
+        print(h.patternMap['GROUND'])
 
         MockExpect.side_effect = simulator.side_effect
         simulator.side_effect.responses = responses

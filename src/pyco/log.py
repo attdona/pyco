@@ -16,7 +16,7 @@ else:
 try:    
     logging.config.fileConfig(logfile)
 except:
-    print('failed to setup the log system: wrong logfile path? (check if [%s] exists)' % logfile)
+    print(('failed to setup the log system: wrong logfile path? (check if [%s] exists)' % logfile))
     
 def getLogger(logId):
     return logging.getLogger(logId)

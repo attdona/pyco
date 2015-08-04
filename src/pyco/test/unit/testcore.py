@@ -13,7 +13,7 @@ from configobj import ConfigObj
 from pyco.device import *
 from pyco import log
 
-from fixture import *
+from .fixture import *
 
 # create logger
 log = log.getLogger("test")

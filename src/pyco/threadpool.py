@@ -4,7 +4,7 @@ Created on Mar 9, 2011
 @author: tt005893
 '''
 
-from Queue import Queue
+from queue import Queue
 from threading import Thread
 
 class Worker(Thread):
@@ -19,7 +19,7 @@ class Worker(Thread):
         while True:
             func, args, kargs = self.tasks.get()
             try: func(*args, **kargs)
-            except Exception, e: print e
+            except Exception as e: print(e)
             self.tasks.task_done()
 
 class ThreadPool:
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     
     from time import sleep
     def wait_delay(d):
-        print 'sleeping for (%d)sec' % d
+        print('sleeping for (%d)sec' % d)
         sleep(d)
     
     # 1) Init a Thread pool with the desired number of threads
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     
     for i, d in enumerate(delays):
         # print the percentage of tasks placed in the queue
-        print '%.2f%c' % ((float(i)/float(len(delays)))*100.0,'%')
+        print('%.2f%c' % ((float(i)/float(len(delays)))*100.0,'%'))
         
         # 2) Add the task to the queue
         pool.add_task(wait_delay, d)

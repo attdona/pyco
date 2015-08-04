@@ -5,7 +5,7 @@ Created on Apr 4, 2011
 '''
 import unittest2 #@UnresolvedImport
 
-from fixture import localhost
+from .fixture import localhost
 from pyco.device import device
 
 class Test(unittest2.TestCase):
@@ -32,7 +32,7 @@ netstat -n | grep ${monitored_port}
 
         out = h.send(template, field_map)
         
-        print '<<%s>>' % out
+        print('<<%s>>' % out)
 
 
 
