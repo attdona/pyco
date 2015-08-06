@@ -8,7 +8,7 @@ Pyco is a python 3 library based on [pexpect](http://www.noah.org/wiki/pexpect) 
 For a quick taste this is the short story for the basic Pyco usage:
 
 ```
-from netcube.device import device
+from pyco.device import device
 
 myHost = device('ssh://willy:coyote@beepbeep.acme.com')
 
