@@ -5,5 +5,5 @@ python:
 install: "pip install -r requirements.txt"
 # command to run tests
 script:
- - sim/telserver.py
+ - sim/telserver.py &
  - nosetests src/pyco/test/unit/test_fake.py
