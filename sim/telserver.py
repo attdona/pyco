@@ -122,12 +122,10 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
 
-    with open('sim.cfg', 'rb') as f:
+    with open('sim/sim.cfg', 'rb') as f:
         config = toml.load(f)
     
     #print(config['commands'].keys())
-
-    print(config['CONSOLE']['commands']['ls'])
 
     # Create a telnet server with a port, address,
     # a function to call with new connections
