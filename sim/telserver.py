@@ -6,24 +6,35 @@ Chat Room Demo for Miniboa.
 
 import logging
 from miniboa import TelnetServer
+import pytoml as toml
+from test.regrtest import PASSED
 
 IDLE_TIMEOUT = 300
 CLIENT_LIST = []
 SERVER_RUN = True
 
 
+def reset(client):
+    global login_count
+    
+    client.active = False
+    
+
 def on_connect(client):
     """
     Sample on_connect function.
     Handles new connections.
     """
+    global config
+
     logging.info("Opened connection to {}".format(client.addrport()))
-    broadcast("{} joins the conversation.\n".format(client.addrport()))
+    #broadcast("{} joins the conversation.\n".format(client.addrport()))
     CLIENT_LIST.append(client)
-    client.send("Welcome to the Chat Server, {}.\n".format(client.addrport()))
 
-    client.send("login: ")
+    client.send(config['banner'])
+    #client.send("Welcome to the Chat Server, {}.\n".format(client.addrport()))
 
+    client.send(config['LOGIN']['response'])
 
 def on_disconnect(client):
     """
@@ -32,7 +43,7 @@ def on_disconnect(client):
     """
     logging.info("Lost connection to {}".format(client.addrport()))
     CLIENT_LIST.remove(client)
-    broadcast("{} leaves the conversation.\n".format(client.addrport()))
+    #broadcast("{} leaves the conversation.\n".format(client.addrport()))
 
 
 def kick_idle():
@@ -46,15 +57,54 @@ def kick_idle():
             client.active = False
 
 
+
 def process_clients():
     """
     Check each client, if client.cmd_ready == True then there is a line of
     input available via client.get_command().
     """
+    global SERVER_RUN, config
+
     for client in CLIENT_LIST:
         if client.active and client.cmd_ready:
             # If the client sends input echo it to the chat room
-            chat(client)
+            #chat(client)
+            msg = client.get_command()
+            
+
+            if (not hasattr(client, 'status')):
+                client.status = 'LOGIN'
+                client.failed_logins = 0
+                
+            if (client.status == 'LOGIN'):
+                config['username'] = msg
+                print("login username: " + config['username'])
+                client.status = config['LOGIN']['next_status']
+
+            elif (client.status == 'PASSWD'):
+                if (config[client.status]['password'] == msg):
+                    client.status = config[client.status]['next_status']
+                elif (client.failed_logins == 1):
+                    reset(client)
+                else:
+                    client.send('\nLogin incorrect\n')
+                    client.status = 'LOGIN'
+                    client.failed_logins += 1
+                    
+            sts = client.status
+            if ('commands' in config[sts] and msg in config[sts]['commands']):
+                client.send(config[sts]['commands'][msg] + "\n")
+
+            client.send(config[sts]['response'])
+                
+            cmd = msg.lower()
+            # bye = disconnect
+            if cmd == 'exit':
+                reset(client)
+            # shutdown == stop the server
+            elif cmd == 'shutdown':
+                SERVER_RUN = False
+
 
 
 def broadcast(msg):
@@ -65,35 +115,19 @@ def broadcast(msg):
         client.send(msg)
 
 
-def chat(client):
-    """
-    Echo whatever client types to everyone.
-    """
-    global SERVER_RUN
-    msg = client.get_command()
-    logging.info("{} says '{}'".format(client.addrport(), msg))
-
-    for guest in CLIENT_LIST:
-        if guest != client:
-            guest.send("{} says '{}'\n".format(client.addrport(), msg))
-        else:
-            guest.send("You say '{}'\n".format(msg))
-
-    cmd = msg.lower()
-    # bye = disconnect
-    if cmd == 'exit':
-        client.active = False
-    # shutdown == stop the server
-    elif cmd == 'shutdown':
-        SERVER_RUN = False
-
-
 if __name__ == '__main__':
 
     # Simple chat server to demonstrate connection handling via the
     # async and telnet modules.
 
     logging.basicConfig(level=logging.DEBUG)
+
+    with open('sim.cfg', 'rb') as f:
+        config = toml.load(f)
+    
+    #print(config['commands'].keys())
+
+    print(config['CONSOLE']['commands']['ls'])
 
     # Create a telnet server with a port, address,
     # a function to call with new connections
