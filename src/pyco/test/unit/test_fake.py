@@ -5,6 +5,7 @@ Created on Mar 21, 2011
 '''
 import unittest #@UnresolvedImport
 from pyco.device import device, ConnectionRefused
+from os import environ
 
 from pyco import log
 
@@ -13,6 +14,7 @@ log = log.getLogger("test")
 
 class Test(unittest.TestCase):
     
+    @unittest.skip("skipping")
     def testFakeOk(self):
         print("should not work")
         log.info("testFakeOk ...")
@@ -21,6 +23,14 @@ class Test(unittest.TestCase):
         out = h('id')
         self.assertRegexpMatches(out, 'uid=[0-9]+\(pyco\).*')
 
+    def testNativeTelnet(self):
+        log.info("testNative ...")
+        user = environ['USER']
+        log.info("USER: [%s]" % user)
+        h = device('telnet://%s:%s@%s' % (user, user, 'localhost'))
+        h.maxWait = 10
+        out = h('id')
+        log.info(out)
  
  
 

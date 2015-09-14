@@ -32,7 +32,11 @@ def sendPassword(target):
     # check if the expect session detect a cli shell 
     #cliIsConnected(target)
 
-
+def wrongCredentials(target):
+    log.info("wrong username/password")
+    raise PermissionDenied(target)
+    
+    
 def setCliPrompt(target):
     '''
     setCliPrompt may be used when the device cli supports the PS1 command for setting the prompt.
