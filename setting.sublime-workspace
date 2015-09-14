@@ -1,0 +1,560 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"S",
+				"STATUS"
+			],
+			[
+				"te",
+				"template"
+			],
+			[
+				"pro",
+				"process"
+			],
+			[
+				"time",
+				"timeval"
+			],
+			[
+				"P",
+				"HTTP_PROXY"
+			],
+			[
+				"U",
+				"uncaughtException"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "sim/telserver.py",
+			"settings":
+			{
+				"buffer_size": 3420,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "sim/sim.cfg",
+			"settings":
+			{
+				"buffer_size": 398,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/pyco/test/unit/test_fake.py",
+			"settings":
+			{
+				"buffer_size": 647,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/attilio/Documents/LiClipse Workspace/tsim/toml_test.py",
+			"settings":
+			{
+				"buffer_size": 241,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 327.0,
+		"selected_items":
+		[
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/attilio/Documents/LiClipse Workspace/tsim/sim.cfg",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/.gitignore",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/setup.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/requirements.txt",
+		"/home/attilio/Documents/LiClipse Workspace/tsim/telserver.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/src/pyco/test/unit/test_telnet_ok.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/src/pyco/test/unit/test_fake.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/.travis.yml",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/gdb_template",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/tests/hwtimer.py",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/board_test.sh",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/Makefile.include",
+		"/home/attilio/RIOT/examples/leds_and_buttons/main.c",
+		"/home/attilio/RIOT/examples/leds_and_buttons/bin/cc3200-launchxl/a.S",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/test.gdb",
+		"/home/attilio/RIOT/Makefile.buildtests",
+		"/home/attilio/RIOT/Makefile.application",
+		"/home/attilio/RIOT/Makefile.base",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/unit_test.py",
+		"/home/attilio/RIOT-netdev/RIOT/boards/cc3200-launchxl/dist/cc3200.cfg",
+		"/home/attilio/RIOT-netdev/RIOT/boards/cc3200-launchxl/dist/debug.sh",
+		"/home/attilio/RIOT-netdev/RIOT/boards/cc3200-launchxl/Makefile.include",
+		"/home/attilio/RIOT-netdev/RIOT/boards/cc3200-launchxl/dist/gdbinit",
+		"/home/attilio/RIOT-netdev/RIOT/boards/cc3200-launchxl/Makefile",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/src/pyco/test/unit/__init__.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/src/pyco/test/unit/fixture.py",
+		"/home/attilio/RIOT-netdev/RIOT/examples/gnrc_networking/bin/cc3200-launchxl/r.S",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/board.c",
+		"/home/attilio/RIOT/boards/Makefile.include.cortexm_common",
+		"/home/attilio/RIOT/cpu/cc3200/periph/timer.c",
+		"/home/attilio/RIOT/cpu/lm4f120/periph/timer.c",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/gdbinit",
+		"/home/attilio/RIOT/cpu/cc2538/hwtimer_arch.c",
+		"/home/attilio/RIOT/cpu/cc2538/periph/timer.c",
+		"/home/attilio/RIOT/core/hwtimer.c",
+		"/home/attilio/RIOT/examples/leds_and_buttons/gdbinit",
+		"/home/attilio/Documents/LiClipse Workspace/miniboa-py3/chat_demo.py",
+		"/home/attilio/Documents/LiClipse Workspace/miniboa-py3/miniboa/__init__.py",
+		"/home/attilio/Documents/LiClipse Workspace/miniboa-py3/miniboa/async.py",
+		"/home/attilio/Documents/LiClipse Workspace/miniboa-py3/miniboa/telnet.py",
+		"/home/attilio/Documents/LiClipse Workspace/tsim/toml_test.py",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/Makefile",
+		"/home/attilio/RIOT/.gitignore",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/cc3200.cfg",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/debug.sh",
+		"/home/attilio/dev/ols-0.9.7.2/README",
+		"/home/attilio/RIOT/boards/cc3200-launchxl/dist/flash.sh",
+		"/home/attilio/Documents/LiClipse Workspace/nose-1.3.7/bin/nosetests",
+		"/home/attilio/meteor/simple-todo/simple-todo.css",
+		"/home/attilio/nodejs-school/test.txt",
+		"/home/attilio/nodejs-school/program.js",
+		"/home/attilio/nodejs-school/scope.js",
+		"/home/attilio/.bashrc",
+		"/home/attilio/meteor/simple-todo/simple-todo.js",
+		"/home/attilio/meteor/etrentin/etrentin.css",
+		"/home/attilio/meteor/etrentin/etrentin.js",
+		"/home/attilio/node-red/mosca/server.js",
+		"/home/attilio/node-red/mosca/client-demo.js",
+		"/home/attilio/node-red/node-red/README.md",
+		"/home/attilio/meteor/filo/filo.css",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/src/pyco/test/unit/testcore.py",
+		"/home/attilio/Documents/LiClipse Workspace/pyco/README.md",
+		"/usr/local/lib/python3.4/dist-packages/pexpect/__init__.py",
+		"/home/attilio/meteor/filo/filo.js",
+		"/home/attilio/meteor/filo/filo.html",
+		"/home/attilio/meteor/etrentin/etrentin.html",
+		"/home/attilio/dev/openwsn-fw/bsp/boards/OpenMote-CC2538/board.c",
+		"/home/attilio/meteor/simple-todo/simple-todo.html",
+		"/home/attilio/meteor/etrentin/.lib/data/NEW.csv",
+		"/home/attilio/meteor/etrentin/.lib/config/env/development.js",
+		"/home/attilio/meteor/etrentin/.lib/config/config.js",
+		"/home/attilio/etrentin/data/ooutils.py",
+		"/home/attilio/etrentin/data/ssconverter.py",
+		"/home/attilio/meteor/etrentin/.lib/data/TRENTIN.csv",
+		"/home/attilio/meteor/etrentin/.lib/load-db-full.js",
+		"/home/attilio/meteor/simple-todo/TRENTIN.csv",
+		"/home/attilio/etrentin/load-db.js",
+		"/home/attilio/dev/etrentin/data/TRENTIN.csv",
+		"/home/attilio/dev/etrentin/load-db.js",
+		"/home/attilio/nodejs-school/stream1.js",
+		"/home/attilio/nodejs-school/http_get.js",
+		"/home/attilio/nodejs-school/lesson13.js",
+		"/home/attilio/nodejs-school/collect.js",
+		"/home/attilio/nodejs-school/html_stream.js",
+		"/home/attilio/nodejs-school/duplex.js",
+		"/home/attilio/nodejs-school/dirreader.js",
+		"/home/attilio/nodejs-school/lesson9.js",
+		"/home/attilio/nodejs-school/lesson10.js",
+		"/home/attilio/nodejs-school/concat.js",
+		"/home/attilio/nodejs-school/http_server.js",
+		"/home/attilio/nodejs-school/http_client.js",
+		"/home/attilio/nodejs-school/web_socket.js",
+		"/home/attilio/dev/CC3200SDK_1.1.0/cc3200-sdk/example/interrupt/main.c",
+		"/home/attilio/.themes/MyRadiance/gtk-3.0/apps/gnome-terminal.css",
+		"/home/attilio/.themes/MyRadiance/gtk-3.0/apps/unity.css",
+		"/home/attilio/docker/kanban/docker-compose.yml",
+		"/home/attilio/docker/foo.sh",
+		"/home/attilio/docker/Dockerfile",
+		"/home/attilio/MIOT/interrupt/gdbinit",
+		"/home/attilio/MIOT/div/Debug/div.s",
+		"/home/attilio/dev/CC3200SDK_1.1.0/cc3200-sdk/inc/hw_ints.h",
+		"/home/attilio/dev/CC3200SDK_1.1.0/cc3200-sdk/driverlib/interrupt.h",
+		"/home/attilio/MIOT/interrupt/startup_gcc.c",
+		"/home/attilio/MIOT/interrupt/Debug/int.S",
+		"/home/attilio/MIOT/interrupt/gdb.cmd",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/stm32f4/periph/spi.c",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/stm32f4/stm32f407vg_linkerscript.ld",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/stm32f4/Makefile",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/stm32f4/Makefile.include",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/stm32f4/startup.c",
+		"/home/attilio/MIOT/RIOT_CC3200/boards/stm32f4discovery/include/board.h",
+		"/home/attilio/MIOT/RIOT_CC3200/cpu/cortex-m4_common/include/cpu.h",
+		"/home/attilio/etrentin/app/views/index.html",
+		"/home/attilio/etrentin/load-db-full.js",
+		"/home/attilio/etrentin/app/scripts/app.js",
+		"/home/attilio/etrentin/app/scripts/controllers/main.js",
+		"/home/attilio/etrentin/app/views/partials/main.html",
+		"/home/attilio/etrentin/app/styles/main.scss",
+		"/home/attilio/etrentin/data/TRENTIN.csv",
+		"/home/attilio/dev/micropython/cc3200/make.log",
+		"/home/attilio/dev/RIOT-CC3200/README.md",
+		"/home/attilio/dev/micropython/cc3200/bootmgr/relocator/relocator.bin",
+		"/home/attilio/dev/CC3200SDK_1.1.0/cc3200-sdk/tools/gcc_scripts/gdbinit",
+		"/home/attilio/etrentin/data/TRENTIN.csv.sav",
+		"/home/attilio/etrentin/bower.json",
+		"/home/attilio/etrentin/Gruntfile.js",
+		"/home/attilio/etrentin/app/scripts/directives/proverb.js",
+		"/home/attilio/etrentin/app/scripts/services/translate.js"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"debug",
+			"test",
+			"20004d71",
+			"gpio_init",
+			"through2",
+			"])",
+			"cc110x.c",
+			"EXTERNAL_MODULE_DIRS",
+			"update_interval",
+			"get_url",
+			"update_interval",
+			"request_timeout",
+			"update_interval",
+			"request_timeout",
+			"get_url",
+			"update_interval",
+			"rp_osc_sig_mutex",
+			"rp_osc_get_signals",
+			"get_signals_func",
+			"rp_osc_set_signals",
+			"rp_osc_signals",
+			"rp_osc_get_signals",
+			"SIGNALS_NUM",
+			"rp_bazaar_app_load_module",
+			"app_file",
+			"c_rp_get_signals_str",
+			"get_signals_func",
+			"rp_data_get_signals",
+			"ngx_http_rp_bazaar_cmd",
+			"rp_module_send_response",
+			"rp_data_cmd_handler",
+			"ngx_http_dav_loc_conf_t",
+			"ngx_http_rp_create_loc_conf",
+			"ngx_http_rp_loc_conf_t",
+			"gui_reset_y_range",
+			"axes.yaxis.max",
+			"yrange",
+			"range_y",
+			"range-badge",
+			"meas_min_ch1",
+			"toFixed",
+			"wrong appl",
+			"get_url",
+			"data?",
+			"jade",
+			"KIGITHUB",
+			"type Github",
+			"TERMPROG",
+			"term",
+			"msp430_use_f5_series_hwmult",
+			"__multi2_f5",
+			"__multi2_fs",
+			"MPY_OP1",
+			"main",
+			"ui2a",
+			"6df6",
+			"ui2a",
+			"cc110x",
+			"/Makefile",
+			"transc",
+			"DIRS",
+			"USEMODULE",
+			"transc",
+			"include",
+			"DIRS",
+			"drivers",
+			"BSP430_CORE_DELAY_CYCLES",
+			"pre",
+			"GetNameOfUsbIf",
+			"MSP430_GetNameOfUsbIf",
+			"MSP430_GetNumberOfUsbIfs",
+			"report_error",
+			"MSP430_GetNumberOfUsbIfs",
+			"getPortElement",
+			"GetNameOfUsbIf",
+			"manager",
+			"GetNameOfUsbIf",
+			"MSP430_GetNameOfUsbIf",
+			"newlib",
+			"a7c2",
+			"#0x8c74",
+			"call #0x8c74",
+			"call	#0x8c74",
+			"__isr_9",
+			"cc430_cpu_init",
+			"board_init",
+			"1c04",
+			"__data_size",
+			"WDTIMER_KICK",
+			"__stack",
+			"__wdt_clear_value,",
+			"__WDTCTL"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"KISYSMOD",
+			"type kicad"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "sim/telserver.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3420,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1855,
+								1855
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 510.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "sim/sim.cfg",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 398,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								287,
+								287
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/pyco/test/unit/test_fake.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 647,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								461,
+								461
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/attilio/Documents/LiClipse Workspace/tsim/toml_test.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 241,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								227,
+								227
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"project": "setting.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

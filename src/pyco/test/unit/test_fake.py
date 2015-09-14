@@ -8,8 +8,6 @@ from pyco.device import device, ConnectionRefused
 
 from pyco import log
 
-from .fixture import *
-
 # create logger
 log = log.getLogger("test")
 

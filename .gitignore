@@ -8,3 +8,4 @@ src/pyco.egg-info/
 *.pyc
 *.bak
 *.old
+src/pyco/test/local_tests
