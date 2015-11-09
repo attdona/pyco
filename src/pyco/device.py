@@ -5,12 +5,13 @@ Created on Mar 15, 2011
 @author: Attilio Donà
 '''
 import sys
-import re #@UnresolvedImport
+import os
+import re
 import time
-from mako.template import Template #@UnresolvedImport
-from mako.runtime import Context #@UnresolvedImport
-from io import StringIO #@UnresolvedImport
-from validate import Validator #@UnresolvedImport
+from mako.template import Template
+from mako.runtime import Context
+from io import StringIO
+from validate import Validator
 from pkg_resources import resource_filename, resource_string, iter_entry_points #@UnresolvedImport
 
 import pyco.log
@@ -24,7 +25,8 @@ expectLogfile = '/tmp/expect.log'
 cfgFile = resource_filename('pyco', 'cfg/pyco.cfg')
 if hasattr(pyco, 'pyco_home'):
     expectLogfile = pyco.pyco_home + "/logs/expect.log"
-    cfgFile = pyco.pyco_home + "/cfg/pyco.cfg"
+    if (os.path.isfile(pyco.pyco_home + "/cfg/pyco.cfg")):
+        cfgFile = pyco.pyco_home + "/cfg/pyco.cfg"
 
 # the shared configObj
 configObj = None

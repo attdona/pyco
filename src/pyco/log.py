@@ -9,7 +9,7 @@ import pyco
 import os
 from pkg_resources import resource_filename #@UnresolvedImport
 
-if hasattr(pyco, 'pyco_home'):
+if hasattr(pyco, 'pyco_home') and os.path.isfile(pyco.pyco_home + "/cfg/log.cfg"):
     logfile = pyco.pyco_home + "/cfg/log.cfg"
 else:
     logfile = resource_filename('pyco', 'cfg/log.cfg')

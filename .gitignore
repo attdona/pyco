@@ -9,3 +9,5 @@ src/pyco.egg-info/
 *.bak
 *.old
 src/pyco/test/local_tests
+setting.sublime-workspace
+setting.sublime-project
