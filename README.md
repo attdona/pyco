@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/attdona/pyco.svg?branch=master)](https://travis-ci.org/attdona/pyco)
+
 # Pyco
 
 
