@@ -1,0 +1,6 @@
+pool 3 {
+pool 4 {
+pool ALICE6-NDRA-POOL {
+pool DHCPv6-PD-POOL {
+
+{master}

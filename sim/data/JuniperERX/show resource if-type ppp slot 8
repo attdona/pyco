@@ -1,0 +1,9 @@
+                                  max      current    rising      falling 
+       type          location   capacity    value    threshold   threshold
+------------------   --------   --------   -------   ---------   ---------
+ppp-link interface   slot 8         8000       238        7200          80
+                                hold-down
+       type          location     time   
+------------------   --------   ---------
+ppp-link interface   slot 8           300
+

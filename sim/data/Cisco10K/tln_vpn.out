@@ -1,0 +1,5 @@
+r-rm491#sh virtual-router | i VRF
+VRF : VPN_MGMT_SPOKE
+VRF : VPN_MGMT_PIPPO
+VRF : VPN_MGMT_PLUTO
+r-rm491#

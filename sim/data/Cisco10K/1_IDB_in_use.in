@@ -1,0 +1,1 @@
+sh pxf cpu vcci summary | i Other

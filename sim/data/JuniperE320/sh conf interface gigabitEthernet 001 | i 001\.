@@ -1,0 +1,14 @@
+interface gigabitEthernet 0/0/1.284
+interface gigabitEthernet 0/0/1.304
+interface gigabitEthernet 0/0/1.306
+interface gigabitEthernet 0/0/1.308
+interface gigabitEthernet 0/0/1.310
+interface gigabitEthernet 0/0/1.312
+interface gigabitEthernet 0/0/1.314
+interface gigabitEthernet 0/0/1.348
+interface gigabitEthernet 0/0/1.356
+interface gigabitEthernet 0/0/1.358
+interface gigabitEthernet 0/0/1.360
+interface gigabitEthernet 0/0/1.364
+interface gigabitEthernet 0/0/1.366
+interface gigabitEthernet 0/0/1.368

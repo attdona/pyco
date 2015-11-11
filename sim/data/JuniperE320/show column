@@ -1,0 +1,7 @@
+Type 			Total 		Static 	Dynamic
+-------------------- ---------- ---------- ----------
+Bridged Ethernet 	0 		0 		0
+IP over ATM 		11 		11 		0
+PPP 			0 		0 		0
+PPPoE 			0 		0 		0
+

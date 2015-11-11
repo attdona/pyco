@@ -1,0 +1,27 @@
+Cisco Internetwork Operating System Software
+IOS (tm) 10000 Software (C10K-P11-M), Version 12.2(15)BZ1, RELEASE SOFTWARE (fc1)
+TAC Support: http://www.cisco.com/tac
+Copyright (c) 1986-2003 by cisco Systems, Inc.
+Compiled Mon 04-Aug-03 17:49 by leccese
+Image text-base: 0x60008954, data-base: 0x61780000
+ROM: System Bootstrap, Version 12.0(9r)SL2, RELEASE SOFTWARE (fc1)
+r-bo093 uptime is 13 weeks, 5 days, 19 hours, 2 minutes
+System returned to ROM by reload at 17:51:13 MET Tue Nov 11 2003
+System restarted at 17:52:34 MET Tue Nov 11 2003
+System image file is "disk0:c10k-p11-mz.122-15.BZ1"
+cisco C10008 (PRE1-RP) processor with 458751K/65536K bytes of memory.
+R7000 CPU at 262Mhz, Implementation 39, Rev 2.1, 256KB L2, 2048KB L3 Cache
+Bac
+Last reset from register reset
+PXF processor tmc0 is running.
+PXF processor tmc1 is running.
+1 Ethernet/IEEE 802.3 interface(s)
+1 FastEthernet/IEEE 802.3 interface(s)
+2 Gigabit Ethernet/IEEE 802.3 interface(s)
+12 ATM network interface(s)
+509K bytes of non-volatile configuration memory.
+125952K bytes of ATA PCMCIA card at slot 0 (Sector size 512 bytes).
+32768K bytes of Flash internal SIMM (Sector size 256KB).
+Secondary is up.
+Secondary has 524288K bytes of memory.
+Configuration register is 0x102

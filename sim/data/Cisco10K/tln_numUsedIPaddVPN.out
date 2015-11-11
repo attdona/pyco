@@ -1,0 +1,43 @@
+ ERX-TP4#virtual-router default:VPN_MGMT_SPOKE
+
+ERX-TP4:default:VPN_MGMT_SPOKE#show ip local pool
+
+ 
+
+        High    Abated      
+
+Pool   Thresh   Thresh   Trap
+
+----   ------   ------   ----
+
+5          85       75    N 
+
+                                    In
+
+      Begin        End       Free   Use
+
+    ---------   ----------   ----   ---
+
+    206.0.0.1   206.0.0.31    28     3
+
+ 
+
+        High    Abated      
+
+Pool   Thresh   Thresh   Trap
+
+----   ------   ------   ----
+
+6          85       75    N 
+
+                                         In
+
+       Begin           End        Free   Use
+
+    ------------   ------------   ----   ---
+
+    206.41.95.78   206.41.95.78    1      1
+
+ERX-TP4:default:VPN_MGMT_SPOKE#virtual-router default
+
+ERX-TP4#

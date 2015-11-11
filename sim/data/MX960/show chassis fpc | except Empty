@@ -1,0 +1,8 @@
+Temp  CPU Utilization (%)   Memory    Utilization (%)
+Slot State            (C)  Total  Interrupt      DRAM (MB) Heap     Buffer
+  0  Online            29     23          0       2048        9         14
+  2  Online            26      8          0       1024       18         29
+ 11  Online            36      5          0       1024        7         41
+
+{master}
+

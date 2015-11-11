@@ -1,0 +1,17 @@
+Interface VPI           Description          
+--------- --- -------------------------------
+ATM 3/0   1   VPRaccoltaDa_AS-PICAITAG-001_31
+ATM 3/0   2   VPRaccoltaDa_AS-BOLZITAR-016_8 
+ATM 3/0   3   VPRaccoltaDa_AS-BOLZITBM-001_7 
+ATM 3/0   4   VPRaccoltaDa_AS-BRUNITAQ-002_6 
+ATM 3/0   5   VPRaccoltaDa_AS-PRDAITAD-001_5 
+ATM 3/0   6   VPRaccoltaDa_BOLZITAR-003_50   
+ATM 3/0   7   VPRaccoltaDa_AS-BOLZITAR-002_7 
+ATM 3/0   8   VPRaccoltaDa_AS-CAVAITAE-002_34
+ATM 3/0   9   VPRaccoltaDa_BOLZITBM-001_33   
+ATM 3/0   10  VPRaccoltaDa_AS-TRENITAK-002_34
+ATM 3/0   11  VPRaccoltaDa_TRENITAT-002_30   
+ATM 3/0   15  VPRaccoltaDa_AS-BOLZITAR-016_35
+ATM 3/0   16  VPRaccoltaDa_AS-TRENITAQ-003_39
+ATM 3/0   51  ALICE                          
+14 VP description(s) found 
