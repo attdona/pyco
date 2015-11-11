@@ -7,7 +7,7 @@ import sys
 from setuptools import setup, find_packages
 
 if sys.platform != 'win32':
-    expect = 'pexpect>=2.4'
+    expect = 'pexpect>=4.0.1'
 else:
     expect = 'winpexpect'
 
