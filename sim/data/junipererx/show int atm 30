@@ -1,0 +1,52 @@
+ATM Interface 3/0 is up, line protocol is disabled
+
+AAL5 operational status:       up
+      time since last status change: 22:04:16
+ATM operational status:        up
+      time since last status change: 22:04:16
+SONET path operational status: up
+      time since last status change: 22:04:16
+SONET operational status:      up
+      time since last status change: 22:04:16
+
+UNI version: Auto-config, Maximum VCs: 16380
+Current VCs: 92
+Max VCI per VPI: 4095
+CAC admin state: disabled
+SNMP trap link-status: enabled
+OAM cell receive status: disabled
+OAM cell filter : alarm cells
+atm oam loopback-location 0XFFFFFFFF
+Interface Alias: LINK 155Mbps verso BPX74752 9 6
+Assigned VC Class:  none assigned
+
+PHY Type: stm1, Framing: sdh, TX clocking: line
+Loopback: none, Receive FIFO Overruns: 0
+
+5 minute input rate 353280 bits/sec, 64 packets/sec 
+5 minute output rate 272384 bits/sec, 66 packets/sec 
+
+InPackets:         9495246644
+InBytes:           2247841194532
+InCells:           35093256870
+OutPackets:        13624678413
+OutBytes:          15805194526166
+OutCells:          1659740389
+InErrors:          0
+OutErrors:         0
+InPacketDiscards:  48921205
+InByteDiscards:    0
+InCellErrors:      0
+InPolicedPackets:  0
+OutPolicedPackets: 0
+Administrative qos-shaping-mode: cell
+Operational qos-shaping-mode: cell
+Administrative qos-mode-port: none
+Operational qos-mode-port: none
+
+queue 0: traffic class control, bound to ATM3/0
+  Queue length 0 bytes 
+  Forwarded packets 291808722, bytes 690551891440
+  Dropped committed packets 0, bytes 0
+  Dropped conformed packets 0, bytes 0
+  Dropped exceeded packets 0, bytes 0

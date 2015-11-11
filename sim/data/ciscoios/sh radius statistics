@@ -1,0 +1,20 @@
+                                  Auth.      Acct.       Both
+         Maximum inQ length:         NA         NA       1366
+       Maximum waitQ length:         NA         NA        302
+       Maximum doneQ length:         NA         NA         49
+       Total responses seen:   16209868   27291424   43501292
+     Packets with responses:   16209868   27291424   43501292
+  Packets without responses:          0          9          9
+ Access Rejects:    1154971
+ Average response delay(ms):         58         36         44
+ Maximum response delay(ms):      61160      95512      95512
+  Number of Radius timeouts:       2304       8898      11202
+       Duplicate ID detects:          0          0          0
+ Buffer Allocation Failures:          0          0          0
+Maximum Buffer Size (bytes):        504        820        820
+ Source Port Range: (full range)
+ 21645 - 21844
+ Last used Source Port/Identifier:
+ 21807/186
+
+  Elapsed time since counters last cleared: 16w1d8h52m

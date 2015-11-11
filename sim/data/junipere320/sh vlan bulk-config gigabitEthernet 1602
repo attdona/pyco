@@ -1,0 +1,15 @@
+                         Bulk    Start  End  Start End                          
+                        Config   Svlan Svlan Vlan  Vlan                         
+      Interface          Name     Id    Id    Id    Id  Assigned Profile  Status
+---------------------- --------- ----- ----- ----- ---- ----------------- ------
+GigabitEthernet 16/0/2 ACI_Res    3515  3515   aci  aci S-VLAN_Res_NGN2   Up    
+GigabitEthernet 16/0/2 ACI_Res    3539  3539   aci  aci S-VLAN_Res_NGN2   Up    
+GigabitEthernet 16/0/2 ACI_Res    3542  3542   aci  aci S-VLAN_Res_NGN2   Up    
+GigabitEthernet 16/0/2 ACI_Voice  3516  3516   aci  aci S-VLAN_Voice_NGN2 Up    
+GigabitEthernet 16/0/2 ACI_Voice  3540  3540   aci  aci S-VLAN_Voice_NGN2 Up    
+GigabitEthernet 16/0/2 ACI_Voice  3543  3543   aci  aci S-VLAN_Voice_NGN2 Up    
+GigabitEthernet 16/0/2 ACI_Biz    3517  3517   aci  aci S-VLAN_Biz_NGN2   Up    
+GigabitEthernet 16/0/2 ACI_Biz    3541  3541   aci  aci S-VLAN_Biz_NGN2   Up    
+GigabitEthernet 16/0/2 ACI_Biz    3544  3544   aci  aci S-VLAN_Biz_NGN2   Up    
+% 9 vlan bulk-config(s) found
+
