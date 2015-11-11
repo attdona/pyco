@@ -6,5 +6,5 @@ before_install: sudo apt-get install telnet
 install: "pip install -r requirements.txt"
 # command to run tests
 script:
- - sim/telserver.py &
+ - sim/telserver.py sim.cfg &
  - nosetests src/pyco/test/unit/test_fake.py
