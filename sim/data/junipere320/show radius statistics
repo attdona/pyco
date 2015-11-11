@@ -1,0 +1,19 @@
+ADIUS Authentication Statistics        
+        --------------------------------        
+     Statistic        80.17.211.4   80.17.211.39
+-------------------   -----------   ------------
+UDP Port              1645          1645        
+Round Trip Time       0             4           
+Access Requests       0             7536677     
+Rollover Requests     0             0           
+Retransmissions       0             43          
+Access Accepts        0             6672652     
+Access Rejects        0             864025      
+Access Challenges     0             0           
+Malformed Responses   0             0           
+Bad Authenticators    0             0           
+Requests Pending      0             0           
+Request Timeouts      0             43          
+Unknown Responses     0             0           
+Packets Dropped       0             0           
+

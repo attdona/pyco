@@ -1,0 +1,12 @@
+Lag PortChannel1 is Up, Administrative status is Up
+
+   Member-interface GigabitEthernet2/0 is Up
+      (LACP disabled, state collecting/distributing)
+   Member-interface GigabitEthernet2/1 is Up
+      (LACP disabled, state collecting/distributing)
+Lag PortChannel2 is Up, Administrative status is Up
+
+   Member-interface GigabitEthernet4/0 is Up
+      (LACP disabled, state collecting/distributing)
+   Member-interface GigabitEthernet4/1 is Up
+

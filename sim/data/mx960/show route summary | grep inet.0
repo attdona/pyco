@@ -1,0 +1,3 @@
+inet.0: 38531 destinations, 40920 routes (38531 active, 0 holddown, 0 hidden)
+
+VPN_MGMT_SPOKE.inet.0: 11468 destinations, 11557 routes (11468 active, 0 holddown, 0 hidden)

@@ -1,0 +1,37 @@
+TenGigabitEthernet4/0/0 is Up, Administrative status is Up
+  Hardware is Marvell GT64260, address is 0090.1aa4.8ec5
+  Primary MAU is 10000BASE-LR 10km, secondary MAU is XFP (Empty)
+  TX Output Power: 622.1uW,  RX Input Power: 502.0uW
+  MTU: Operational 1550, Administrative 1550
+  Duplex Mode: Operational Full Duplex, Administrative Full Duplex
+  Speed: Operational 10000 Mbps, Administrative 10000 Mbps
+  Debounce: State is Disabled 
+  Link: Operational Primary Link Selected,
+        Administrative Link Selected Automatically
+  Link Failover Timeout: Operational 741 ms, Administrative default
+  Primary link selected 1 time, Secondary link selected 0 times
+  Primary link signal detected, Secondary link signal not detected
+  Cleararp: State is Disabled 
+
+  5 minute input rate 2589652992 bits/sec, 271094 packets/sec 
+  5 minute output rate 423902208 bits/sec, 186492 packets/sec 
+
+  In: Bytes 4762826559540473, Unicast 4057658412691
+   Multicast 24729324, Broadcast 0
+   Errors 0, Discards 0, Mac Errors 0, Alignment 0
+   CRC 0, Too Longs 0, Symbol Errors 0
+  Out: Bytes 665309424672762, Unicast 2795880801931
+   Multicast 8930695, Broadcast 33
+   Errors 0, Discards 0, Mac Errors 0, Deferred 0, No Carrier 0
+   Collisions: Single 0, Multiple 0, Late 0, Excessive 0
+Policed Statistics:
+  In: 0, Out: 0
+ARP Statistics:
+  In: ARP requests 1347, ARP responses 30
+   Errors 0, Discards 0
+  Out: ARP requests 33, ARP responses 1347
+   Errors 0, Discards 0
+
+Administrative qos-shaping-mode: none
+Operational qos-shaping-mode: frame
+

@@ -1,0 +1,45 @@
+GigabitEthernet15/0/2 is Up, Administrative status is Up
+  Description: LINK verso mdr-rn02 - 4/20 A03179/70
+  Hardware is Intel IXF1110, address is 0090.1aa4.80ee
+  MAU is 1000BASE-LX 10km
+  TX Output Power: 328.2uW,  RX Input Power: 191.2uW
+  MTU: Operational 1530, Administrative 1530
+  Duplex Mode: Operational Full Duplex, Administrative Auto Negotiate
+  Speed: Operational 1000 Mbps, Administrative Auto Negotiate
+  Debounce: State is Disabled 
+
+  5 minute input rate 34383872 bits/sec, 13913 packets/sec 
+  5 minute output rate 184210432 bits/sec, 19233 packets/sec 
+
+  In: Bytes 97556120860967, Unicast 416765624505
+   Multicast 7703, Broadcast 41384584
+   Errors 0, Discards 0, Mac Errors 0, Alignment 0
+   CRC 0, Too Longs 0, Symbol Errors 0
+  Out: Bytes 725577385984054, Unicast 608153539834
+   Multicast 0, Broadcast 0
+   Errors 0, Discards 0, Mac Errors 0, Deferred 0, No Carrier 0
+   Collisions: Single 0, Multiple 0, Late 0, Excessive 0
+Policed Statistics:
+  In: 0, Out: 0
+ARP Statistics:
+  In: ARP requests 0, ARP responses 0
+   Errors 0, Discards 0
+  Out: ARP requests 0, ARP responses 0
+   Errors 0, Discards 0
+
+Administrative qos-shaping-mode: none
+Operational qos-shaping-mode: frame
+
+Attached QoS profile: gbe-default-iptv
+queue 0: traffic class best-effort, bound to ethernet GigabitEthernet15/0/2
+  Queue length 0 bytes 
+  Forwarded packets 103083241626, bytes 120576743448639
+  Dropped committed packets 26971251, bytes 35348608911
+  Dropped conformed packets 0, bytes 0
+  Dropped exceeded packets 0, bytes 0
+queue 1: traffic class control, bound to GigabitEthernet15/0/2
+  Queue length 0 bytes 
+  Forwarded packets 2868636351, bytes 183637861259
+  Dropped committed packets 0, bytes 0
+  Dropped conformed packets 0, bytes 0
+  Dropped exceeded packets 0, bytes 0

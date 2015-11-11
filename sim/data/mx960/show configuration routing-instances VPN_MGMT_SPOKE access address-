@@ -1,0 +1,3 @@
+assignment | grep pool | except _
+pool 5 {
+{master}

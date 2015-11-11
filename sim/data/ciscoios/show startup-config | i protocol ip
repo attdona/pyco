@@ -1,0 +1,19 @@
+protocol ip 80.183.162.134
+protocol ip 80.183.162.146
+protocol ip 80.183.162.142
+protocol ip 80.183.162.222
+protocol ip 80.183.162.170
+protocol ip 80.183.162.178
+protocol ip 80.183.162.158
+protocol ip 80.183.162.202
+protocol ip 80.183.162.198
+protocol ip 80.183.162.210
+protocol ip 80.183.162.218
+protocol ip 80.183.162.226
+protocol ip 80.183.162.130
+protocol ip 80.183.162.166
+no protocol ip inarp1
+no protocol ip inarp2
+protocol ip 82.89.142.203
+protocol ip 82.89.9.1
+protocol ip 82.89.9.87
