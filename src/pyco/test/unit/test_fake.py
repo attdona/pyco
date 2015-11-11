@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
     #@unittest.skip("skipping")
     def testFakeOk(self):
         log.debug("testFakeOk ...")
-        h = device('telnet://%s:%s@%s:%d/ciscoios' % 
+        h = device('telnet://%s:%s@%s:%d' % 
                    ('username', 'secret', 'localhost',TELNET_PORT))
         
         h.maxWait = 2
