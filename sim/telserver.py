@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 """
-Chat Room Demo for Miniboa.
+simple telnet server simulator
 """
 
 import logging
+import sys
+import os
+import argparse
 from miniboa import TelnetServer
 import pytoml as toml
 from test.regrtest import PASSED
@@ -12,7 +15,7 @@ from test.regrtest import PASSED
 IDLE_TIMEOUT = 300
 CLIENT_LIST = []
 SERVER_RUN = True
-
+SIM_DATA_DIR = None
 
 def reset(client):
     global login_count
@@ -84,6 +87,8 @@ def process_clients():
             elif (client.status == 'PASSWD'):
                 if (config[client.status]['password'] == msg):
                     client.status = config[client.status]['next_status']
+                    client.send(config[client.status]['response'])
+                    break
                 elif (client.failed_logins == 1):
                     reset(client)
                 else:
@@ -94,7 +99,12 @@ def process_clients():
             sts = client.status
             if ('commands' in config[sts] and msg in config[sts]['commands']):
                 client.send(config[sts]['commands'][msg] + "\n")
-
+            elif (os.path.isfile(os.path.join(SIM_DATA_DIR, msg))):
+                with open (os.path.join(SIM_DATA_DIR, msg), "r") as myfile:
+                    data=myfile.read()
+                    client.send(data)
+            elif ('commands' in config[sts] and msg != ""):
+                client.send("pretty output from %s\n" % msg)
             client.send(config[sts]['response'])
                 
             cmd = msg.lower()
@@ -119,10 +129,17 @@ if __name__ == '__main__':
 
     # Simple chat server to demonstrate connection handling via the
     # async and telnet modules.
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("cfg_file", help="simulator config file")
+    parser.add_argument("--port", help="telnet port", type=int, default=7777)
+    parser.add_argument("--dir", help="commands dir", default="ciscoios")
+    args = parser.parse_args()
+    
+    SIM_DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', args.dir)
+    
     logging.basicConfig(level=logging.DEBUG)
 
-    with open('sim/sim.cfg', 'rb') as f:
+    with open('sim/%s' % args.cfg_file, 'rb') as f:
         config = toml.load(f)
     
     #print(config['commands'].keys())
@@ -132,7 +149,7 @@ if __name__ == '__main__':
     # and one to call with lost connections.
 
     telnet_server = TelnetServer(
-        port=7777,
+        port=args.port,
         address='',
         on_connect=on_connect,
         on_disconnect=on_disconnect,

@@ -20,7 +20,11 @@ setup(name='pyco',
       url='http://code.google.com/p/pyco/',
       packages=find_packages('src'),
       package_dir={'': 'src'},
-      install_requires = ['configobj>=4.7.0', 'docutils>=0.7', expect, 'mako'],
+      install_requires = ['configobj>=4.7.0', 
+                          'docutils>=0.7',
+                           expect,
+                           'mako',
+                           'sqlalchemy', 'zope.sqlalchemy', 'transaction'],
       
       package_data = {
         # If any package contains *.txt or *.rst files, include them:

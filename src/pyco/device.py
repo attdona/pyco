@@ -1421,7 +1421,6 @@ class Driver:
         
   
 try:
-
     import sqlalchemy as sa #@UnresolvedImport
     from sqlalchemy import create_engine #@UnresolvedImport
     from sqlalchemy import Column #@UnresolvedImport
@@ -1431,7 +1430,11 @@ try:
     from sqlalchemy.orm import sessionmaker #@UnresolvedImport
     from zope.sqlalchemy import ZopeTransactionExtension #@UnresolvedImport
     import transaction #@UnresolvedImport
-    
+    import logging
+
+    logging.basicConfig()
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
+   
     Base = declarative_base()
     
     class DevicePrompt(Base):
@@ -1449,7 +1452,7 @@ try:
     def initialize_sql():
         Base.metadata.bind = engine
         Base.metadata.create_all(engine)
-    
+
     
     def createDB(url):
         log.debug('db endpoint: [%s]' % url)
@@ -1528,7 +1531,8 @@ if sql_powered:
     DBSession = None
     if 'cache' in configObj['common']:
         log.debug('creating engine for [%s]' % db_url())
-        engine = create_engine(db_url(), echo=True)
+        engine = create_engine(db_url(), echo=False)
+
         DBSession = scoped_session(sessionmaker(
                                  extension=ZopeTransactionExtension(), bind=engine))
     
