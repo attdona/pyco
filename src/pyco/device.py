@@ -1421,7 +1421,6 @@ class Driver:
         
   
 try:
-    import sqlalchemy as sa #@UnresolvedImport
     from sqlalchemy import create_engine #@UnresolvedImport
     from sqlalchemy import Column #@UnresolvedImport
     from sqlalchemy import String #@UnresolvedImport
@@ -1431,7 +1430,7 @@ try:
     from zope.sqlalchemy import ZopeTransactionExtension #@UnresolvedImport
     import transaction #@UnresolvedImport
     import logging
-
+    
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
    
@@ -1517,6 +1516,8 @@ try:
             
     sql_powered = True
 except:
+    logging.exception("unable to load sql pluging for caching prompts")
+    
     sql_powered = False
     
     def cache_enabled():
