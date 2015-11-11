@@ -11,6 +11,8 @@ log = log.getLogger("handlers")
 
 
 def initCiscoTerminal(target):
-    target.send_line('terminal length 0')
+    target.send('terminal length 0')
 
+def sendWhitespace(target):
+    target.send(' ')
     

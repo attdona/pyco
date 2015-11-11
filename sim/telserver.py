@@ -73,7 +73,7 @@ def process_clients():
             # If the client sends input echo it to the chat room
             #chat(client)
             msg = client.get_command()
-            
+            print("--> %s" % msg)
 
             if (not hasattr(client, 'status')):
                 client.status = 'LOGIN'
@@ -103,8 +103,6 @@ def process_clients():
                 with open (os.path.join(SIM_DATA_DIR, msg), "r") as myfile:
                     data=myfile.read()
                     client.send(data)
-            elif ('commands' in config[sts] and msg != ""):
-                client.send("pretty output from %s\n" % msg)
             client.send(config[sts]['response'])
                 
             cmd = msg.lower()

@@ -20,11 +20,12 @@ class Test(unittest.TestCase):
     #@unittest.skip("skipping")
     def testFakeOk(self):
         log.debug("testFakeOk ...")
-        h = device('telnet://%s:%s@%s:%d' % 
+        h = device('telnet://%s:%s@%s:%d/ciscoios' % 
                    ('username', 'secret', 'localhost',TELNET_PORT))
         
         h.maxWait = 2
         out = h('id')
+        print("--> %s" % out) 
         self.assertRegex(out, 'uid=[0-9]+\(pyco\).*')
 
     @unittest.skip("skipping")
