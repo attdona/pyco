@@ -7,15 +7,30 @@ simple telnet server simulator
 import logging
 import sys
 import os
+import re
 import argparse
 from miniboa import TelnetServer
 import pytoml as toml
-from test.regrtest import PASSED
 
 IDLE_TIMEOUT = 300
 CLIENT_LIST = []
 SERVER_RUN = True
-SIM_DATA_DIR = None
+
+
+def simulator_face(cfgfile):
+    global config
+
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    
+    f = os.path.join(cwd, cfgfile + '.cfg')
+
+    if (os.path.isfile(f)):
+        with open(f, 'rb') as f:
+            config = toml.load(f)
+            config['datadir'] = os.path.join(cwd, 'data', cfgfile)
+    else:
+        print("not found config file [%s], simulator not changed" % f)
+
 
 def reset(client):
     global login_count
@@ -70,10 +85,8 @@ def process_clients():
 
     for client in CLIENT_LIST:
         if client.active and client.cmd_ready:
-            # If the client sends input echo it to the chat room
-            #chat(client)
             msg = client.get_command()
-            print("--> %s" % msg)
+            #print("--> %s" % msg)
 
             if (not hasattr(client, 'status')):
                 client.status = 'LOGIN'
@@ -99,8 +112,8 @@ def process_clients():
             sts = client.status
             if ('commands' in config[sts] and msg in config[sts]['commands']):
                 client.send(config[sts]['commands'][msg] + "\n")
-            elif (os.path.isfile(os.path.join(SIM_DATA_DIR, msg))):
-                with open (os.path.join(SIM_DATA_DIR, msg), "r") as myfile:
+            elif (os.path.isfile(os.path.join(config["datadir"], msg))):
+                with open (os.path.join(config["datadir"], msg), "r") as myfile:
                     data=myfile.read()
                     client.send(data)
             client.send(config[sts]['response'])
@@ -112,6 +125,10 @@ def process_clients():
             # shutdown == stop the server
             elif cmd == 'shutdown':
                 SERVER_RUN = False
+            else:
+                r = re.match("__face__ (\w+)", cmd)
+                if (r):
+                    simulator_face(r.group(1))
 
 
 
@@ -130,16 +147,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("cfg_file", help="simulator config file")
     parser.add_argument("--port", help="telnet port", type=int, default=7777)
-    parser.add_argument("--dir", help="commands dir", default="ciscoios")
     args = parser.parse_args()
     
-    SIM_DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', args.dir)
+    cwd = os.path.dirname(os.path.realpath(__file__))
     
     logging.basicConfig(level=logging.DEBUG)
 
-    with open('sim/%s' % args.cfg_file, 'rb') as f:
+    with open(os.path.join(cwd,args.cfg_file + '.cfg'), 'rb') as f:
         config = toml.load(f)
-    
+
+    config['datadir'] = os.path.join(cwd, 'data', args.cfg_file)
+       
     #print(config['commands'].keys())
 
     # Create a telnet server with a port, address,
