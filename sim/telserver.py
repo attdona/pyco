@@ -11,17 +11,39 @@ import re
 import argparse
 from miniboa import TelnetServer
 import pytoml as toml
+import socket
+import threading
+import socketserver
 
 IDLE_TIMEOUT = 300
 CLIENT_LIST = []
 SERVER_RUN = True
+
+OOB_PORT = 7778
+
+
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
+
+    def handle(self):
+        data = str(self.request.recv(1024), 'ascii')
+        cur_thread = threading.current_thread()
+        
+        print("RCV: %s" % data)
+        r = re.match("__face__ (\w+)", data)
+        if (r):
+            simulator_face(r.group(1))
+
+        #response = bytes("{}: {}".format(cur_thread.name, data), 'ascii')
+        #self.request.sendall(response)
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
 
 
 def simulator_face(cfgfile):
     global config
 
     cwd = os.path.dirname(os.path.realpath(__file__))
-    
     f = os.path.join(cwd, cfgfile + '.cfg')
 
     if (os.path.isfile(f)):
@@ -157,6 +179,16 @@ if __name__ == '__main__':
         config = toml.load(f)
 
     config['datadir'] = os.path.join(cwd, 'data', args.cfg_file)
+
+    oob_server = ThreadedTCPServer(("localhost", OOB_PORT), ThreadedTCPRequestHandler)
+    # Start a thread with the server -- that thread will then start one
+    # more thread for each request
+    server_thread = threading.Thread(target=oob_server.serve_forever)
+    # Exit the server thread when the main thread terminates
+    server_thread.daemon = True
+    server_thread.start()
+    print("Server loop running in thread:", server_thread.name)
+
        
     #print(config['commands'].keys())
 
@@ -171,6 +203,8 @@ if __name__ == '__main__':
         on_disconnect=on_disconnect,
         timeout = .05
         )
+
+
 
     logging.info("Listening for connections on port {}. CTRL-C to break.".format(telnet_server.port))
 

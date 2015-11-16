@@ -9,22 +9,30 @@ from os import environ
 
 from pyco import log
 
+from utils import setface
 
 TELNET_PORT = 7777
-
 # create logger
 log = log.getLogger("test")
 
+
 class Test(unittest.TestCase):
-    
+
+    # device under test
+    target = device('telnet://%s:%s@%s:%d' % 
+                ('username', 'secret', 'localhost', TELNET_PORT))
+
+    @classmethod
+    def setUpClass(cls):
+        log.debug("setting face to linux")
+        setface("linux")
+ 
     #@unittest.skip("skipping")
-    def testFakeOk(self):
-        log.debug("testFakeOk ...")
-        h = device('telnet://%s:%s@%s:%d' % 
-                   ('username', 'secret', 'localhost',TELNET_PORT))
+    def testSimpleCommand(self):
+        log.debug("starting testSimpleCommand ...")
         
-        h.maxWait = 2
-        out = h('id')
+        Test.target.maxWait = 2
+        out = Test.target('id')
         print("--> %s" % out) 
         self.assertRegex(out, 'uid=[0-9]+\(pyco\).*')
 
@@ -45,7 +53,6 @@ class Test(unittest.TestCase):
         h.maxWait = 10
         
         self.assertRaises(PermissionDenied, h, 'id')
- 
  
 
 if __name__ == "__main__":
