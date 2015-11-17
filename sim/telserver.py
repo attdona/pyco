@@ -103,7 +103,7 @@ def process_clients():
     Check each client, if client.cmd_ready == True then there is a line of
     input available via client.get_command().
     """
-    global SERVER_RUN, config
+    global SERVER_RUN, config, sts
 
     for client in CLIENT_LIST:
         if client.active and client.cmd_ready:
@@ -115,12 +115,16 @@ def process_clients():
                 client.failed_logins = 0
                 
             if (client.status == 'LOGIN'):
-                config['username'] = msg
-                print("login username: " + config['username'])
+                print("username: %s (expected %s)" % (msg, config[client.status]['username']))
+                if(config[client.status]['username'] == msg):
+                    client.valid_username = True
+                else:
+                    client.valid_username = False
+                    
                 client.status = config['LOGIN']['next_status']
 
             elif (client.status == 'PASSWD'):
-                if (config[client.status]['password'] == msg):
+                if (client.valid_username and config[client.status]['password'] == msg):
                     client.status = config[client.status]['next_status']
                     client.send(config[client.status]['response'])
                     break
